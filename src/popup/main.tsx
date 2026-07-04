@@ -32,8 +32,15 @@ function App() {
     llmModel: defaultModels.google,
     apiKey: ''
   });
+  const [draftSettings, setDraftSettings] = useState<Settings>(settings);
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const recentItems = useMemo(() => items.slice(0, 20), [items]);
+  const explanationLanguageLabel =
+    explanationLanguageOptions.find((option) => option.value === settings.explanationLanguage)
+      ?.label ?? settings.explanationLanguage;
+  const isApiKeyConfigured = settings.apiKey.trim().length > 0;
 
   useEffect(() => {
     let isMounted = true;
@@ -47,6 +54,7 @@ function App() {
 
       setItems(savedItems);
       setSettings(settings);
+      setDraftSettings(settings);
       setIsLoading(false);
     }
 
@@ -57,14 +65,35 @@ function App() {
     };
   }, []);
 
-  async function handleSettingsChange(nextSettings: Partial<Settings>) {
-    setSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
-    const savedSettings = await updateSettings(nextSettings);
-    setSettings(savedSettings);
+  function handleStartSettingsEdit() {
+    setDraftSettings(settings);
+    setIsEditingSettings(true);
   }
 
-  async function handleProviderChange(nextProvider: LlmProvider) {
-    await handleSettingsChange({
+  function handleCancelSettingsEdit() {
+    setDraftSettings(settings);
+    setIsEditingSettings(false);
+  }
+
+  async function handleSaveSettings() {
+    setIsSavingSettings(true);
+
+    try {
+      const savedSettings = await updateSettings(draftSettings);
+      setSettings(savedSettings);
+      setDraftSettings(savedSettings);
+      setIsEditingSettings(false);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  }
+
+  function handleDraftSettingsChange(nextSettings: Partial<Settings>) {
+    setDraftSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
+  }
+
+  function handleDraftProviderChange(nextProvider: LlmProvider) {
+    handleDraftSettingsChange({
       llmProvider: nextProvider,
       llmModel: defaultModels[nextProvider],
       apiKey: ''
@@ -86,61 +115,120 @@ function App() {
       </header>
 
       <section className="settingsPanel" aria-label="LinguaLens 设置">
-        <label className="fieldControl">
-          <span>解释语言</span>
-          <select
-            value={settings.explanationLanguage}
-            onChange={(event) => {
-              void handleSettingsChange({
-                explanationLanguage: event.target.value as ExplanationLanguage
-              });
-            }}
-          >
-            {explanationLanguageOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="settingsGrid">
-          <label className="fieldControl">
-            <span>Provider</span>
-            <select
-              value={settings.llmProvider}
-              onChange={(event) => {
-                void handleProviderChange(event.target.value as LlmProvider);
-              }}
-            >
-              <option value="google">Gemini</option>
-              <option value="openai">OpenAI</option>
-            </select>
-          </label>
-
-          <label className="fieldControl">
-            <span>Model</span>
-            <input
-              value={settings.llmModel}
-              onChange={(event) => {
-                void handleSettingsChange({ llmModel: event.target.value });
-              }}
-            />
-          </label>
+        <div className="settingsHeader">
+          <div>
+            <h2>设置</h2>
+            <p>{isEditingSettings ? '编辑配置' : '当前配置'}</p>
+          </div>
+          {isEditingSettings ? (
+            <div className="settingsActions">
+              <button
+                className="secondaryButton"
+                disabled={isSavingSettings}
+                type="button"
+                onClick={handleCancelSettingsEdit}
+              >
+                Cancel
+              </button>
+              <button
+                className="primaryButton"
+                disabled={isSavingSettings}
+                type="button"
+                onClick={() => {
+                  void handleSaveSettings();
+                }}
+              >
+                {isSavingSettings ? 'Saving' : 'Save'}
+              </button>
+            </div>
+          ) : (
+            <button className="settingsButton" type="button" onClick={handleStartSettingsEdit}>
+              设置
+              {!isApiKeyConfigured ? (
+                <span className="settingsAlertDot" aria-label="API key 未配置" />
+              ) : null}
+            </button>
+          )}
         </div>
 
-        <label className="fieldControl">
-          <span>API key</span>
-          <input
-            autoComplete="off"
-            placeholder={settings.llmProvider === 'google' ? 'Gemini API key' : 'sk-...'}
-            type="password"
-            value={settings.apiKey}
-            onChange={(event) => {
-              void handleSettingsChange({ apiKey: event.target.value });
-            }}
-          />
-        </label>
+        {isEditingSettings ? (
+          <>
+            <label className="fieldControl">
+              <span>解释语言</span>
+              <select
+                value={draftSettings.explanationLanguage}
+                onChange={(event) => {
+                  handleDraftSettingsChange({
+                    explanationLanguage: event.target.value as ExplanationLanguage
+                  });
+                }}
+              >
+                {explanationLanguageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="settingsGrid">
+              <label className="fieldControl">
+                <span>Provider</span>
+                <select
+                  value={draftSettings.llmProvider}
+                  onChange={(event) => {
+                    handleDraftProviderChange(event.target.value as LlmProvider);
+                  }}
+                >
+                  <option value="google">Gemini</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </label>
+
+              <label className="fieldControl">
+                <span>Model</span>
+                <input
+                  value={draftSettings.llmModel}
+                  onChange={(event) => {
+                    handleDraftSettingsChange({ llmModel: event.target.value });
+                  }}
+                />
+              </label>
+            </div>
+
+            <label className="fieldControl">
+              <span>API key</span>
+              <input
+                autoComplete="off"
+                placeholder={draftSettings.llmProvider === 'google' ? 'Gemini API key' : 'sk-...'}
+                type="password"
+                value={draftSettings.apiKey}
+                onChange={(event) => {
+                  handleDraftSettingsChange({ apiKey: event.target.value });
+                }}
+              />
+            </label>
+          </>
+        ) : (
+          <dl className="settingsSummary">
+            <div>
+              <dt>解释语言</dt>
+              <dd>{explanationLanguageLabel}</dd>
+            </div>
+            <div>
+              <dt>Provider</dt>
+              <dd>{settings.llmProvider === 'google' ? 'Gemini' : 'OpenAI'}</dd>
+            </div>
+            <div>
+              <dt>Model</dt>
+              <dd>{settings.llmModel}</dd>
+            </div>
+            <div>
+              <dt>API key</dt>
+              <dd>{isApiKeyConfigured ? '已配置' : '未配置'}</dd>
+            </div>
+          </dl>
+        )}
 
         <p className="settingsNote">
           选中文本和可用句子上下文会发送给配置的 LLM provider，并可能消耗你的 API 额度。

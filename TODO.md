@@ -58,7 +58,7 @@
 - [x] Rename target-language settings and data flow to explanation-language.
 - [x] Add user-managed LLM API key and model settings.
 - [x] Add LLM-backed translation provider.
-- [ ] Move popup provider/model/API key edits behind an explicit settings mode with Save and Cancel.
+- [x] Move popup provider/model/API key edits behind an explicit settings mode with Save and Cancel.
 - [ ] Improve sentence-context extraction across nested or split DOM text nodes.
 - [x] Manually verify the Gemini-backed flow in Chrome with a real API key.
 - [ ] Manually verify the OpenAI-backed flow in Chrome with a real API key.

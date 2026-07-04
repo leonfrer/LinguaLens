@@ -69,6 +69,10 @@ Use this checklist as features land:
 - Popup deletion removes the saved item and updates the UI.
 - Explanation-language setting persists and affects later translation requests.
 - API key and model settings persist, and the API key never appears in saved items or non-settings UI.
+- Popup settings show a compact summary by default, with provider/model/explanation language visible and API key shown only as configured or unconfigured.
+- Popup settings show a bright red dot on the settings button when no API key is configured, and hide it after a key is saved.
+- Popup settings edits stay local until Save is clicked; Cancel discards changed provider, model, explanation language, and API key values.
+- Popup settings remain correct after closing and reopening the popup, and after refreshing the unpacked extension.
 
 ## Unit Test Scope
 
@@ -116,5 +120,6 @@ Use the production flow before considering extension behavior complete:
 8. Test content-script behavior on at least one article-like page and one dynamic web app page.
 9. Check the relevant Chrome DevTools consoles: popup, page/content script, and service worker.
 10. For storage or settings changes, reload Chrome pages and the extension, then confirm the persisted state still behaves correctly.
+11. For popup settings changes, verify Save persists edits, Cancel discards edits, and the API key is never displayed outside the password input while editing.
 
 When using Codex to perform this verification, ask it to enter the local Chrome browser, load or refresh the unpacked extension, run the workflow, and report the observed result. If the test depends on a logged-in page or private browser state, keep that state in your own Chrome profile and tell Codex when the page is ready.

@@ -34,7 +34,7 @@
 
 ## Open Decisions
 
-- Real translation provider choice after MVP validation.
+- Real translation provider choice after MVP validation: tracked in GitHub issue [#1](https://github.com/leonfrer/LinguaLens/issues/1).
 - Whether saved-item storage should enforce a maximum item count.
 
 ## Implementation Checklist

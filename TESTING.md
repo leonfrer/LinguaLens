@@ -16,6 +16,21 @@ npm run build
 - `npm test` runs focused unit tests for pure logic.
 - `npm run build` runs TypeScript checking and builds the extension into `dist/`.
 
+## Playwright Extension Checks
+
+Run the standardized browser smoke tests after building the extension:
+
+```bash
+npm run build
+npm run test:e2e
+```
+
+- `npm run test:e2e` launches a persistent Playwright Chromium context with the built extension from `dist/`.
+- `npm run test:e2e:headed` forces a headed browser run for local debugging.
+- `npm run test:e2e:ui` opens the Playwright UI runner.
+- Run `npx playwright install chromium` once after installing Playwright dependencies.
+- Google Chrome and Microsoft Edge do not support the side-loading flags needed by this automated flow.
+
 ## Development Verification
 
 Use the Vite/CRXJS dev server while iterating:

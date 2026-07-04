@@ -40,4 +40,8 @@ describe('extractSentenceContainingText', () => {
       '这里有 hello world。'
     );
   });
+
+  it('returns empty context when the selected text is not in the source text', () => {
+    expect(extractSentenceContainingText('Only part of the selection.', 'missing phrase')).toBe('');
+  });
 });

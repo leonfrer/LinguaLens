@@ -302,7 +302,8 @@ async function handleSelectionChange(): Promise<void> {
 
   ensurePanel();
   positionPanel(selection);
-  const sentenceContext = extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text);
+  const sentenceContext =
+    extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
   const { explanationLanguage } = await getSettings();
   await translateSelection(text, explanationLanguage, sentenceContext);
 }

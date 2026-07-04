@@ -20,7 +20,7 @@ export function extractSentenceContainingText(sourceText: string, selectedText: 
     .indexOf(normalizedSelection.toLocaleLowerCase());
 
   if (selectionStart === -1) {
-    return normalizedSource.slice(0, 1000);
+    return '';
   }
 
   const selectionEnd = selectionStart + normalizedSelection.length;

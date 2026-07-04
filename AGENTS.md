@@ -24,6 +24,8 @@ This is a Chrome extension for assisting foreign-language reading.
 
 - Do not run dependency installation commands such as `npm install`, `npm ci`, or `npx playwright install` in the sandbox. These commands require the real local environment because they access the network, npm caches, and tool-managed browser/dependency directories.
 - Do not run GitHub remote operations such as creating pull requests, pushing branches, or checking GitHub authentication in the sandbox. Use the real local environment or the configured GitHub connector for these operations.
+- When GitHub operations are needed, prefer the `gh` CLI.
+- When creating pull requests, create regular PRs by default unless a draft PR is specifically requested.
 
 ## Branch Naming
 

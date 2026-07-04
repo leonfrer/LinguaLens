@@ -38,6 +38,11 @@ This is a Chrome extension for assisting foreign-language reading.
 ## Development Notes
 
 - Always run `npm run build` before considering a code change complete.
+- Use Vercel AI SDK as the default abstraction for LLM-backed translation and explanation calls.
+- Implement the MVP with a user-managed API key model: users provide their own LLM provider API key in extension settings.
+- Treat user-provided API keys as sensitive local settings. Never hard-code keys, commit keys, include keys in saved items or exports, show keys outside settings, include keys in errors, or log keys.
+- Keep the MVP provider/model settings minimal: start with one default provider/model path and expand only when the provider boundary and popup UI can stay simple.
+- Avoid adding heavier orchestration or gateway frameworks such as LangChain or LiteLLM unless the project explicitly needs complex agents, RAG workflows, multi-provider routing, or cost governance.
 - Prefer small unit tests for pure logic, especially text extraction, language detection, selection handling, message payload shaping, and settings helpers.
 - Keep DOM-heavy content script behavior testable by moving pure parsing/transformation logic into separate modules, then test those modules outside the browser.
 - Manually verify extension behavior in Chrome after changes that affect:

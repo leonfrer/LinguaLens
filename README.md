@@ -15,6 +15,8 @@ The main MVP reading loop is in place:
 
 Translation currently uses a mock provider. Real translation provider integration is tracked in [GitHub issue #1](https://github.com/leonfrer/LinguaLens/issues/1).
 
+The planned LLM integration should use Vercel AI SDK as the default TypeScript abstraction. The MVP should support a user-managed API key model: users enter their own provider API key in extension settings, the key is stored locally in Chrome extension storage, and saved reading items must never include the key. The UI should make clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
+
 ## Tech Stack
 
 - Vite
@@ -116,12 +118,14 @@ See [TESTING.md](./TESTING.md) for the fuller verification checklist.
 
 - Keep DOM-heavy content-script behavior thin and move pure logic into `src/shared` where practical.
 - Prefer small unit tests for text normalization, storage helpers, message payload shapes, settings, and translation boundary behavior.
+- Use Vercel AI SDK as the default library for LLM-backed translation and explanation calls.
+- Treat user-provided LLM API keys as sensitive local settings: never hard-code them, commit them, include them in saved items or exports, show them outside settings, include them in errors, or log them.
 - Run `npm run build` before considering code changes complete.
 - Manually verify in Chrome after changes to manifest config, permissions, content-script injection, background messaging, popup behavior, or storage behavior.
 
 ## Roadmap
 
-- Choose and integrate a real translation provider.
-- Decide how provider configuration and credentials should work.
+- Integrate a real LLM-backed translation provider with Vercel AI SDK.
+- Add user-managed LLM provider, model, and API key settings.
 - Add user-facing error behavior for translation failures.
 - Decide whether saved-item storage should enforce a maximum item count.

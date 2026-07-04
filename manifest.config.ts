@@ -8,14 +8,15 @@ export default defineManifest({
     default_popup: 'index.html',
     default_title: 'LinguaLens'
   },
+  permissions: ['storage'],
   background: {
-    service_worker: 'src/background/index.ts',
+    service_worker: 'src/background/service-worker.ts',
     type: 'module'
   },
   content_scripts: [
     {
       matches: ['<all_urls>'],
-      js: ['src/content/index.ts']
+      js: ['src/content/selection.ts']
     }
   ]
 });

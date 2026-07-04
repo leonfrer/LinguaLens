@@ -65,6 +65,40 @@ Keep browser-heavy behavior thin and move pure logic into modules that can be te
 - Saved-item creation and validation.
 - Settings defaults and updates.
 
-## Chrome Verification Notes
+## When To Use Real Chrome Verification
 
-For changes affecting `manifest.config.ts`, content-script injection, background messaging, popup behavior, or Chrome permissions, verify in the real browser after `npm run build`.
+Use real Chrome verification whenever a change depends on Chrome extension runtime behavior that unit tests or a normal Vite page cannot faithfully cover. This includes changes to:
+
+- `manifest.config.ts`, extension permissions, host permissions, action config, or content-script match patterns.
+- Content-script injection, selection handling, DOM positioning, overlays, or behavior on third-party pages.
+- Background service-worker startup, message routing, `chrome.runtime` APIs, alarms, or lifecycle-sensitive behavior.
+- Popup UI behavior at the real extension popup size.
+- `chrome.storage`, saved settings, persisted items, or migration/default handling.
+- Cross-surface flows where popup, content script, and background code need to work together.
+
+Real Chrome verification is also required after fixing a bug that only appears in Chrome, after changing build or extension packaging behavior, or before marking a user-facing extension workflow complete.
+
+## How To Test In Real Chrome
+
+Use the development flow for quick iteration:
+
+1. Run `npm run dev`.
+2. Open `chrome://extensions`.
+3. Enable Developer mode.
+4. Load or refresh the unpacked extension from the dev output path shown by Vite/CRXJS.
+5. Exercise the changed popup, content-script, or background behavior in Chrome.
+
+Use the production flow before considering extension behavior complete:
+
+1. Run `npm test`.
+2. Run `npm run build`.
+3. Open `chrome://extensions`.
+4. Enable Developer mode.
+5. Load or refresh the unpacked extension from `dist/`.
+6. Confirm Chrome shows no manifest, permission, or service-worker errors.
+7. Open the popup from the extension action and verify it at real popup size.
+8. Test content-script behavior on at least one article-like page and one dynamic web app page.
+9. Check the relevant Chrome DevTools consoles: popup, page/content script, and service worker.
+10. For storage or settings changes, reload Chrome pages and the extension, then confirm the persisted state still behaves correctly.
+
+When using Codex to perform this verification, ask it to enter the local Chrome browser, load or refresh the unpacked extension, run the workflow, and report the observed result. If the test depends on a logged-in page or private browser state, keep that state in your own Chrome profile and tell Codex when the page is ready.

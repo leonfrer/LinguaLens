@@ -39,10 +39,10 @@
 
 ## Implementation Checklist
 
-- [ ] Add content-script selection listener.
-- [ ] Render and position the floating translation panel.
-- [ ] Add background message handling for translation and saving.
-- [ ] Add translation provider boundary and initial mock/provider implementation.
-- [ ] Build popup saved-item list.
-- [ ] Add delete support in popup.
-- [ ] Add target-language setting in popup.
+- [x] Add content-script selection listener.
+- [x] Render and position the floating translation panel.
+- [x] Add background message handling for translation and saving.
+- [x] Add translation provider boundary and initial mock/provider implementation.
+- [x] Build popup saved-item list.
+- [x] Add delete support in popup.
+- [x] Add target-language setting in popup.

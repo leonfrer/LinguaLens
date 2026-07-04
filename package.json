@@ -14,8 +14,11 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.8",
+    "@ai-sdk/openai": "latest",
     "@crxjs/vite-plugin": "latest",
     "@vitejs/plugin-react": "latest",
+    "ai": "latest",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest",

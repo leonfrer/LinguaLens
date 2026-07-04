@@ -64,10 +64,11 @@ Use this checklist as features land:
 - Floating translation panel appears near the selected text.
 - Translation requests go through the background message API.
 - Save action persists the item to `chrome.storage.local`.
-- Saved item includes source URL, page title, original text, translation, target language, and timestamp.
+- Saved item includes source URL, page title, original text, translation, explanation language, sentence context when available, provider/model metadata, and timestamp.
 - Popup displays recent saved items.
 - Popup deletion removes the saved item and updates the UI.
-- Target-language setting persists and affects later translation requests.
+- Explanation-language setting persists and affects later translation requests.
+- API key and model settings persist, and the API key never appears in saved items or non-settings UI.
 
 ## Unit Test Scope
 

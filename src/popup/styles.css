@@ -27,7 +27,7 @@ body {
   display: flex;
   gap: 12px;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 h1 {
@@ -46,7 +46,23 @@ p {
   margin-top: 2px;
 }
 
-.languageControl {
+.settingsPanel {
+  background: #ffffff;
+  border: 1px solid #e3e7ee;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.settingsGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+
+.fieldControl {
   align-items: flex-start;
   color: #526070;
   display: grid;
@@ -54,7 +70,8 @@ p {
   gap: 4px;
 }
 
-select {
+select,
+input {
   appearance: none;
   background: #ffffff;
   border: 1px solid #d8dee8;
@@ -63,6 +80,22 @@ select {
   font: inherit;
   min-height: 30px;
   padding: 0 24px 0 10px;
+  width: 100%;
+}
+
+input {
+  padding-right: 10px;
+}
+
+select:disabled {
+  background: #f6f7f9;
+  color: #687386;
+}
+
+.settingsNote {
+  color: #687386;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .empty {
@@ -99,6 +132,7 @@ select {
 
 .sourceText,
 .translationText,
+.explanationText,
 .metaText {
   overflow-wrap: anywhere;
 }
@@ -113,6 +147,12 @@ select {
   color: #172033;
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.4;
+}
+
+.explanationText {
+  color: #526070;
+  font-size: 12px;
   line-height: 1.4;
 }
 

@@ -9,6 +9,7 @@ export default defineManifest({
     default_title: 'LinguaLens'
   },
   permissions: ['storage'],
+  host_permissions: ['https://api.openai.com/*', 'https://generativelanguage.googleapis.com/*'],
   background: {
     service_worker: 'src/background/service-worker.ts',
     type: 'module'

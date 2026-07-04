@@ -15,7 +15,7 @@
 - Keep content-script UI lightweight and local to the current page.
 - Use an LLM-backed translation provider behind the stable provider/message boundary.
 - Use Vercel AI SDK as the default implementation library for LLM-backed translation and explanation calls.
-- Start with one default LLM provider/model path for the MVP, then expand provider choices later only if the settings UI and provider boundary remain simple.
+- Support a minimal pair of LLM provider/model paths for the MVP: Gemini by default and OpenAI as an alternate provider.
 - Use a user-managed API key model for the MVP. The user's LLM API key is stored locally in Chrome extension storage and is used only for LLM requests.
 - Never include the user's API key in saved items, exported reading data, error messages, logs, or non-settings UI.
 - Use `explanationLanguage` instead of the narrower `targetLanguage` concept. The explanation language controls the language used for translations, contextual explanations, and later learning guidance.
@@ -26,8 +26,9 @@
 - Saved entries are stored as a single saved-item type for MVP. Word-vs-phrase classification can be added later without changing the main save flow.
 - Default explanation language is Simplified Chinese (`zh-CN`).
 - Popup layout targets the real Chrome extension popup size, around 320-360px wide, with recent saved items, deletion, explanation-language settings, and minimal LLM provider settings.
+- Popup should show a compact settings summary by default. Editing provider, model, explanation language, or API key should happen in an explicit settings mode and persist only when the user clicks Save.
 - Popup shows the latest 20 saved items first. MVP storage can keep all saved items locally unless a practical limit is needed later.
-- Mock translation can remain available for development fallback, but normal use should return LLM-backed output once the user configures an API key.
+- Mock translation can remain available for development fallback, but normal use should return LLM-backed output once the user configures a Gemini or OpenAI API key.
 
 ## MVP Needs
 
@@ -42,7 +43,7 @@
 
 ## Open Decisions
 
-- Initial LLM provider choice and default model: tracked in GitHub issue [#1](https://github.com/leonfrer/LinguaLens/issues/1).
+- Whether Gemini `gemini-2.5-flash` should remain the default MVP model after real-user testing.
 - Whether saved-item storage should enforce a maximum item count.
 
 ## Implementation Checklist
@@ -53,7 +54,11 @@
 - [x] Add translation provider boundary and initial mock/provider implementation.
 - [x] Build popup saved-item list.
 - [x] Add delete support in popup.
-- [x] Add target-language setting in popup.
-- [ ] Rename target-language settings and data flow to explanation-language.
-- [ ] Add user-managed LLM API key and model settings.
-- [ ] Add LLM-backed translation provider.
+- [x] Add explanation-language setting in popup.
+- [x] Rename target-language settings and data flow to explanation-language.
+- [x] Add user-managed LLM API key and model settings.
+- [x] Add LLM-backed translation provider.
+- [ ] Move popup provider/model/API key edits behind an explicit settings mode with Save and Cancel.
+- [ ] Manually verify the Gemini-backed flow in Chrome with a real API key.
+- [ ] Manually verify the OpenAI-backed flow in Chrome with a real API key.
+- [ ] Add more specific provider error handling for auth, quota, and network failures.

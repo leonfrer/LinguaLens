@@ -1,14 +1,35 @@
-export type TargetLanguage = 'zh-CN' | 'en';
+export type ExplanationLanguage =
+  | 'zh-CN'
+  | 'zh-TW'
+  | 'en'
+  | 'ja'
+  | 'ko'
+  | 'fr'
+  | 'de'
+  | 'es'
+  | 'pt'
+  | 'it'
+  | 'ru'
+  | 'ar';
+
+export type LlmProvider = 'google' | 'openai';
 
 export type Settings = {
-  targetLanguage: TargetLanguage;
+  explanationLanguage: ExplanationLanguage;
+  llmProvider: LlmProvider;
+  llmModel: string;
+  apiKey: string;
 };
 
 export type SavedItem = {
   id: string;
   text: string;
   translation: string;
-  targetLanguage: TargetLanguage;
+  explanationLanguage: ExplanationLanguage;
+  sentenceContext?: string;
+  explanation?: string;
+  provider?: LlmProvider | 'mock';
+  model?: string;
   sourceUrl: string;
   sourceTitle: string;
   createdAt: number;
@@ -17,14 +38,19 @@ export type SavedItem = {
 export type TranslateRequestMessage = {
   type: 'LINGUALENS_TRANSLATE';
   text: string;
-  targetLanguage: TargetLanguage;
+  sentenceContext?: string;
+  explanationLanguage: ExplanationLanguage;
 };
 
 export type SaveItemMessage = {
   type: 'LINGUALENS_SAVE_ITEM';
   text: string;
   translation: string;
-  targetLanguage: TargetLanguage;
+  explanationLanguage: ExplanationLanguage;
+  sentenceContext?: string;
+  explanation?: string;
+  provider?: LlmProvider | 'mock';
+  model?: string;
   sourceUrl: string;
   sourceTitle: string;
 };
@@ -35,7 +61,9 @@ export type TranslateResponse =
   | {
       ok: true;
       translation: string;
-      provider: 'mock';
+      explanation?: string;
+      provider: LlmProvider | 'mock';
+      model?: string;
     }
   | {
       ok: false;

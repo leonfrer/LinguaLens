@@ -1,7 +1,10 @@
 import type { SavedItem, SaveItemMessage, Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
-  targetLanguage: 'zh-CN'
+  explanationLanguage: 'zh-CN',
+  llmProvider: 'google',
+  llmModel: 'gemini-2.5-flash',
+  apiKey: ''
 };
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
@@ -15,7 +18,11 @@ export function createSavedItem(
     id: `${now}-${crypto.randomUUID()}`,
     text: payload.text,
     translation: payload.translation,
-    targetLanguage: payload.targetLanguage,
+    explanationLanguage: payload.explanationLanguage,
+    sentenceContext: payload.sentenceContext,
+    explanation: payload.explanation,
+    provider: payload.provider,
+    model: payload.model,
     sourceUrl: payload.sourceUrl,
     sourceTitle: payload.sourceTitle,
     createdAt: now
@@ -24,9 +31,16 @@ export function createSavedItem(
 
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get(SETTINGS_KEY);
+  const storedSettings = result[SETTINGS_KEY] as
+    | (Partial<Settings> & { targetLanguage?: Settings['explanationLanguage'] })
+    | undefined;
+  const { targetLanguage, ...currentSettings } = storedSettings ?? {};
+
   return {
     ...DEFAULT_SETTINGS,
-    ...(result[SETTINGS_KEY] as Partial<Settings> | undefined)
+    ...currentSettings,
+    explanationLanguage:
+      currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
 }
 

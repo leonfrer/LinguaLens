@@ -20,6 +20,17 @@ This is a Chrome extension for assisting foreign-language reading.
 - `npm run build` runs TypeScript checking and builds the extension into `dist/`.
 - `npm run preview` previews the built Vite app.
 
+## Execution Environment Notes
+
+- Do not run dependency installation commands such as `npm install`, `npm ci`, or `npx playwright install` in the sandbox. These commands require the real local environment because they access the network, npm caches, and tool-managed browser/dependency directories.
+- Do not run GitHub remote operations such as creating pull requests, pushing branches, or checking GitHub authentication in the sandbox. Use the real local environment or the configured GitHub connector for these operations.
+- When GitHub operations are needed, prefer the `gh` CLI.
+- When creating pull requests, create regular PRs by default unless a draft PR is specifically requested.
+
+## Branch Naming
+
+- When creating branches, do not use the default `codex/*` prefix. Use a meaningful branch name that always includes an explicit prefix, such as `docs/update-agents-md`, `feat/selection-popup`, or `fix/background-message-handling`.
+
 ## Commit Message Guidelines
 
 - Use Conventional Commits style: `type(scope): summary`.

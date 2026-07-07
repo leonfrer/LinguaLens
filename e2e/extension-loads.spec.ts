@@ -393,7 +393,9 @@ for (const providerConfig of providerConfigs) {
     expect(savedItems[0]).not.toHaveProperty('apiKey');
 
     await popupPage.reload();
-    await expect(popupPage.getByText('rare comet')).toBeVisible();
+    await expect(
+      popupPage.locator('.sourceText').getByText('rare comet', { exact: true })
+    ).toBeVisible();
 
     await page.close();
   });

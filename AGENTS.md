@@ -20,6 +20,12 @@ This is a Chrome extension for assisting foreign-language reading.
 - `npm run build` runs TypeScript checking and builds the extension into `dist/`.
 - `npm run preview` previews the built Vite app.
 
+## Release Workflow
+
+- Use the project skill at `.codex/skills/lingualens-release/SKILL.md` when preparing, PRing, tagging, or verifying a release.
+- Package and Chrome manifest versions use plain semver such as `0.1.0`; Git tags use a leading `v`, such as `v0.1.0`.
+- Do not commit local `release/` zip files. GitHub Actions creates the release artifact from the pushed tag.
+
 ## Execution Environment Notes
 
 - If a command is not appropriate to run in the sandbox, ask the user by default for permission to run it in the real local environment.

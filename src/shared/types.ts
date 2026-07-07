@@ -12,7 +12,7 @@ export type ExplanationLanguage =
   | 'ru'
   | 'ar';
 
-export type LlmProvider = 'google' | 'openai';
+export type LlmProvider = 'nvidia';
 
 export type Settings = {
   explanationLanguage: ExplanationLanguage;

@@ -1,5 +1,4 @@
-import { createGoogle } from '@ai-sdk/google';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAI as createOpenAICompatible } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
 import { generateText } from 'ai';
 import type { ExplanationLanguage, LlmProvider, Settings, TranslateResponse } from './types';
@@ -45,9 +44,10 @@ type LlmTranslation = {
 };
 
 const providerErrorLabels: Record<LlmProvider, string> = {
-  google: 'Google Gemini',
-  openai: 'OpenAI'
+  nvidia: 'NVIDIA NIM'
 };
+
+const NVIDIA_NIM_BASE_URL = 'https://integrate.api.nvidia.com/v1';
 
 export function createMockTranslation(
   text: string,
@@ -91,17 +91,11 @@ export function parseLlmTranslation(text: string): LlmTranslation {
 }
 
 function createLanguageModel(settings: Settings): LanguageModel {
-  if (settings.llmProvider === 'google') {
-    const google = createGoogle({
-      apiKey: settings.apiKey.trim()
-    });
-    return google(settings.llmModel);
-  }
-
-  const openai = createOpenAI({
-    apiKey: settings.apiKey.trim()
+  const nvidia = createOpenAICompatible({
+    apiKey: settings.apiKey.trim(),
+    baseURL: NVIDIA_NIM_BASE_URL
   });
-  return openai(settings.llmModel);
+  return nvidia.chat(settings.llmModel);
 }
 
 export async function translateWithConfiguredProvider({

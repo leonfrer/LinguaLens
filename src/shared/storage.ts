@@ -1,11 +1,15 @@
-import type { SavedItem, SaveItemMessage, Settings } from './types';
+import type { LlmProvider, SavedItem, SaveItemMessage, Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
   explanationLanguage: 'zh-CN',
-  llmProvider: 'google',
-  llmModel: 'gemini-2.5-flash',
+  llmProvider: 'nvidia',
+  llmModel: 'meta/llama-3.1-8b-instruct',
   apiKey: ''
 };
+
+const NVIDIA_DEFAULT_MODEL = 'meta/llama-3.1-8b-instruct';
+const LEGACY_NVIDIA_MODEL = 'nvidia/llama-3.1-nemotron-nano-8b-v1';
+const SUPPORTED_LLM_PROVIDER: LlmProvider = 'nvidia';
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
 export const SETTINGS_KEY = 'lingualens.settings';
@@ -32,16 +36,34 @@ export function createSavedItem(
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get(SETTINGS_KEY);
   const storedSettings = result[SETTINGS_KEY] as
-    | (Partial<Settings> & { targetLanguage?: Settings['explanationLanguage'] })
+    | (Partial<Omit<Settings, 'llmProvider'>> & {
+        llmProvider?: string;
+        targetLanguage?: Settings['explanationLanguage'];
+      })
     | undefined;
   const { targetLanguage, ...currentSettings } = storedSettings ?? {};
+  const removedProviderModel =
+    currentSettings.llmProvider && currentSettings.llmProvider !== SUPPORTED_LLM_PROVIDER
+      ? DEFAULT_SETTINGS.llmModel
+      : currentSettings.llmModel;
 
-  return {
+  const nextSettings = {
     ...DEFAULT_SETTINGS,
     ...currentSettings,
+    llmProvider: SUPPORTED_LLM_PROVIDER,
+    llmModel: removedProviderModel ?? DEFAULT_SETTINGS.llmModel,
     explanationLanguage:
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
+
+  if (nextSettings.llmProvider === 'nvidia' && nextSettings.llmModel === LEGACY_NVIDIA_MODEL) {
+    return {
+      ...nextSettings,
+      llmModel: NVIDIA_DEFAULT_MODEL
+    };
+  }
+
+  return nextSettings;
 }
 
 export async function updateSettings(settings: Partial<Settings>): Promise<Settings> {

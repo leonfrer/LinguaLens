@@ -13,7 +13,7 @@ The main MVP reading loop is in place:
 - Review and delete recently saved items in the popup.
 - Persist explanation-language, model, provider, and user-managed API key settings.
 
-Translation uses Vercel AI SDK with Gemini and OpenAI provider paths. Gemini is the default MVP provider so users can test with a Google AI Studio API key; OpenAI remains available from settings. Users enter their own API key in extension settings; the key is stored locally in Chrome extension storage and saved reading items do not include it. The UI makes clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
+Translation uses Vercel AI SDK with NVIDIA NIM as the supported provider path. Users enter their own NVIDIA API key in extension settings; the key is stored locally in Chrome extension storage and saved reading items do not include it. The UI makes clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
 
 ## Tech Stack
 
@@ -123,6 +123,6 @@ See [TESTING.md](./TESTING.md) for the fuller verification checklist.
 
 ## Roadmap
 
-- Manually verify the real extension workflow in Chrome with a configured Gemini or OpenAI API key.
+- Manually verify the real extension workflow in Chrome with a configured NVIDIA API key.
 - Refine user-facing error behavior for provider-specific auth, quota, and network failures.
 - Decide whether saved-item storage should enforce a maximum item count.

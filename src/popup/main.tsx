@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import { fetchModelOptions, type ModelOption } from '../shared/models';
 import { deleteSavedItem, getSavedItems, getSettings, updateSettings } from '../shared/storage';
-import type { ExplanationLanguage, LlmProvider, SavedItem, Settings } from '../shared/types';
+import type { ExplanationLanguage, SavedItem, Settings } from '../shared/types';
 import './styles.css';
 
 const explanationLanguageOptions: Array<{ value: ExplanationLanguage; label: string }> = [
@@ -19,23 +20,25 @@ const explanationLanguageOptions: Array<{ value: ExplanationLanguage; label: str
   { value: 'ar', label: 'العربية' }
 ];
 
-const defaultModels: Record<LlmProvider, string> = {
-  google: 'gemini-2.5-flash',
-  openai: 'gpt-4o-mini'
-};
+const defaultModel = 'meta/llama-3.1-8b-instruct';
+const providerLabel = 'NVIDIA NIM';
+const apiKeyPlaceholder = 'NVIDIA API key';
 
 function App() {
   const [items, setItems] = useState<SavedItem[]>([]);
   const [settings, setSettings] = useState<Settings>({
     explanationLanguage: 'zh-CN',
-    llmProvider: 'google',
-    llmModel: defaultModels.google,
+    llmProvider: 'nvidia',
+    llmModel: defaultModel,
     apiKey: ''
   });
   const [draftSettings, setDraftSettings] = useState<Settings>(settings);
   const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>([]);
+  const [modelLoadError, setModelLoadError] = useState('');
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const recentItems = useMemo(() => items.slice(0, 20), [items]);
   const explanationLanguageLabel =
     explanationLanguageOptions.find((option) => option.value === settings.explanationLanguage)
@@ -67,11 +70,13 @@ function App() {
 
   function handleStartSettingsEdit() {
     setDraftSettings(settings);
+    setModelLoadError('');
     setIsEditingSettings(true);
   }
 
   function handleCancelSettingsEdit() {
     setDraftSettings(settings);
+    setModelLoadError('');
     setIsEditingSettings(false);
   }
 
@@ -92,12 +97,35 @@ function App() {
     setDraftSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
   }
 
-  function handleDraftProviderChange(nextProvider: LlmProvider) {
-    handleDraftSettingsChange({
-      llmProvider: nextProvider,
-      llmModel: defaultModels[nextProvider],
-      apiKey: ''
-    });
+  function handleApiKeyChange(apiKey: string) {
+    handleDraftSettingsChange({ apiKey });
+    setModelOptions([]);
+    setModelLoadError('');
+  }
+
+  async function handleLoadModels() {
+    setIsLoadingModels(true);
+    setModelLoadError('');
+
+    try {
+      const models = await fetchModelOptions({
+        apiKey: draftSettings.apiKey,
+        provider: draftSettings.llmProvider
+      });
+      setModelOptions(models);
+
+      if (!models.some((model) => model.id === draftSettings.llmModel) && models[0]) {
+        handleDraftSettingsChange({ llmModel: models[0].id });
+      }
+
+      if (models.length === 0) {
+        setModelLoadError('没有从 provider 返回可选模型。');
+      }
+    } catch (error) {
+      setModelLoadError(error instanceof Error ? error.message : 'Unable to load models.');
+    } finally {
+      setIsLoadingModels(false);
+    }
   }
 
   async function handleDelete(itemId: string) {
@@ -171,43 +199,60 @@ function App() {
               </select>
             </label>
 
-            <div className="settingsGrid">
-              <label className="fieldControl">
-                <span>Provider</span>
-                <select
-                  value={draftSettings.llmProvider}
-                  onChange={(event) => {
-                    handleDraftProviderChange(event.target.value as LlmProvider);
-                  }}
-                >
-                  <option value="google">Gemini</option>
-                  <option value="openai">OpenAI</option>
-                </select>
-              </label>
-
-              <label className="fieldControl">
-                <span>Model</span>
-                <input
-                  value={draftSettings.llmModel}
-                  onChange={(event) => {
-                    handleDraftSettingsChange({ llmModel: event.target.value });
-                  }}
-                />
-              </label>
-            </div>
-
             <label className="fieldControl">
               <span>API key</span>
               <input
                 autoComplete="off"
-                placeholder={draftSettings.llmProvider === 'google' ? 'Gemini API key' : 'sk-...'}
+                placeholder={apiKeyPlaceholder}
                 type="password"
                 value={draftSettings.apiKey}
                 onChange={(event) => {
-                  handleDraftSettingsChange({ apiKey: event.target.value });
+                  handleApiKeyChange(event.target.value);
                 }}
               />
             </label>
+
+            <div className="settingsGrid">
+              <label className="fieldControl">
+                <span>Model</span>
+                <select
+                  disabled={modelOptions.length === 0}
+                  value={draftSettings.llmModel}
+                  onChange={(event) => {
+                    handleDraftSettingsChange({ llmModel: event.target.value });
+                  }}
+                >
+                  {modelOptions.length === 0 ? (
+                    <option value={draftSettings.llmModel}>{draftSettings.llmModel}</option>
+                  ) : null}
+                  {modelOptions.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="secondaryButton loadModelsButton"
+                disabled={isLoadingModels || !draftSettings.apiKey.trim()}
+                type="button"
+                onClick={() => {
+                  void handleLoadModels();
+                }}
+              >
+                {isLoadingModels ? 'Loading' : 'Load models'}
+              </button>
+            </div>
+            <label className="fieldControl">
+              <span>手动 Model ID</span>
+              <input
+                value={draftSettings.llmModel}
+                onChange={(event) => {
+                  handleDraftSettingsChange({ llmModel: event.target.value });
+                }}
+              />
+            </label>
+            {modelLoadError ? <p className="settingsError">{modelLoadError}</p> : null}
           </>
         ) : (
           <dl className="settingsSummary">
@@ -217,7 +262,7 @@ function App() {
             </div>
             <div>
               <dt>Provider</dt>
-              <dd>{settings.llmProvider === 'google' ? 'Gemini' : 'OpenAI'}</dd>
+              <dd>{providerLabel}</dd>
             </div>
             <div>
               <dt>Model</dt>

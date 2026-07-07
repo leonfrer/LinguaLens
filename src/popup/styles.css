@@ -81,9 +81,10 @@ p {
 }
 
 .settingsGrid {
+  align-items: end;
   display: grid;
   gap: 8px;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .fieldControl {
@@ -171,6 +172,16 @@ select:disabled {
 .secondaryButton:disabled {
   cursor: not-allowed;
   opacity: 0.65;
+}
+
+.loadModelsButton {
+  min-width: 92px;
+}
+
+.settingsError {
+  color: #b42318;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .settingsSummary {

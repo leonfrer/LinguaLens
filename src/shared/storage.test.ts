@@ -15,8 +15,8 @@ describe('createSavedItem', () => {
           explanationLanguage: 'zh-CN',
           sentenceContext: 'Well, hello there.',
           explanation: 'A greeting.',
-          provider: 'openai',
-          model: 'gpt-4o-mini',
+          provider: 'nvidia',
+          model: 'meta/llama-3.1-8b-instruct',
           sourceUrl: 'https://example.com',
           sourceTitle: 'Example'
         },
@@ -29,8 +29,8 @@ describe('createSavedItem', () => {
       explanationLanguage: 'zh-CN',
       sentenceContext: 'Well, hello there.',
       explanation: 'A greeting.',
-      provider: 'openai',
-      model: 'gpt-4o-mini',
+      provider: 'nvidia',
+      model: 'meta/llama-3.1-8b-instruct',
       sourceUrl: 'https://example.com',
       sourceTitle: 'Example',
       createdAt: 123
@@ -56,6 +56,27 @@ describe('getSettings', () => {
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
       explanationLanguage: 'en',
+      apiKey: 'test-key'
+    });
+  });
+
+  it('migrates removed provider settings to the supported default provider', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              llmProvider: 'openai',
+              llmModel: 'gpt-4o-mini',
+              apiKey: 'test-key'
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
       apiKey: 'test-key'
     });
   });

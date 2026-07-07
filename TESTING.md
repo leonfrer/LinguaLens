@@ -31,6 +31,26 @@ npm run test:e2e
 - Run `npx playwright install chromium` once after installing Playwright dependencies.
 - Google Chrome and Microsoft Edge do not support the side-loading flags needed by this automated flow.
 
+### Real Provider E2E Checks
+
+Playwright loads `.env` and `.env.local` before tests run. Provider-backed tests are skipped unless
+the matching test API key is present:
+
+```bash
+cp .env.example .env
+LINGUALENS_E2E_NVIDIA_API_KEY=...
+```
+
+Optional model overrides:
+
+```bash
+LINGUALENS_E2E_NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+```
+
+These tests make real LLM requests, send selected text and sentence context to the configured
+provider, and may consume the test account's API quota. Keep `.env` files local and never commit
+real API keys.
+
 ## Development Verification
 
 Use the Vite/CRXJS dev server while iterating:
@@ -65,6 +85,7 @@ Use this checklist as features land:
 - Translation requests go through the background message API.
 - Save action persists the item to `chrome.storage.local`.
 - Saved item includes source URL, page title, original text, translation, explanation language, sentence context when available, provider/model metadata, and timestamp.
+- Real provider e2e tests pass with a configured NVIDIA test API key, or are intentionally skipped when that key is absent.
 - Popup displays recent saved items.
 - Popup deletion removes the saved item and updates the UI.
 - Explanation-language setting persists and affects later translation requests.

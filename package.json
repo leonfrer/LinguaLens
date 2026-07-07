@@ -9,12 +9,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:headed": "npm run build && playwright test --headed",
+    "test:e2e:ui": "npm run build && playwright test --ui"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.8",
     "@ai-sdk/openai": "latest",
     "@crxjs/vite-plugin": "latest",
     "@vitejs/plugin-react": "latest",

@@ -3,7 +3,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 export default defineManifest({
   manifest_version: 3,
   name: 'LinguaLens',
-  version: '0.0.0',
+  version: '0.1.0',
   action: {
     default_popup: 'index.html',
     default_title: 'LinguaLens'

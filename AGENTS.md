@@ -22,6 +22,7 @@ This is a Chrome extension for assisting foreign-language reading.
 
 ## Execution Environment Notes
 
+- If a command is not appropriate to run in the sandbox, ask the user by default for permission to run it in the real local environment.
 - Do not run dependency installation commands such as `npm install`, `npm ci`, or `npx playwright install` in the sandbox. These commands require the real local environment because they access the network, npm caches, and tool-managed browser/dependency directories.
 - Do not run `npm run test:e2e` in the sandbox. Playwright extension tests must run in the real local environment because they launch a persistent Chromium context with the built extension.
 - Do not run GitHub remote operations such as creating pull requests, pushing branches, or checking GitHub authentication in the sandbox. Use the real local environment or the configured GitHub connector for these operations.

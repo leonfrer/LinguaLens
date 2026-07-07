@@ -9,13 +9,11 @@ The main MVP reading loop is in place:
 - Detect selected text on web pages.
 - Show an inline translation panel near the selection.
 - Route translation and save requests through the background service worker.
-- Save selected text, translation, source URL, source title, target language, and timestamp to `chrome.storage.local`.
+- Save selected text, translation, sentence context, source URL, source title, explanation language, provider/model metadata, and timestamp to `chrome.storage.local`.
 - Review and delete recently saved items in the popup.
-- Persist the target-language setting.
+- Persist explanation-language, model, provider, and user-managed API key settings.
 
-Translation currently uses a mock provider. Real translation provider integration is tracked in [GitHub issue #1](https://github.com/leonfrer/LinguaLens/issues/1).
-
-The planned LLM integration should use Vercel AI SDK as the default TypeScript abstraction. The MVP should support a user-managed API key model: users enter their own provider API key in extension settings, the key is stored locally in Chrome extension storage, and saved reading items must never include the key. The UI should make clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
+Translation uses Vercel AI SDK with NVIDIA NIM as the supported provider path. Users enter their own NVIDIA API key in extension settings; the key is stored locally in Chrome extension storage and saved reading items do not include it. The UI makes clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
 
 ## Tech Stack
 
@@ -53,9 +51,9 @@ Key entry points:
 
 - `src/content/index.ts`: content-script selection handling and inline panel UI.
 - `src/background/index.ts`: message handling for translation and saving.
-- `src/shared/translation.ts`: current mock translation provider boundary.
+- `src/shared/translation.ts`: LLM translation provider boundary and development mock helper.
 - `src/shared/storage.ts`: saved items and settings storage helpers.
-- `src/popup/main.tsx`: popup UI for recent saved items and language settings.
+- `src/popup/main.tsx`: popup UI for recent saved items and minimal LLM settings.
 - `manifest.config.ts`: Chrome extension manifest configuration.
 
 ## Getting Started
@@ -125,7 +123,6 @@ See [TESTING.md](./TESTING.md) for the fuller verification checklist.
 
 ## Roadmap
 
-- Integrate a real LLM-backed translation provider with Vercel AI SDK.
-- Add user-managed LLM provider, model, and API key settings.
-- Add user-facing error behavior for translation failures.
+- Manually verify the real extension workflow in Chrome with a configured NVIDIA API key.
+- Refine user-facing error behavior for provider-specific auth, quota, and network failures.
 - Decide whether saved-item storage should enforce a maximum item count.

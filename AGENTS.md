@@ -23,6 +23,7 @@ This is a Chrome extension for assisting foreign-language reading.
 ## Execution Environment Notes
 
 - Do not run dependency installation commands such as `npm install`, `npm ci`, or `npx playwright install` in the sandbox. These commands require the real local environment because they access the network, npm caches, and tool-managed browser/dependency directories.
+- Do not run `npm run test:e2e` in the sandbox. Playwright extension tests must run in the real local environment because they launch a persistent Chromium context with the built extension.
 - Do not run GitHub remote operations such as creating pull requests, pushing branches, or checking GitHub authentication in the sandbox. Use the real local environment or the configured GitHub connector for these operations.
 - When GitHub operations are needed, prefer the `gh` CLI.
 - When creating pull requests, create regular PRs by default unless a draft PR is specifically requested.
@@ -49,6 +50,8 @@ This is a Chrome extension for assisting foreign-language reading.
 ## Development Notes
 
 - Always run `npm run build` before considering a code change complete.
+- Run `npm run test` after changes that add or modify pure logic, storage helpers, message payload shaping, translation/model helpers, or existing unit-tested behavior.
+- Run `npm run test:e2e` in the real local environment after changes that affect extension loading, `manifest.config.ts`, content script injection, background service worker messaging, popup UI flows, Chrome permissions, or end-to-end selection/translation/save behavior.
 - Use Vercel AI SDK as the default abstraction for LLM-backed translation and explanation calls.
 - Implement the MVP with a user-managed API key model: users provide their own LLM provider API key in extension settings.
 - Treat user-provided API keys as sensitive local settings. Never hard-code keys, commit keys, include keys in saved items or exports, show keys outside settings, include keys in errors, or log keys.

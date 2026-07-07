@@ -1,13 +1,26 @@
 import { getSettings } from '../shared/storage';
-import { isValidSelectionText, normalizeSelectedText } from '../shared/text';
-import type { SaveItemResponse, TargetLanguage, TranslateResponse } from '../shared/types';
+import {
+  extractSentenceContainingText,
+  isValidSelectionText,
+  normalizeSelectedText
+} from '../shared/text';
+import type {
+  ExplanationLanguage,
+  LlmProvider,
+  SaveItemResponse,
+  TranslateResponse
+} from '../shared/types';
 
 const PANEL_ID = 'lingualens-selection-panel';
 
 type PanelState = {
   text: string;
   translation: string;
-  targetLanguage: TargetLanguage;
+  explanationLanguage: ExplanationLanguage;
+  sentenceContext?: string;
+  explanation?: string;
+  provider?: LlmProvider | 'mock';
+  model?: string;
   status: 'loading' | 'ready' | 'saved' | 'error';
   error?: string;
 };
@@ -88,7 +101,9 @@ function renderPanel(state: PanelState): void {
         ? '已保存'
         : state.status === 'error'
           ? state.error ?? '翻译失败'
-          : 'MVP mock';
+          : state.provider === 'mock'
+            ? 'MVP mock'
+            : state.model ?? 'LLM';
 
   root.innerHTML = `
     <style>
@@ -182,7 +197,7 @@ function renderPanel(state: PanelState): void {
 
   root.querySelector('.source')!.textContent = state.text;
   root.querySelector('.translation')!.textContent =
-    state.status === 'loading' ? '正在生成模拟翻译' : state.translation;
+    state.status === 'loading' ? '正在生成翻译' : state.translation;
   root.querySelector('.status')!.textContent = statusText;
   root.querySelector('[data-action="close"]')?.addEventListener('click', hidePanel);
   root.querySelector('[data-action="save"]')?.addEventListener('click', () => {
@@ -190,14 +205,19 @@ function renderPanel(state: PanelState): void {
   });
 }
 
-async function translateSelection(text: string, targetLanguage: TargetLanguage): Promise<void> {
+async function translateSelection(
+  text: string,
+  explanationLanguage: ExplanationLanguage,
+  sentenceContext?: string
+): Promise<void> {
   const requestedText = text;
   lastRequestedText = requestedText;
 
   currentState = {
     text,
     translation: '',
-    targetLanguage,
+    explanationLanguage,
+    sentenceContext,
     status: 'loading'
   };
   renderPanel(currentState);
@@ -206,7 +226,8 @@ async function translateSelection(text: string, targetLanguage: TargetLanguage):
     const response = await sendRuntimeMessage<TranslateResponse>({
       type: 'LINGUALENS_TRANSLATE',
       text,
-      targetLanguage
+      sentenceContext,
+      explanationLanguage
     });
 
     if (lastRequestedText !== requestedText) {
@@ -217,13 +238,18 @@ async function translateSelection(text: string, targetLanguage: TargetLanguage):
       ? {
           text,
           translation: response.translation,
-          targetLanguage,
+          explanationLanguage,
+          sentenceContext,
+          explanation: response.explanation,
+          provider: response.provider,
+          model: response.model,
           status: 'ready'
         }
       : {
           text,
           translation: '',
-          targetLanguage,
+          explanationLanguage,
+          sentenceContext,
           status: 'error',
           error: response.error
         };
@@ -231,7 +257,8 @@ async function translateSelection(text: string, targetLanguage: TargetLanguage):
     currentState = {
       text,
       translation: '',
-      targetLanguage,
+      explanationLanguage,
+      sentenceContext,
       status: 'error',
       error: error instanceof Error ? error.message : '翻译失败'
     };
@@ -249,7 +276,11 @@ async function saveCurrentSelection(): Promise<void> {
     type: 'LINGUALENS_SAVE_ITEM',
     text: currentState.text,
     translation: currentState.translation,
-    targetLanguage: currentState.targetLanguage,
+    explanationLanguage: currentState.explanationLanguage,
+    sentenceContext: currentState.sentenceContext,
+    explanation: currentState.explanation,
+    provider: currentState.provider,
+    model: currentState.model,
     sourceUrl: window.location.href,
     sourceTitle: document.title
   });
@@ -271,8 +302,10 @@ async function handleSelectionChange(): Promise<void> {
 
   ensurePanel();
   positionPanel(selection);
-  const { targetLanguage } = await getSettings();
-  await translateSelection(text, targetLanguage);
+  const sentenceContext =
+    extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
+  const { explanationLanguage } = await getSettings();
+  await translateSelection(text, explanationLanguage, sentenceContext);
 }
 
 function scheduleSelectionChange(event?: Event): void {

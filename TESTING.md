@@ -31,6 +31,26 @@ npm run test:e2e
 - Run `npx playwright install chromium` once after installing Playwright dependencies.
 - Google Chrome and Microsoft Edge do not support the side-loading flags needed by this automated flow.
 
+### Real Provider E2E Checks
+
+Playwright loads `.env` and `.env.local` before tests run. Provider-backed tests are skipped unless
+the matching test API key is present:
+
+```bash
+cp .env.example .env
+LINGUALENS_E2E_NVIDIA_API_KEY=...
+```
+
+Optional model overrides:
+
+```bash
+LINGUALENS_E2E_NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+```
+
+These tests make real LLM requests, send selected text and sentence context to the configured
+provider, and may consume the test account's API quota. Keep `.env` files local and never commit
+real API keys.
+
 ## Development Verification
 
 Use the Vite/CRXJS dev server while iterating:
@@ -64,10 +84,16 @@ Use this checklist as features land:
 - Floating translation panel appears near the selected text.
 - Translation requests go through the background message API.
 - Save action persists the item to `chrome.storage.local`.
-- Saved item includes source URL, page title, original text, translation, target language, and timestamp.
+- Saved item includes source URL, page title, original text, translation, explanation language, sentence context when available, provider/model metadata, and timestamp.
+- Real provider e2e tests pass with a configured NVIDIA test API key, or are intentionally skipped when that key is absent.
 - Popup displays recent saved items.
 - Popup deletion removes the saved item and updates the UI.
-- Target-language setting persists and affects later translation requests.
+- Explanation-language setting persists and affects later translation requests.
+- API key and model settings persist, and the API key never appears in saved items or non-settings UI.
+- Popup settings show a compact summary by default, with provider/model/explanation language visible and API key shown only as configured or unconfigured.
+- Popup settings show a bright red dot on the settings button when no API key is configured, and hide it after a key is saved.
+- Popup settings edits stay local until Save is clicked; Cancel discards changed provider, model, explanation language, and API key values.
+- Popup settings remain correct after closing and reopening the popup, and after refreshing the unpacked extension.
 
 ## Unit Test Scope
 
@@ -115,5 +141,6 @@ Use the production flow before considering extension behavior complete:
 8. Test content-script behavior on at least one article-like page and one dynamic web app page.
 9. Check the relevant Chrome DevTools consoles: popup, page/content script, and service worker.
 10. For storage or settings changes, reload Chrome pages and the extension, then confirm the persisted state still behaves correctly.
+11. For popup settings changes, verify Save persists edits, Cancel discards edits, and the API key is never displayed outside the password input while editing.
 
 When using Codex to perform this verification, ask it to enter the local Chrome browser, load or refresh the unpacked extension, run the workflow, and report the observed result. If the test depends on a logged-in page or private browser state, keep that state in your own Chrome profile and tell Codex when the page is ready.

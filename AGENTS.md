@@ -54,6 +54,15 @@ This is a Chrome extension for assisting foreign-language reading.
 - Use scopes that match project areas when helpful, such as `popup`, `content`, `background`, `manifest`, or `build`.
 - Example: `feat(content): detect selected text on page`.
 
+## PR Title Guidelines
+
+- PR titles must use Conventional Commits style: `type(scope): summary` or `type: summary`.
+- Allowed PR title types are `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, and `build`.
+- Prefer scopes that match project areas, such as `popup`, `content`, `background`, `manifest`, `build`, or `release`.
+- Keep the subject imperative, concise, and start it with a lowercase letter.
+- Example: `fix(background): handle missing API key`.
+- PR title format is enforced by `.github/workflows/lint-pr.yml` using `amannn/action-semantic-pull-request`.
+
 ## Development Notes
 
 - Always run `npm run build` before considering a code change complete.

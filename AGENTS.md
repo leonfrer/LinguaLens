@@ -52,13 +52,14 @@ This is a Chrome extension for assisting foreign-language reading.
   - `test`: test additions or updates.
   - `chore`: tooling, dependencies, generated setup, or maintenance.
 - Use scopes that match project areas when helpful, such as `popup`, `content`, `background`, `manifest`, or `build`.
+- Use `deps` for dependency update commits.
 - Example: `feat(content): detect selected text on page`.
 
 ## PR Title Guidelines
 
 - PR titles must use Conventional Commits style: `type(scope): summary` or `type: summary`.
 - Allowed PR title types are `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, and `build`.
-- Prefer scopes that match project areas, such as `popup`, `content`, `background`, `manifest`, `build`, or `release`.
+- Prefer scopes that match project areas, such as `popup`, `content`, `background`, `manifest`, `build`, `release`, or `deps`.
 - Keep the subject imperative, concise, and start it with a lowercase letter.
 - Example: `fix(background): handle missing API key`.
 - PR title format is enforced by `.github/workflows/lint-pr.yml` using `amannn/action-semantic-pull-request`.
@@ -68,6 +69,9 @@ This is a Chrome extension for assisting foreign-language reading.
 - Always run `npm run build` before considering a code change complete.
 - Run `npm run test` after changes that add or modify pure logic, storage helpers, message payload shaping, translation/model helpers, or existing unit-tested behavior.
 - Run `npm run test:e2e` in the real local environment after changes that affect extension loading, `manifest.config.ts`, content script injection, background service worker messaging, popup UI flows, Chrome permissions, or end-to-end selection/translation/save behavior.
+- Keep direct dependencies in `package.json` pinned to exact versions. Do not use `latest`, caret ranges, tilde ranges, or wildcards for direct dependencies.
+- Let Dependabot propose dependency updates through PRs, then review release notes and run the relevant verification before merging.
+- Use `npm ci` in CI/release workflows so installs follow `package-lock.json` exactly.
 - Use Vercel AI SDK as the default abstraction for LLM-backed translation and explanation calls.
 - Implement the MVP with a user-managed API key model: users provide their own LLM provider API key in extension settings.
 - Treat user-provided API keys as sensitive local settings. Never hard-code keys, commit keys, include keys in saved items or exports, show keys outside settings, include keys in errors, or log keys.

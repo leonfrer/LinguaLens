@@ -1,6 +1,7 @@
 import { createOpenAI as createOpenAICompatible } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import type { ExplanationLanguage, LlmProvider, Settings, TranslateResponse } from './types';
+import { LLM_PROVIDERS } from './providers';
+import type { ExplanationLanguage, Settings, TranslateResponse } from './types';
 
 const languageLabels: Record<ExplanationLanguage, string> = {
   'zh-CN': 'Simplified Chinese',
@@ -27,12 +28,6 @@ type LlmTranslation = {
   translation: string;
   explanation?: string;
 };
-
-const providerErrorLabels: Record<LlmProvider, string> = {
-  nvidia: 'NVIDIA NIM'
-};
-
-const NVIDIA_NIM_BASE_URL = 'https://integrate.api.nvidia.com/v1';
 
 export function parseLlmTranslation(text: string): LlmTranslation {
   const trimmedText = text.trim();
@@ -67,6 +62,7 @@ export async function translateWithConfiguredProvider({
   }
 
   try {
+    const providerConfig = LLM_PROVIDERS[settings.llmProvider];
     const languageLabel = languageLabels[settings.explanationLanguage];
     const prompt = [
       `Selected text: ${text}`,
@@ -80,7 +76,7 @@ export async function translateWithConfiguredProvider({
 
     const nvidia = createOpenAICompatible({
       apiKey: settings.apiKey.trim(),
-      baseURL: NVIDIA_NIM_BASE_URL
+      baseURL: providerConfig.baseUrl
     });
     const result = await generateText({
       model: nvidia.chat(settings.llmModel),
@@ -107,7 +103,7 @@ export async function translateWithConfiguredProvider({
   } catch {
     return {
       ok: false,
-      error: `Unable to translate with ${providerErrorLabels[settings.llmProvider]}.`
+      error: `Unable to translate with ${LLM_PROVIDERS[settings.llmProvider].label}.`
     };
   }
 }

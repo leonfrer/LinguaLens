@@ -1,15 +1,15 @@
-import type { LlmProvider, SavedItem, SaveItemMessage, Settings } from './types';
+import {
+  DEFAULT_LLM_PROVIDER_CONFIG,
+  SUPPORTED_LLM_PROVIDER
+} from './providers';
+import type { SavedItem, SaveItemMessage, Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
   explanationLanguage: 'zh-CN',
-  llmProvider: 'nvidia',
-  llmModel: 'meta/llama-3.1-8b-instruct',
+  llmProvider: SUPPORTED_LLM_PROVIDER,
+  llmModel: DEFAULT_LLM_PROVIDER_CONFIG.defaultModel,
   apiKey: ''
 };
-
-const NVIDIA_DEFAULT_MODEL = 'meta/llama-3.1-8b-instruct';
-const LEGACY_NVIDIA_MODEL = 'nvidia/llama-3.1-nemotron-nano-8b-v1';
-const SUPPORTED_LLM_PROVIDER: LlmProvider = 'nvidia';
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
 export const SETTINGS_KEY = 'lingualens.settings';
@@ -56,10 +56,10 @@ export async function getSettings(): Promise<Settings> {
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
 
-  if (nextSettings.llmProvider === 'nvidia' && nextSettings.llmModel === LEGACY_NVIDIA_MODEL) {
+  if (DEFAULT_LLM_PROVIDER_CONFIG.legacyModels?.includes(nextSettings.llmModel)) {
     return {
       ...nextSettings,
-      llmModel: NVIDIA_DEFAULT_MODEL
+      llmModel: DEFAULT_LLM_PROVIDER_CONFIG.defaultModel
     };
   }
 

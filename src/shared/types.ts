@@ -28,7 +28,7 @@ export type SavedItem = {
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
-  provider?: LlmProvider | 'mock';
+  provider?: LlmProvider;
   model?: string;
   sourceUrl: string;
   sourceTitle: string;
@@ -49,7 +49,7 @@ export type SaveItemMessage = {
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
-  provider?: LlmProvider | 'mock';
+  provider?: LlmProvider;
   model?: string;
   sourceUrl: string;
   sourceTitle: string;
@@ -62,7 +62,7 @@ export type TranslateResponse =
       ok: true;
       translation: string;
       explanation?: string;
-      provider: LlmProvider | 'mock';
+      provider: LlmProvider;
       model?: string;
     }
   | {

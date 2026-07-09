@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import { t } from '../shared/i18n';
 import { fetchModelOptions, type ModelOption } from '../shared/models';
 import { DEFAULT_LLM_PROVIDER_CONFIG } from '../shared/providers';
 import {
@@ -52,7 +53,7 @@ function getSavedItemSourceLabel(item: SavedItem): string {
   try {
     return new URL(item.sourceUrl).hostname;
   } catch {
-    return item.sourceUrl || 'Unknown source';
+    return item.sourceUrl || t('commonUnknownSource');
   }
 }
 
@@ -94,11 +95,11 @@ function SettingsPanel({
   onToggleWordLookup
 }: SettingsPanelProps) {
   return (
-    <section className="settingsPanel" aria-label="LinguaLens 设置">
+    <section className="settingsPanel" aria-label={t('settingsAriaLabel')}>
       <div className="settingsHeader">
         <div>
-          <h2>设置</h2>
-          <p>{isEditingSettings ? '编辑配置' : '当前配置'}</p>
+          <h2>{t('settingsTitle')}</h2>
+          <p>{isEditingSettings ? t('settingsEditConfig') : t('settingsCurrentConfig')}</p>
         </div>
         {isEditingSettings ? (
           <div className="settingsActions">
@@ -108,7 +109,7 @@ function SettingsPanel({
               type="button"
               onClick={onCancelSettingsEdit}
             >
-              Cancel
+              {t('commonCancel')}
             </button>
             <button
               className="primaryButton"
@@ -116,14 +117,14 @@ function SettingsPanel({
               type="button"
               onClick={onSaveSettings}
             >
-              {isSavingSettings ? 'Saving' : 'Save'}
+              {isSavingSettings ? t('commonSaving') : t('commonSave')}
             </button>
           </div>
         ) : (
           <button className="settingsButton" type="button" onClick={onStartSettingsEdit}>
-            设置
+            {t('settingsTitle')}
             {!isApiKeyConfigured ? (
-              <span className="settingsAlertDot" aria-label="API key 未配置" />
+              <span className="settingsAlertDot" aria-label={t('settingsApiKeyMissingLabel')} />
             ) : null}
           </button>
         )}
@@ -132,7 +133,7 @@ function SettingsPanel({
       {isEditingSettings ? (
         <>
           <label className="fieldControl">
-            <span>解释语言</span>
+            <span>{t('settingsExplanationLanguage')}</span>
             <select
               value={draftSettings.explanationLanguage}
               onChange={(event) => {
@@ -150,10 +151,10 @@ function SettingsPanel({
           </label>
 
           <label className="fieldControl">
-            <span>API key</span>
+            <span>{t('settingsApiKey')}</span>
             <input
               autoComplete="off"
-              placeholder={DEFAULT_LLM_PROVIDER_CONFIG.apiKeyPlaceholder}
+              placeholder={t('settingsApiKeyPlaceholder')}
               type="password"
               value={draftSettings.apiKey}
               onChange={(event) => {
@@ -164,7 +165,7 @@ function SettingsPanel({
 
           <div className="settingsGrid">
             <label className="fieldControl">
-              <span>Model</span>
+              <span>{t('settingsModel')}</span>
               <select
                 disabled={modelOptions.length === 0}
                 value={draftSettings.llmModel}
@@ -188,11 +189,11 @@ function SettingsPanel({
               type="button"
               onClick={onLoadModels}
             >
-              {isLoadingModels ? 'Loading' : 'Load models'}
+              {isLoadingModels ? t('commonLoading') : t('settingsLoadModels')}
             </button>
           </div>
           <label className="fieldControl">
-            <span>手动 Model ID</span>
+            <span>{t('settingsManualModelId')}</span>
             <input
               value={draftSettings.llmModel}
               onChange={(event) => {
@@ -205,12 +206,12 @@ function SettingsPanel({
       ) : (
         <dl className="settingsSummary">
           <div>
-            <dt>划词查询</dt>
+            <dt>{t('settingsWordLookup')}</dt>
             <dd>
               <label className="summaryToggleControl">
-                <span>{settings.wordLookupEnabled ? '开启' : '关闭'}</span>
+                <span>{settings.wordLookupEnabled ? t('commonEnabled') : t('commonDisabled')}</span>
                 <input
-                  aria-label="划词查询"
+                  aria-label={t('settingsWordLookup')}
                   className="toggleInput"
                   checked={settings.wordLookupEnabled}
                   type="checkbox"
@@ -223,27 +224,25 @@ function SettingsPanel({
             </dd>
           </div>
           <div>
-            <dt>解释语言</dt>
+            <dt>{t('settingsExplanationLanguage')}</dt>
             <dd>{explanationLanguageLabel}</dd>
           </div>
           <div>
-            <dt>Provider</dt>
+            <dt>{t('settingsProvider')}</dt>
             <dd>{DEFAULT_LLM_PROVIDER_CONFIG.label}</dd>
           </div>
           <div>
-            <dt>Model</dt>
+            <dt>{t('settingsModel')}</dt>
             <dd>{settings.llmModel}</dd>
           </div>
           <div>
-            <dt>API key</dt>
-            <dd>{isApiKeyConfigured ? '已配置' : '未配置'}</dd>
+            <dt>{t('settingsApiKey')}</dt>
+            <dd>{isApiKeyConfigured ? t('commonConfigured') : t('commonNotConfigured')}</dd>
           </div>
         </dl>
       )}
 
-      <p className="settingsNote">
-        选中文本和可用句子上下文会发送给配置的 LLM provider，并可能消耗你的 API 额度。
-      </p>
+      <p className="settingsNote">{t('settingsProviderUsageNote')}</p>
     </section>
   );
 }
@@ -256,7 +255,7 @@ function SavedList({
   onDelete: (itemId: string) => void;
 }) {
   return (
-    <section className="savedList" aria-label="最近保存的内容">
+    <section className="savedList" aria-label={t('savedListAriaLabel')}>
       {items.map((item) => (
         <article className="savedItem" key={item.id}>
           <div className="savedText">
@@ -269,7 +268,7 @@ function SavedList({
             </p>
           </div>
           <button
-            aria-label={`删除 ${item.text}`}
+            aria-label={t('savedDeleteLabel', item.text)}
             className="deleteButton"
             type="button"
             onClick={() => {
@@ -394,10 +393,10 @@ function App() {
       }
 
       if (models.length === 0) {
-        setModelLoadError('没有从 provider 返回可选模型。');
+        setModelLoadError(t('modelNoModelsReturned'));
       }
     } catch (error) {
-      setModelLoadError(error instanceof Error ? error.message : 'Unable to load models.');
+      setModelLoadError(error instanceof Error ? error.message : t('modelUnableToLoad'));
     } finally {
       setIsLoadingModels(false);
     }
@@ -415,7 +414,7 @@ function App() {
           <img className="brandMark" src="icons/icon48.png" alt="" />
           <div>
             <h1>LinguaLens</h1>
-            <p>最近保存</p>
+            <p>{t('savedRecent')}</p>
           </div>
         </div>
       </header>
@@ -445,10 +444,10 @@ function App() {
         }}
       />
 
-      {isLoading ? <p className="empty">加载中...</p> : null}
+      {isLoading ? <p className="empty">{t('commonLoading')}</p> : null}
 
       {!isLoading && recentItems.length === 0 ? (
-        <p className="empty">配置 API key 后，在网页中选中文本即可翻译并保存。</p>
+        <p className="empty">{t('emptySavedHint')}</p>
       ) : null}
 
       <SavedList

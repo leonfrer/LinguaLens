@@ -1,3 +1,4 @@
+import { t } from '../shared/i18n';
 import { getSettings, SETTINGS_KEY } from '../shared/storage';
 import {
   extractSentenceContainingText,
@@ -21,7 +22,7 @@ function sendRuntimeMessage<TResponse>(message: unknown): Promise<TResponse> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage<TResponse>(message, (response) => {
       if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message ?? 'Extension message failed'));
+        reject(new Error(chrome.runtime.lastError.message ?? t('runtimeMessageFailed')));
         return;
       }
 
@@ -91,7 +92,7 @@ async function translateSelection(
       explanationLanguage,
       sentenceContext,
       status: 'error',
-      error: error instanceof Error ? error.message : '翻译失败'
+      error: error instanceof Error ? error.message : t('panelTranslationFailed')
     };
   }
 

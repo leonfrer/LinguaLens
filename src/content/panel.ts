@@ -1,3 +1,4 @@
+import { t } from '../shared/i18n';
 import type { ExplanationLanguage, LlmProvider } from '../shared/types';
 
 const PANEL_ID = 'lingualens-selection-panel';
@@ -76,11 +77,11 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
   const saveDisabled = state.status !== 'ready';
   const statusText =
     state.status === 'loading'
-      ? '翻译中...'
+      ? t('panelTranslatingStatus')
       : state.status === 'saved'
-        ? '已保存'
+        ? t('panelSavedStatus')
         : state.status === 'error'
-          ? state.error ?? '翻译失败'
+          ? state.error ?? t('panelTranslationFailed')
           : state.model ?? 'LLM';
 
   root.innerHTML = `
@@ -190,7 +191,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         cursor: default;
       }
     </style>
-    <section class="panel" role="dialog" aria-label="LinguaLens translation">
+    <section class="panel" role="dialog" aria-label="${t('panelTranslationAriaLabel')}">
       <div class="body">
         <div class="source"></div>
         <div class="translation"></div>
@@ -198,12 +199,12 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       <div class="actions">
         <span class="status"></span>
         <div class="actionButtons">
-          <button class="secondary iconButton" type="button" data-action="close" aria-label="关闭">
+          <button class="secondary iconButton" type="button" data-action="close" aria-label="${t('panelClose')}">
             <svg aria-hidden="true" viewBox="0 0 20 20">
               <path d="M5.25 5.25l9.5 9.5M14.75 5.25l-9.5 9.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
             </svg>
           </button>
-          <button type="button" data-action="save"${saveDisabled ? ' disabled' : ''}>保存</button>
+          <button type="button" data-action="save"${saveDisabled ? ' disabled' : ''}>${t('panelSave')}</button>
         </div>
       </div>
     </section>
@@ -211,7 +212,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
   root.querySelector('.source')!.textContent = state.text;
   root.querySelector('.translation')!.textContent =
-    state.status === 'loading' ? '正在生成翻译' : state.translation;
+    state.status === 'loading' ? t('panelGeneratingTranslation') : state.translation;
   root.querySelector('.status')!.textContent = statusText;
   root.querySelector('[data-action="close"]')?.addEventListener('click', actions.onClose);
   root.querySelector('[data-action="save"]')?.addEventListener('click', actions.onSave);

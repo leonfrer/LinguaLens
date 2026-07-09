@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { LLM_PROVIDERS } from './providers';
 import type { LlmProvider } from './types';
 
@@ -42,7 +43,7 @@ export async function fetchModelOptions({
   const trimmedApiKey = apiKey.trim();
 
   if (!trimmedApiKey) {
-    throw new Error('Please add your LLM API key before loading models.');
+    throw new Error(t('modelApiKeyRequired'));
   }
 
   const providerConfig = LLM_PROVIDERS[provider];
@@ -53,7 +54,7 @@ export async function fetchModelOptions({
   });
 
   if (!response.ok) {
-    throw new Error(`Unable to load models from ${providerConfig.label}.`);
+    throw new Error(t('modelProviderUnableToLoad', providerConfig.label));
   }
 
   return normalizeModelOptions((await response.json()) as ProviderModelResponse);

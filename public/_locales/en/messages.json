@@ -1,0 +1,149 @@
+{
+  "extensionName": {
+    "message": "LinguaLens"
+  },
+  "extensionDescription": {
+    "message": "Translate and save selected foreign-language text while reading the web."
+  },
+  "commonCancel": {
+    "message": "Cancel"
+  },
+  "commonSave": {
+    "message": "Save"
+  },
+  "commonSaving": {
+    "message": "Saving"
+  },
+  "commonLoading": {
+    "message": "Loading..."
+  },
+  "commonConfigured": {
+    "message": "Configured"
+  },
+  "commonNotConfigured": {
+    "message": "Not configured"
+  },
+  "commonEnabled": {
+    "message": "On"
+  },
+  "commonDisabled": {
+    "message": "Off"
+  },
+  "commonUnknownSource": {
+    "message": "Unknown source"
+  },
+  "settingsAriaLabel": {
+    "message": "LinguaLens settings"
+  },
+  "settingsTitle": {
+    "message": "Settings"
+  },
+  "settingsEditConfig": {
+    "message": "Edit configuration"
+  },
+  "settingsCurrentConfig": {
+    "message": "Current configuration"
+  },
+  "settingsApiKeyMissingLabel": {
+    "message": "API key is not configured"
+  },
+  "settingsExplanationLanguage": {
+    "message": "Explanation language"
+  },
+  "settingsApiKey": {
+    "message": "API key"
+  },
+  "settingsApiKeyPlaceholder": {
+    "message": "NVIDIA API key"
+  },
+  "settingsModel": {
+    "message": "Model"
+  },
+  "settingsLoadModels": {
+    "message": "Load models"
+  },
+  "settingsManualModelId": {
+    "message": "Manual model ID"
+  },
+  "settingsWordLookup": {
+    "message": "Selection lookup"
+  },
+  "settingsProvider": {
+    "message": "Provider"
+  },
+  "settingsProviderUsageNote": {
+    "message": "Selected text and available sentence context are sent to the configured LLM provider and may consume your API quota."
+  },
+  "savedListAriaLabel": {
+    "message": "Recently saved items"
+  },
+  "savedRecent": {
+    "message": "Recently saved"
+  },
+  "savedDeleteLabel": {
+    "message": "Delete $itemText$",
+    "placeholders": {
+      "itemText": {
+        "content": "$1"
+      }
+    }
+  },
+  "emptySavedHint": {
+    "message": "Add an API key, then select text on a web page to translate and save it."
+  },
+  "modelNoModelsReturned": {
+    "message": "The provider did not return any available models."
+  },
+  "modelUnableToLoad": {
+    "message": "Unable to load models."
+  },
+  "modelApiKeyRequired": {
+    "message": "Please add your LLM API key before loading models."
+  },
+  "modelProviderUnableToLoad": {
+    "message": "Unable to load models from $provider$.",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelTranslationAriaLabel": {
+    "message": "LinguaLens translation"
+  },
+  "panelTranslatingStatus": {
+    "message": "Translating..."
+  },
+  "panelSavedStatus": {
+    "message": "Saved"
+  },
+  "panelTranslationFailed": {
+    "message": "Translation failed"
+  },
+  "panelClose": {
+    "message": "Close"
+  },
+  "panelSave": {
+    "message": "Save"
+  },
+  "panelGeneratingTranslation": {
+    "message": "Generating translation"
+  },
+  "runtimeMessageFailed": {
+    "message": "Extension message failed"
+  },
+  "translationApiKeyRequired": {
+    "message": "Please add your LLM API key in LinguaLens settings before translating."
+  },
+  "translationEmptyProviderResponse": {
+    "message": "The LLM provider returned an empty translation."
+  },
+  "translationUnableWithProvider": {
+    "message": "Unable to translate with $provider$.",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  }
+}

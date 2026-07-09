@@ -18,6 +18,11 @@ declare namespace chrome {
     }
   }
 
+  namespace i18n {
+    function getMessage(messageName: string, substitutions?: string | string[]): string;
+    function getUILanguage(): string;
+  }
+
   namespace storage {
     type StorageChange = {
       oldValue?: unknown;

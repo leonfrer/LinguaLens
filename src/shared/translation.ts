@@ -1,5 +1,6 @@
 import { createOpenAI as createOpenAICompatible } from '@ai-sdk/openai';
 import { generateText } from 'ai';
+import { t } from './i18n';
 import { LLM_PROVIDERS } from './providers';
 import type { ExplanationLanguage, Settings, TranslateResponse } from './types';
 
@@ -57,7 +58,7 @@ export async function translateWithConfiguredProvider({
   if (!settings.apiKey.trim()) {
     return {
       ok: false,
-      error: 'Please add your LLM API key in LinguaLens settings before translating.'
+      error: t('translationApiKeyRequired')
     };
   }
 
@@ -89,7 +90,7 @@ export async function translateWithConfiguredProvider({
     if (!parsed.translation) {
       return {
         ok: false,
-        error: 'The LLM provider returned an empty translation.'
+        error: t('translationEmptyProviderResponse')
       };
     }
 
@@ -103,7 +104,7 @@ export async function translateWithConfiguredProvider({
   } catch {
     return {
       ok: false,
-      error: `Unable to translate with ${LLM_PROVIDERS[settings.llmProvider].label}.`
+      error: t('translationUnableWithProvider', LLM_PROVIDERS[settings.llmProvider].label)
     };
   }
 }

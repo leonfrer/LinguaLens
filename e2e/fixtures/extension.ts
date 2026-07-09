@@ -11,20 +11,49 @@ type ExtensionFixtures = {
   serviceWorker: Worker;
 };
 
-export const test = base.extend<ExtensionFixtures>({
+type ExtensionOptions = {
+  uiLocale: string;
+};
+
+async function seedChromeLocalePreferences(userDataDir: string, uiLocale: string): Promise<void> {
+  await fs.mkdir(path.join(userDataDir, 'Default'), { recursive: true });
+  await fs.writeFile(
+    path.join(userDataDir, 'Local State'),
+    JSON.stringify({
+      intl: {
+        app_locale: uiLocale
+      }
+    })
+  );
+  await fs.writeFile(
+    path.join(userDataDir, 'Default', 'Preferences'),
+    JSON.stringify({
+      intl: {
+        accept_languages: uiLocale
+      }
+    })
+  );
+}
+
+export const test = base.extend<ExtensionFixtures, ExtensionOptions>({
+  uiLocale: ['en-US', { option: true }],
+
   extensionPath: async ({}, use) => {
     await use(path.join(process.cwd(), 'dist'));
   },
 
-  context: async ({ extensionPath, headless }, use, testInfo) => {
+  context: async ({ extensionPath, headless, uiLocale }, use, testInfo) => {
     const userDataDir = await fs.mkdtemp(
       path.join(os.tmpdir(), `lingualens-e2e-${testInfo.workerIndex}-`)
     );
+    await seedChromeLocalePreferences(userDataDir, uiLocale);
 
     const context = await chromium.launchPersistentContext(userDataDir, {
       channel: 'chromium',
       headless,
+      locale: uiLocale,
       args: [
+        `--lang=${uiLocale}`,
         `--disable-extensions-except=${extensionPath}`,
         `--load-extension=${extensionPath}`
       ]

@@ -1,3 +1,4 @@
+import { t } from '../shared/i18n';
 import { getSettings, saveItem } from '../shared/storage';
 import { translateWithConfiguredProvider } from '../shared/translation';
 import type { LinguaLensMessage, SaveItemResponse, TranslateResponse } from '../shared/types';
@@ -36,7 +37,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       .catch(() => {
         const response: TranslateResponse = {
           ok: false,
-          error: 'Unable to translate selected text.'
+          error: t('panelTranslationFailed')
         };
         sendResponse(response);
       });
@@ -61,7 +62,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     .catch((error: unknown) => {
       const response: SaveItemResponse = {
         ok: false,
-        error: error instanceof Error ? error.message : 'Unable to save item'
+        error: error instanceof Error ? error.message : t('panelTranslationFailed')
       };
       sendResponse(response);
     });

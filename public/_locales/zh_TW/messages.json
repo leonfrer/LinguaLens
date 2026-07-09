@@ -1,0 +1,149 @@
+{
+  "extensionName": {
+    "message": "LinguaLens"
+  },
+  "extensionDescription": {
+    "message": "協助閱讀外語網頁文字，並儲存選取內容與翻譯。"
+  },
+  "commonCancel": {
+    "message": "取消"
+  },
+  "commonSave": {
+    "message": "儲存"
+  },
+  "commonSaving": {
+    "message": "儲存中"
+  },
+  "commonLoading": {
+    "message": "載入中..."
+  },
+  "commonConfigured": {
+    "message": "已設定"
+  },
+  "commonNotConfigured": {
+    "message": "未設定"
+  },
+  "commonEnabled": {
+    "message": "開啟"
+  },
+  "commonDisabled": {
+    "message": "關閉"
+  },
+  "commonUnknownSource": {
+    "message": "未知來源"
+  },
+  "settingsAriaLabel": {
+    "message": "LinguaLens 設定"
+  },
+  "settingsTitle": {
+    "message": "設定"
+  },
+  "settingsEditConfig": {
+    "message": "編輯設定"
+  },
+  "settingsCurrentConfig": {
+    "message": "目前設定"
+  },
+  "settingsApiKeyMissingLabel": {
+    "message": "API 金鑰尚未設定"
+  },
+  "settingsExplanationLanguage": {
+    "message": "解釋語言"
+  },
+  "settingsApiKey": {
+    "message": "API 金鑰"
+  },
+  "settingsApiKeyPlaceholder": {
+    "message": "NVIDIA API 金鑰"
+  },
+  "settingsModel": {
+    "message": "模型"
+  },
+  "settingsLoadModels": {
+    "message": "載入模型"
+  },
+  "settingsManualModelId": {
+    "message": "手動模型 ID"
+  },
+  "settingsWordLookup": {
+    "message": "劃詞查詢"
+  },
+  "settingsProvider": {
+    "message": "服務商"
+  },
+  "settingsProviderUsageNote": {
+    "message": "選取文字和可用句子上下文會傳送給設定的 LLM 服務商，並可能消耗你的 API 額度。"
+  },
+  "savedListAriaLabel": {
+    "message": "最近儲存的內容"
+  },
+  "savedRecent": {
+    "message": "最近儲存"
+  },
+  "savedDeleteLabel": {
+    "message": "刪除 $itemText$",
+    "placeholders": {
+      "itemText": {
+        "content": "$1"
+      }
+    }
+  },
+  "emptySavedHint": {
+    "message": "設定 API 金鑰後，在網頁中選取文字即可翻譯並儲存。"
+  },
+  "modelNoModelsReturned": {
+    "message": "服務商沒有返回可用模型。"
+  },
+  "modelUnableToLoad": {
+    "message": "無法載入模型。"
+  },
+  "modelApiKeyRequired": {
+    "message": "請先新增 LLM API 金鑰再載入模型。"
+  },
+  "modelProviderUnableToLoad": {
+    "message": "無法從 $provider$ 載入模型。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelTranslationAriaLabel": {
+    "message": "LinguaLens 翻譯"
+  },
+  "panelTranslatingStatus": {
+    "message": "翻譯中..."
+  },
+  "panelSavedStatus": {
+    "message": "已儲存"
+  },
+  "panelTranslationFailed": {
+    "message": "翻譯失敗"
+  },
+  "panelClose": {
+    "message": "關閉"
+  },
+  "panelSave": {
+    "message": "儲存"
+  },
+  "panelGeneratingTranslation": {
+    "message": "正在生成翻譯"
+  },
+  "runtimeMessageFailed": {
+    "message": "擴充功能訊息傳送失敗"
+  },
+  "translationApiKeyRequired": {
+    "message": "請先在 LinguaLens 設定中新增 LLM API 金鑰再翻譯。"
+  },
+  "translationEmptyProviderResponse": {
+    "message": "LLM 服務商返回了空白翻譯。"
+  },
+  "translationUnableWithProvider": {
+    "message": "無法使用 $provider$ 翻譯。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  }
+}

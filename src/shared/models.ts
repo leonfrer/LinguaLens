@@ -1,3 +1,4 @@
+import { LLM_PROVIDERS } from './providers';
 import type { LlmProvider } from './types';
 
 export type ModelOption = {
@@ -8,17 +9,7 @@ export type ModelOption = {
 type ProviderModelResponse = {
   data?: Array<{
     id?: unknown;
-    object?: unknown;
-    owned_by?: unknown;
   }>;
-};
-
-const providerBaseUrls: Record<LlmProvider, string> = {
-  nvidia: 'https://integrate.api.nvidia.com/v1'
-};
-
-const modelErrorLabels: Record<LlmProvider, string> = {
-  nvidia: 'NVIDIA NIM'
 };
 
 export function normalizeModelOptions(response: ProviderModelResponse): ModelOption[] {
@@ -54,14 +45,15 @@ export async function fetchModelOptions({
     throw new Error('Please add your LLM API key before loading models.');
   }
 
-  const response = await fetch(`${providerBaseUrls[provider]}/models`, {
+  const providerConfig = LLM_PROVIDERS[provider];
+  const response = await fetch(`${providerConfig.baseUrl}/models`, {
     headers: {
       Authorization: `Bearer ${trimmedApiKey}`
     }
   });
 
   if (!response.ok) {
-    throw new Error(`Unable to load models from ${modelErrorLabels[provider]}.`);
+    throw new Error(`Unable to load models from ${providerConfig.label}.`);
   }
 
   return normalizeModelOptions((await response.json()) as ProviderModelResponse);

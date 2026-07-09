@@ -1,21 +1,7 @@
 import { createOpenAI as createOpenAICompatible } from '@ai-sdk/openai';
-import type { LanguageModel } from 'ai';
 import { generateText } from 'ai';
-import type { ExplanationLanguage, LlmProvider, Settings, TranslateResponse } from './types';
-
-const dictionary: Record<string, string> = {
-  hello: '你好',
-  world: '世界',
-  language: '语言',
-  reading: '阅读',
-  text: '文本',
-  word: '单词',
-  phrase: '短语',
-  save: '保存',
-  learn: '学习',
-  browser: '浏览器',
-  page: '页面'
-};
+import { LLM_PROVIDERS } from './providers';
+import type { ExplanationLanguage, Settings, TranslateResponse } from './types';
 
 const languageLabels: Record<ExplanationLanguage, string> = {
   'zh-CN': 'Simplified Chinese',
@@ -43,33 +29,6 @@ type LlmTranslation = {
   explanation?: string;
 };
 
-const providerErrorLabels: Record<LlmProvider, string> = {
-  nvidia: 'NVIDIA NIM'
-};
-
-const NVIDIA_NIM_BASE_URL = 'https://integrate.api.nvidia.com/v1';
-
-export function createMockTranslation(
-  text: string,
-  explanationLanguage: ExplanationLanguage
-): string {
-  if (explanationLanguage !== 'zh-CN') {
-    return `[Mock translation to ${explanationLanguage}] ${text}`;
-  }
-
-  const translatedWords = text
-    .toLowerCase()
-    .match(/[a-z]+/g)
-    ?.map((word) => dictionary[word])
-    .filter(Boolean);
-
-  if (translatedWords?.length) {
-    return `[MVP 模拟翻译] ${translatedWords.join(' / ')}`;
-  }
-
-  return `[MVP 模拟翻译] ${text}`;
-}
-
 export function parseLlmTranslation(text: string): LlmTranslation {
   const trimmedText = text.trim();
   const jsonText = trimmedText
@@ -90,14 +49,6 @@ export function parseLlmTranslation(text: string): LlmTranslation {
   }
 }
 
-function createLanguageModel(settings: Settings): LanguageModel {
-  const nvidia = createOpenAICompatible({
-    apiKey: settings.apiKey.trim(),
-    baseURL: NVIDIA_NIM_BASE_URL
-  });
-  return nvidia.chat(settings.llmModel);
-}
-
 export async function translateWithConfiguredProvider({
   text,
   sentenceContext,
@@ -111,6 +62,7 @@ export async function translateWithConfiguredProvider({
   }
 
   try {
+    const providerConfig = LLM_PROVIDERS[settings.llmProvider];
     const languageLabel = languageLabels[settings.explanationLanguage];
     const prompt = [
       `Selected text: ${text}`,
@@ -122,8 +74,12 @@ export async function translateWithConfiguredProvider({
       .filter(Boolean)
       .join('\n');
 
+    const nvidia = createOpenAICompatible({
+      apiKey: settings.apiKey.trim(),
+      baseURL: providerConfig.baseUrl
+    });
     const result = await generateText({
-      model: createLanguageModel(settings),
+      model: nvidia.chat(settings.llmModel),
       system:
         'You help readers understand foreign-language web text. Never include API keys or private settings in the response.',
       prompt
@@ -147,7 +103,7 @@ export async function translateWithConfiguredProvider({
   } catch {
     return {
       ok: false,
-      error: `Unable to translate with ${providerErrorLabels[settings.llmProvider]}.`
+      error: `Unable to translate with ${LLM_PROVIDERS[settings.llmProvider].label}.`
     };
   }
 }

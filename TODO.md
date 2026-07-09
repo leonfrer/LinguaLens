@@ -29,7 +29,6 @@
 - Popup should show a compact settings summary by default. Editing provider, model, explanation language, or API key should happen in an explicit settings mode and persist only when the user clicks Save.
 - Model selection should load provider-supported models with the user's API key when possible, while keeping manual model ID entry as a fallback.
 - Popup shows the latest 20 saved items first. MVP storage can keep all saved items locally unless a practical limit is needed later.
-- Mock translation can remain available for development fallback, but normal use should return LLM-backed output once the user configures an NVIDIA API key.
 
 ## MVP Needs
 
@@ -53,7 +52,7 @@
 - [x] Add content-script selection listener.
 - [x] Render and position the floating translation panel.
 - [x] Add background message handling for translation and saving.
-- [x] Add translation provider boundary and initial mock/provider implementation.
+- [x] Add translation provider boundary and initial provider implementation.
 - [x] Build popup saved-item list.
 - [x] Add delete support in popup.
 - [x] Add explanation-language setting in popup.

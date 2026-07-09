@@ -51,7 +51,7 @@ Key entry points:
 
 - `src/content/index.ts`: content-script selection handling and inline panel UI.
 - `src/background/index.ts`: message handling for translation and saving.
-- `src/shared/translation.ts`: LLM translation provider boundary and development mock helper.
+- `src/shared/translation.ts`: LLM translation provider boundary.
 - `src/shared/storage.ts`: saved items and settings storage helpers.
 - `src/popup/main.tsx`: popup UI for recent saved items and minimal LLM settings.
 - `manifest.config.ts`: Chrome extension manifest configuration.

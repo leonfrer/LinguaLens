@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { fetchModelOptions, type ModelOption } from '../shared/models';
-import { deleteSavedItem, getSavedItems, getSettings, updateSettings } from '../shared/storage';
+import { DEFAULT_LLM_PROVIDER_CONFIG } from '../shared/providers';
+import {
+  DEFAULT_SETTINGS,
+  deleteSavedItem,
+  getSavedItems,
+  getSettings,
+  updateSettings
+} from '../shared/storage';
 import type { ExplanationLanguage, SavedItem, Settings } from '../shared/types';
 import './styles.css';
 
@@ -20,18 +27,229 @@ const explanationLanguageOptions: Array<{ value: ExplanationLanguage; label: str
   { value: 'ar', label: 'العربية' }
 ];
 
-const defaultModel = 'meta/llama-3.1-8b-instruct';
-const providerLabel = 'NVIDIA NIM';
-const apiKeyPlaceholder = 'NVIDIA API key';
+function getSavedItemSourceLabel(item: SavedItem): string {
+  if (item.sourceTitle) {
+    return item.sourceTitle;
+  }
+
+  try {
+    return new URL(item.sourceUrl).hostname;
+  } catch {
+    return item.sourceUrl || 'Unknown source';
+  }
+}
+
+type SettingsPanelProps = {
+  draftSettings: Settings;
+  explanationLanguageLabel: string;
+  isApiKeyConfigured: boolean;
+  isEditingSettings: boolean;
+  isLoadingModels: boolean;
+  isSavingSettings: boolean;
+  modelLoadError: string;
+  modelOptions: ModelOption[];
+  settings: Settings;
+  onApiKeyChange: (apiKey: string) => void;
+  onCancelSettingsEdit: () => void;
+  onDraftSettingsChange: (nextSettings: Partial<Settings>) => void;
+  onLoadModels: () => void;
+  onSaveSettings: () => void;
+  onStartSettingsEdit: () => void;
+};
+
+function SettingsPanel({
+  draftSettings,
+  explanationLanguageLabel,
+  isApiKeyConfigured,
+  isEditingSettings,
+  isLoadingModels,
+  isSavingSettings,
+  modelLoadError,
+  modelOptions,
+  settings,
+  onApiKeyChange,
+  onCancelSettingsEdit,
+  onDraftSettingsChange,
+  onLoadModels,
+  onSaveSettings,
+  onStartSettingsEdit
+}: SettingsPanelProps) {
+  return (
+    <section className="settingsPanel" aria-label="LinguaLens 设置">
+      <div className="settingsHeader">
+        <div>
+          <h2>设置</h2>
+          <p>{isEditingSettings ? '编辑配置' : '当前配置'}</p>
+        </div>
+        {isEditingSettings ? (
+          <div className="settingsActions">
+            <button
+              className="secondaryButton"
+              disabled={isSavingSettings}
+              type="button"
+              onClick={onCancelSettingsEdit}
+            >
+              Cancel
+            </button>
+            <button
+              className="primaryButton"
+              disabled={isSavingSettings}
+              type="button"
+              onClick={onSaveSettings}
+            >
+              {isSavingSettings ? 'Saving' : 'Save'}
+            </button>
+          </div>
+        ) : (
+          <button className="settingsButton" type="button" onClick={onStartSettingsEdit}>
+            设置
+            {!isApiKeyConfigured ? (
+              <span className="settingsAlertDot" aria-label="API key 未配置" />
+            ) : null}
+          </button>
+        )}
+      </div>
+
+      {isEditingSettings ? (
+        <>
+          <label className="fieldControl">
+            <span>解释语言</span>
+            <select
+              value={draftSettings.explanationLanguage}
+              onChange={(event) => {
+                onDraftSettingsChange({
+                  explanationLanguage: event.target.value as ExplanationLanguage
+                });
+              }}
+            >
+              {explanationLanguageOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="fieldControl">
+            <span>API key</span>
+            <input
+              autoComplete="off"
+              placeholder={DEFAULT_LLM_PROVIDER_CONFIG.apiKeyPlaceholder}
+              type="password"
+              value={draftSettings.apiKey}
+              onChange={(event) => {
+                onApiKeyChange(event.target.value);
+              }}
+            />
+          </label>
+
+          <div className="settingsGrid">
+            <label className="fieldControl">
+              <span>Model</span>
+              <select
+                disabled={modelOptions.length === 0}
+                value={draftSettings.llmModel}
+                onChange={(event) => {
+                  onDraftSettingsChange({ llmModel: event.target.value });
+                }}
+              >
+                {modelOptions.length === 0 ? (
+                  <option value={draftSettings.llmModel}>{draftSettings.llmModel}</option>
+                ) : null}
+                {modelOptions.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="secondaryButton loadModelsButton"
+              disabled={isLoadingModels || !draftSettings.apiKey.trim()}
+              type="button"
+              onClick={onLoadModels}
+            >
+              {isLoadingModels ? 'Loading' : 'Load models'}
+            </button>
+          </div>
+          <label className="fieldControl">
+            <span>手动 Model ID</span>
+            <input
+              value={draftSettings.llmModel}
+              onChange={(event) => {
+                onDraftSettingsChange({ llmModel: event.target.value });
+              }}
+            />
+          </label>
+          {modelLoadError ? <p className="settingsError">{modelLoadError}</p> : null}
+        </>
+      ) : (
+        <dl className="settingsSummary">
+          <div>
+            <dt>解释语言</dt>
+            <dd>{explanationLanguageLabel}</dd>
+          </div>
+          <div>
+            <dt>Provider</dt>
+            <dd>{DEFAULT_LLM_PROVIDER_CONFIG.label}</dd>
+          </div>
+          <div>
+            <dt>Model</dt>
+            <dd>{settings.llmModel}</dd>
+          </div>
+          <div>
+            <dt>API key</dt>
+            <dd>{isApiKeyConfigured ? '已配置' : '未配置'}</dd>
+          </div>
+        </dl>
+      )}
+
+      <p className="settingsNote">
+        选中文本和可用句子上下文会发送给配置的 LLM provider，并可能消耗你的 API 额度。
+      </p>
+    </section>
+  );
+}
+
+function SavedList({
+  items,
+  onDelete
+}: {
+  items: SavedItem[];
+  onDelete: (itemId: string) => void;
+}) {
+  return (
+    <section className="savedList" aria-label="最近保存的内容">
+      {items.map((item) => (
+        <article className="savedItem" key={item.id}>
+          <div className="savedText">
+            <p className="sourceText">{item.text}</p>
+            <p className="translationText">{item.translation}</p>
+            {item.explanation ? <p className="explanationText">{item.explanation}</p> : null}
+            <p className="metaText">
+              {getSavedItemSourceLabel(item)}
+              {item.model ? ` · ${item.model}` : ''}
+            </p>
+          </div>
+          <button
+            aria-label={`删除 ${item.text}`}
+            className="deleteButton"
+            type="button"
+            onClick={() => {
+              onDelete(item.id);
+            }}
+          >
+            x
+          </button>
+        </article>
+      ))}
+    </section>
+  );
+}
 
 function App() {
   const [items, setItems] = useState<SavedItem[]>([]);
-  const [settings, setSettings] = useState<Settings>({
-    explanationLanguage: 'zh-CN',
-    llmProvider: 'nvidia',
-    llmModel: defaultModel,
-    apiKey: ''
-  });
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [draftSettings, setDraftSettings] = useState<Settings>(settings);
   const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,143 +360,27 @@ function App() {
         </div>
       </header>
 
-      <section className="settingsPanel" aria-label="LinguaLens 设置">
-        <div className="settingsHeader">
-          <div>
-            <h2>设置</h2>
-            <p>{isEditingSettings ? '编辑配置' : '当前配置'}</p>
-          </div>
-          {isEditingSettings ? (
-            <div className="settingsActions">
-              <button
-                className="secondaryButton"
-                disabled={isSavingSettings}
-                type="button"
-                onClick={handleCancelSettingsEdit}
-              >
-                Cancel
-              </button>
-              <button
-                className="primaryButton"
-                disabled={isSavingSettings}
-                type="button"
-                onClick={() => {
-                  void handleSaveSettings();
-                }}
-              >
-                {isSavingSettings ? 'Saving' : 'Save'}
-              </button>
-            </div>
-          ) : (
-            <button className="settingsButton" type="button" onClick={handleStartSettingsEdit}>
-              设置
-              {!isApiKeyConfigured ? (
-                <span className="settingsAlertDot" aria-label="API key 未配置" />
-              ) : null}
-            </button>
-          )}
-        </div>
-
-        {isEditingSettings ? (
-          <>
-            <label className="fieldControl">
-              <span>解释语言</span>
-              <select
-                value={draftSettings.explanationLanguage}
-                onChange={(event) => {
-                  handleDraftSettingsChange({
-                    explanationLanguage: event.target.value as ExplanationLanguage
-                  });
-                }}
-              >
-                {explanationLanguageOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="fieldControl">
-              <span>API key</span>
-              <input
-                autoComplete="off"
-                placeholder={apiKeyPlaceholder}
-                type="password"
-                value={draftSettings.apiKey}
-                onChange={(event) => {
-                  handleApiKeyChange(event.target.value);
-                }}
-              />
-            </label>
-
-            <div className="settingsGrid">
-              <label className="fieldControl">
-                <span>Model</span>
-                <select
-                  disabled={modelOptions.length === 0}
-                  value={draftSettings.llmModel}
-                  onChange={(event) => {
-                    handleDraftSettingsChange({ llmModel: event.target.value });
-                  }}
-                >
-                  {modelOptions.length === 0 ? (
-                    <option value={draftSettings.llmModel}>{draftSettings.llmModel}</option>
-                  ) : null}
-                  {modelOptions.map((model) => (
-                    <option key={model.id} value={model.id}>
-                      {model.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                className="secondaryButton loadModelsButton"
-                disabled={isLoadingModels || !draftSettings.apiKey.trim()}
-                type="button"
-                onClick={() => {
-                  void handleLoadModels();
-                }}
-              >
-                {isLoadingModels ? 'Loading' : 'Load models'}
-              </button>
-            </div>
-            <label className="fieldControl">
-              <span>手动 Model ID</span>
-              <input
-                value={draftSettings.llmModel}
-                onChange={(event) => {
-                  handleDraftSettingsChange({ llmModel: event.target.value });
-                }}
-              />
-            </label>
-            {modelLoadError ? <p className="settingsError">{modelLoadError}</p> : null}
-          </>
-        ) : (
-          <dl className="settingsSummary">
-            <div>
-              <dt>解释语言</dt>
-              <dd>{explanationLanguageLabel}</dd>
-            </div>
-            <div>
-              <dt>Provider</dt>
-              <dd>{providerLabel}</dd>
-            </div>
-            <div>
-              <dt>Model</dt>
-              <dd>{settings.llmModel}</dd>
-            </div>
-            <div>
-              <dt>API key</dt>
-              <dd>{isApiKeyConfigured ? '已配置' : '未配置'}</dd>
-            </div>
-          </dl>
-        )}
-
-        <p className="settingsNote">
-          选中文本和可用句子上下文会发送给配置的 LLM provider，并可能消耗你的 API 额度。
-        </p>
-      </section>
+      <SettingsPanel
+        draftSettings={draftSettings}
+        explanationLanguageLabel={explanationLanguageLabel}
+        isApiKeyConfigured={isApiKeyConfigured}
+        isEditingSettings={isEditingSettings}
+        isLoadingModels={isLoadingModels}
+        isSavingSettings={isSavingSettings}
+        modelLoadError={modelLoadError}
+        modelOptions={modelOptions}
+        settings={settings}
+        onApiKeyChange={handleApiKeyChange}
+        onCancelSettingsEdit={handleCancelSettingsEdit}
+        onDraftSettingsChange={handleDraftSettingsChange}
+        onLoadModels={() => {
+          void handleLoadModels();
+        }}
+        onSaveSettings={() => {
+          void handleSaveSettings();
+        }}
+        onStartSettingsEdit={handleStartSettingsEdit}
+      />
 
       {isLoading ? <p className="empty">加载中...</p> : null}
 
@@ -286,31 +388,12 @@ function App() {
         <p className="empty">配置 API key 后，在网页中选中文本即可翻译并保存。</p>
       ) : null}
 
-      <section className="savedList" aria-label="最近保存的内容">
-        {recentItems.map((item) => (
-          <article className="savedItem" key={item.id}>
-            <div className="savedText">
-              <p className="sourceText">{item.text}</p>
-              <p className="translationText">{item.translation}</p>
-              {item.explanation ? <p className="explanationText">{item.explanation}</p> : null}
-              <p className="metaText">
-                {item.sourceTitle || new URL(item.sourceUrl).hostname}
-                {item.model ? ` · ${item.model}` : ''}
-              </p>
-            </div>
-            <button
-              aria-label={`删除 ${item.text}`}
-              className="deleteButton"
-              type="button"
-              onClick={() => {
-                void handleDelete(item.id);
-              }}
-            >
-              x
-            </button>
-          </article>
-        ))}
-      </section>
+      <SavedList
+        items={recentItems}
+        onDelete={(itemId) => {
+          void handleDelete(itemId);
+        }}
+      />
     </main>
   );
 }

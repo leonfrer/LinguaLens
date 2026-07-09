@@ -39,6 +39,25 @@ describe('createSavedItem', () => {
 });
 
 describe('getSettings', () => {
+  it('defaults word lookup on for existing users', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              apiKey: 'test-key'
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      apiKey: 'test-key'
+    });
+  });
+
   it('migrates the previous targetLanguage field to explanationLanguage', async () => {
     vi.stubGlobal('chrome', {
       storage: {

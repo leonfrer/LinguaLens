@@ -15,6 +15,7 @@ export type ExplanationLanguage =
 export type LlmProvider = 'nvidia';
 
 export type Settings = {
+  wordLookupEnabled: boolean;
   explanationLanguage: ExplanationLanguage;
   llmProvider: LlmProvider;
   llmModel: string;

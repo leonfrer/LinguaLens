@@ -5,6 +5,7 @@ import {
 import type { SavedItem, SaveItemMessage, Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
+  wordLookupEnabled: true,
   explanationLanguage: 'zh-CN',
   llmProvider: SUPPORTED_LLM_PROVIDER,
   llmModel: DEFAULT_LLM_PROVIDER_CONFIG.defaultModel,

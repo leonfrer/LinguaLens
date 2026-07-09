@@ -121,7 +121,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .actions {
-        align-items: center;
+        align-items: flex-start;
         border-top: 1px solid #edf0f4;
         display: flex;
         gap: 8px;
@@ -132,12 +132,17 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       .actionButtons {
         align-items: center;
         display: flex;
+        flex: 0 0 auto;
         gap: 8px;
       }
 
       .status {
         color: ${state.status === 'error' ? '#b42318' : '#687386'};
+        flex: 1 1 auto;
         font-size: 12px;
+        line-height: 1.35;
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
 
       button {
@@ -152,6 +157,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         font-weight: 600;
         min-height: 30px;
         padding: 0 12px;
+        white-space: nowrap;
       }
 
       button.secondary {

@@ -2,11 +2,13 @@ import { defineManifest } from '@crxjs/vite-plugin';
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'LinguaLens',
+  name: '__MSG_extensionName__',
+  description: '__MSG_extensionDescription__',
   version: '0.2.0',
+  default_locale: 'en',
   action: {
     default_popup: 'index.html',
-    default_title: 'LinguaLens',
+    default_title: '__MSG_extensionName__',
     default_icon: {
       16: 'icons/icon16.png',
       32: 'icons/icon32.png',

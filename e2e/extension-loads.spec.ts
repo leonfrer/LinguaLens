@@ -118,25 +118,71 @@ test('loads the extension popup', async ({ extensionId, popupPage }) => {
   expect(popupPage.url()).toBe(`chrome-extension://${extensionId}/index.html`);
 
   await expect(popupPage.getByRole('heading', { name: 'LinguaLens' })).toBeVisible();
-  await expect(popupPage.getByRole('heading', { name: '设置' })).toBeVisible();
-  await expect(popupPage.getByText('当前配置')).toBeVisible();
-  await expect(popupPage.getByRole('checkbox', { name: /划词查询/ })).toBeChecked();
+  await expect(popupPage.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  await expect(popupPage.getByText('Current configuration')).toBeVisible();
+  await expect(popupPage.getByRole('checkbox', { name: /Selection lookup/ })).toBeChecked();
   await expect(popupPage.getByText('简体中文')).toBeVisible();
   await expect(popupPage.getByText('NVIDIA NIM')).toBeVisible();
   await expect(popupPage.getByText('meta/llama-3.1-8b-instruct')).toBeVisible();
-  await expect(popupPage.getByText('未配置')).toBeVisible();
+  await expect(popupPage.getByText('Not configured', { exact: true })).toBeVisible();
   await expect(
-    popupPage.getByText('配置 API key 后，在网页中选中文本即可翻译并保存。')
+    popupPage.getByText('Add an API key, then select text on a web page to translate and save it.')
   ).toBeVisible();
-  await expect(popupPage.locator('[aria-label="最近保存的内容"]')).toHaveCount(1);
+  await expect(popupPage.locator('[aria-label="Recently saved items"]')).toHaveCount(1);
+});
+
+test.describe('localized Chrome i18n runtime', () => {
+  test.use({ uiLocale: 'zh-CN' });
+
+  test('localizes popup and content panel for Simplified Chinese', async ({
+    context,
+    popupPage
+  }) => {
+    await popupPage.evaluate(async ([settingsKey]) => {
+      await chrome.storage.local.remove(settingsKey);
+    }, [settingsStorageKey]);
+    await popupPage.reload();
+
+    await expect(popupPage.getByRole('heading', { name: '设置' })).toBeVisible();
+    await expect(popupPage.getByText('当前配置')).toBeVisible();
+    await expect(popupPage.getByRole('checkbox', { name: /划词查询/ })).toBeChecked();
+    await expect(popupPage.getByText('未配置', { exact: true })).toBeVisible();
+    await expect(
+      popupPage.getByText('配置 API 密钥后，在网页中选中文本即可翻译并保存。')
+    ).toBeVisible();
+    await expect(popupPage.locator('[aria-label="最近保存的内容"]')).toHaveCount(1);
+
+    await popupPage.getByRole('button', { name: '设置' }).click();
+    await expect(popupPage.getByText('编辑配置')).toBeVisible();
+    await expect(popupPage.getByLabel('API 密钥')).toHaveAttribute(
+      'placeholder',
+      'NVIDIA API 密钥'
+    );
+    await popupPage.getByRole('button', { name: '取消' }).click();
+
+    await routeTestArticle(context);
+
+    const page = await context.newPage();
+    await page.goto(testArticleUrl);
+    await page.locator('#article').waitFor();
+    await selectArticleText(page, 'foreign-language reading');
+
+    const panel = page.locator('#lingualens-selection-panel');
+    await expect(panel).toBeVisible();
+    await expect(panel.getByText('foreign-language reading')).toBeVisible();
+    await expect(panel.getByText('请先在 LinguaLens 设置中添加 LLM API 密钥再翻译。')).toBeVisible();
+    await expect(panel.getByRole('button', { name: '保存' })).toBeDisabled();
+
+    await page.close();
+  });
 });
 
 test('edits popup settings', async ({ popupPage }) => {
-  await popupPage.getByRole('button', { name: '设置' }).click();
+  await popupPage.getByRole('button', { name: 'Settings' }).click();
 
-  await expect(popupPage.getByText('编辑配置')).toBeVisible();
+  await expect(popupPage.getByText('Edit configuration')).toBeVisible();
 
-  const languageSelect = popupPage.getByLabel('解释语言');
+  const languageSelect = popupPage.getByLabel('Explanation language');
   const modelSelect = popupPage.locator('.settingsGrid select');
   const apiKeyInput = popupPage.getByLabel('API key');
 
@@ -148,17 +194,17 @@ test('edits popup settings', async ({ popupPage }) => {
   await apiKeyInput.fill('test-api-key');
   await popupPage.getByRole('button', { name: 'Save' }).click();
 
-  await expect(popupPage.getByText('当前配置')).toBeVisible();
+  await expect(popupPage.getByText('Current configuration')).toBeVisible();
   await expect(popupPage.getByText('English')).toBeVisible();
   await expect(popupPage.getByText('NVIDIA NIM')).toBeVisible();
   await expect(popupPage.getByText('meta/llama-3.1-8b-instruct')).toBeVisible();
-  await expect(popupPage.getByText('已配置')).toBeVisible();
+  await expect(popupPage.getByText('Configured', { exact: true })).toBeVisible();
 });
 
 test('persists popup settings after reopening the popup', async ({ context, extensionId, popupPage }) => {
-  await popupPage.getByRole('button', { name: '设置' }).click();
-  await popupPage.getByLabel('解释语言').selectOption('ja');
-  await popupPage.getByLabel('手动 Model ID').fill('custom-e2e-model');
+  await popupPage.getByRole('button', { name: 'Settings' }).click();
+  await popupPage.getByLabel('Explanation language').selectOption('ja');
+  await popupPage.getByLabel('Manual model ID').fill('custom-e2e-model');
   await popupPage.getByLabel('API key').fill('persisted-e2e-key');
   await popupPage.getByRole('button', { name: 'Save' }).click();
 
@@ -173,33 +219,33 @@ test('persists popup settings after reopening the popup', async ({ context, exte
 
   await expect(reopenedPopupPage.getByText('日本語')).toBeVisible();
   await expect(reopenedPopupPage.getByText('custom-e2e-model')).toBeVisible();
-  await expect(reopenedPopupPage.getByText('已配置')).toBeVisible();
+  await expect(reopenedPopupPage.getByText('Configured', { exact: true })).toBeVisible();
   await expect(reopenedPopupPage.getByText('persisted-e2e-key')).toHaveCount(0);
 
   await reopenedPopupPage.close();
 });
 
 test('cancels popup settings edits and updates the API key alert state', async ({ popupPage }) => {
-  await expect(popupPage.locator('[aria-label="API key 未配置"]')).toBeVisible();
+  await expect(popupPage.locator('[aria-label="API key is not configured"]')).toBeVisible();
 
-  await popupPage.getByRole('button', { name: '设置' }).click();
-  await popupPage.getByLabel('解释语言').selectOption('en');
+  await popupPage.getByRole('button', { name: 'Settings' }).click();
+  await popupPage.getByLabel('Explanation language').selectOption('en');
   await popupPage.getByLabel('API key').fill('discarded-test-key');
   await popupPage.getByRole('button', { name: 'Cancel' }).click();
 
-  await expect(popupPage.getByText('当前配置')).toBeVisible();
+  await expect(popupPage.getByText('Current configuration')).toBeVisible();
   await expect(popupPage.getByText('简体中文')).toBeVisible();
   await expect(popupPage.getByText('NVIDIA NIM')).toBeVisible();
   await expect(popupPage.getByText('meta/llama-3.1-8b-instruct')).toBeVisible();
-  await expect(popupPage.getByText('未配置')).toBeVisible();
-  await expect(popupPage.locator('[aria-label="API key 未配置"]')).toBeVisible();
+  await expect(popupPage.getByText('Not configured', { exact: true })).toBeVisible();
+  await expect(popupPage.locator('[aria-label="API key is not configured"]')).toBeVisible();
 
-  await popupPage.getByRole('button', { name: '设置' }).click();
+  await popupPage.getByRole('button', { name: 'Settings' }).click();
   await popupPage.getByLabel('API key').fill('saved-test-key');
   await popupPage.getByRole('button', { name: 'Save' }).click();
 
-  await expect(popupPage.getByText('已配置')).toBeVisible();
-  await expect(popupPage.locator('[aria-label="API key 未配置"]')).toHaveCount(0);
+  await expect(popupPage.getByText('Configured', { exact: true })).toBeVisible();
+  await expect(popupPage.locator('[aria-label="API key is not configured"]')).toHaveCount(0);
   await expect(popupPage.getByText('saved-test-key')).toHaveCount(0);
 });
 
@@ -223,7 +269,7 @@ test('shows an API key setup error from the content script selection flow', asyn
   await expect(
     panel.getByText('Please add your LLM API key in LinguaLens settings before translating.')
   ).toBeVisible();
-  await expect(panel.getByRole('button', { name: '保存' })).toBeDisabled();
+  await expect(panel.getByRole('button', { name: 'Save' })).toBeDisabled();
 
   await page.close();
 });
@@ -237,12 +283,12 @@ test('toggles word lookup from the popup and suppresses selection handling', asy
   }, [settingsStorageKey]);
   await popupPage.reload();
 
-  const wordLookupToggle = popupPage.getByRole('checkbox', { name: /划词查询/ });
+  const wordLookupToggle = popupPage.getByRole('checkbox', { name: /Selection lookup/ });
   await expect(wordLookupToggle).toBeChecked();
 
   await wordLookupToggle.uncheck();
   await expect(wordLookupToggle).not.toBeChecked();
-  await expect(popupPage.getByText('关闭')).toBeVisible();
+  await expect(popupPage.getByText('Off', { exact: true })).toBeVisible();
 
   const disabledSettings = await popupPage.evaluate(async ([settingsKey]) => {
     const result = await chrome.storage.local.get(settingsKey);
@@ -260,7 +306,7 @@ test('toggles word lookup from the popup and suppresses selection handling', asy
 
   await wordLookupToggle.check();
   await expect(wordLookupToggle).toBeChecked();
-  await expect(popupPage.getByText('开启')).toBeVisible();
+  await expect(popupPage.getByText('On', { exact: true })).toBeVisible();
 
   await selectArticleText(page, 'foreign-language reading');
   const panel = page.locator('#lingualens-selection-panel');
@@ -292,7 +338,7 @@ test('shows provider errors without leaking the configured API key', async ({ co
   await expect(panel).toBeVisible();
   await expect(panel.getByText('Unable to translate with NVIDIA NIM.')).toBeVisible();
   await expect(panel.getByText('invalid-provider-key')).toHaveCount(0);
-  await expect(panel.getByRole('button', { name: '保存' })).toBeDisabled();
+  await expect(panel.getByRole('button', { name: 'Save' })).toBeDisabled();
 
   await page.close();
 });
@@ -311,7 +357,7 @@ test('supports keyboard selection, close, invalid selection, and scroll dismissa
   await expect(panel).toBeVisible();
   await expect(panel.getByText('foreign-language reading')).toBeVisible();
 
-  await panel.getByRole('button', { name: '关闭' }).click();
+  await panel.getByRole('button', { name: 'Close' }).click();
   await expect(panel).toHaveCount(0);
 
   await selectArticleText(page, ' ');
@@ -357,11 +403,11 @@ test('shows saved items in the popup and deletes them', async ({ popupPage }) =>
     popupPage.getByText('LinguaLens Test Article · meta/llama-3.1-8b-instruct')
   ).toBeVisible();
 
-  await popupPage.getByRole('button', { name: '删除 bonjour' }).click();
+  await popupPage.getByRole('button', { name: 'Delete bonjour' }).click();
 
   await expect(popupPage.getByText('bonjour')).toHaveCount(0);
   await expect(
-    popupPage.getByText('配置 API key 后，在网页中选中文本即可翻译并保存。')
+    popupPage.getByText('Add an API key, then select text on a web page to translate and save it.')
   ).toBeVisible();
 });
 
@@ -411,11 +457,11 @@ for (const providerConfig of providerConfigs) {
     const panel = page.locator('#lingualens-selection-panel');
     await expect(panel).toBeVisible();
     await expect(panel.getByText('rare comet')).toBeVisible();
-    await expect(panel.getByRole('button', { name: '保存' })).toBeEnabled({ timeout: 60000 });
+    await expect(panel.getByRole('button', { name: 'Save' })).toBeEnabled({ timeout: 60000 });
     await expect(panel.getByText(providerConfig.model)).toBeVisible();
 
-    await panel.getByRole('button', { name: '保存' }).click();
-    await expect(panel.getByText('已保存')).toBeVisible();
+    await panel.getByRole('button', { name: 'Save' }).click();
+    await expect(panel.getByText('Saved')).toBeVisible();
 
     const savedItems = await popupPage.evaluate(async ([storageKey]) => {
       const result = await chrome.storage.local.get(storageKey);

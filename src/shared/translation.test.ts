@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { t } from './i18n';
 import { DEFAULT_SETTINGS } from './storage';
 import { parseLlmTranslation, translateWithConfiguredProvider } from './translation';
 
@@ -14,7 +15,7 @@ describe('translateWithConfiguredProvider', () => {
       })
     ).resolves.toEqual({
       ok: false,
-      error: 'Please add your LLM API key in LinguaLens settings before translating.'
+      error: t('translationApiKeyRequired')
     });
   });
 });

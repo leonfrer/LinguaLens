@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { t } from './i18n';
 import { fetchModelOptions, normalizeModelOptions } from './models';
 
 describe('normalizeModelOptions', () => {
@@ -26,7 +27,7 @@ describe('fetchModelOptions', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(fetchModelOptions({ apiKey: '', provider: 'nvidia' })).rejects.toThrow(
-      'Please add your LLM API key before loading models.'
+      t('modelApiKeyRequired')
     );
     expect(fetchMock).not.toHaveBeenCalled();
   });

@@ -5,7 +5,6 @@ type ProviderConfig = {
   baseUrl: string;
   defaultModel: string;
   legacyModels?: string[];
-  apiKeyPlaceholder: string;
 };
 
 export const SUPPORTED_LLM_PROVIDER: LlmProvider = 'nvidia';
@@ -15,8 +14,7 @@ export const LLM_PROVIDERS: Record<LlmProvider, ProviderConfig> = {
     label: 'NVIDIA NIM',
     baseUrl: 'https://integrate.api.nvidia.com/v1',
     defaultModel: 'meta/llama-3.1-8b-instruct',
-    legacyModels: ['nvidia/llama-3.1-nemotron-nano-8b-v1'],
-    apiKeyPlaceholder: 'NVIDIA API key'
+    legacyModels: ['nvidia/llama-3.1-nemotron-nano-8b-v1']
   }
 };
 

@@ -6,7 +6,19 @@ export default defineManifest({
   version: '0.1.0',
   action: {
     default_popup: 'index.html',
-    default_title: 'LinguaLens'
+    default_title: 'LinguaLens',
+    default_icon: {
+      16: 'icons/icon16.png',
+      32: 'icons/icon32.png',
+      48: 'icons/icon48.png',
+      128: 'icons/icon128.png'
+    }
+  },
+  icons: {
+    16: 'icons/icon16.png',
+    32: 'icons/icon32.png',
+    48: 'icons/icon48.png',
+    128: 'icons/icon128.png'
   },
   permissions: ['storage'],
   host_permissions: ['https://integrate.api.nvidia.com/*'],

@@ -27,6 +27,23 @@ const explanationLanguageOptions: Array<{ value: ExplanationLanguage; label: str
   { value: 'ar', label: 'العربية' }
 ];
 
+type IconProps = React.SVGProps<SVGSVGElement>;
+
+function TrashIcon(props: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" {...props}>
+      <path
+        d="M3.75 5.5h12.5M8.25 8.5v5M11.75 8.5v5M5.75 5.5l.7 10.25c.06.82.74 1.45 1.56 1.45h3.98c.82 0 1.5-.63 1.56-1.45l.7-10.25M8 5.5V3.9c0-.6.49-1.1 1.1-1.1h1.8c.61 0 1.1.5 1.1 1.1v1.6"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
 function getSavedItemSourceLabel(item: SavedItem): string {
   if (item.sourceTitle) {
     return item.sourceTitle;
@@ -259,7 +276,7 @@ function SavedList({
               onDelete(item.id);
             }}
           >
-            x
+            <TrashIcon className="icon" />
           </button>
         </article>
       ))}
@@ -394,9 +411,12 @@ function App() {
   return (
     <main className="popup">
       <header className="header">
-        <div>
-          <h1>LinguaLens</h1>
-          <p>最近保存</p>
+        <div className="headerTitle">
+          <img className="brandMark" src="icons/icon48.png" alt="" />
+          <div>
+            <h1>LinguaLens</h1>
+            <p>最近保存</p>
+          </div>
         </div>
       </header>
 

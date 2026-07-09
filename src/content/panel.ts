@@ -129,6 +129,12 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         padding: 8px 10px;
       }
 
+      .actionButtons {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+      }
+
       .status {
         color: ${state.status === 'error' ? '#b42318' : '#687386'};
         font-size: 12px;
@@ -153,6 +159,26 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         color: #526070;
       }
 
+      button.iconButton {
+        align-items: center;
+        display: inline-flex;
+        height: 30px;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0;
+        width: 30px;
+      }
+
+      button.iconButton svg {
+        height: 18px;
+        width: 18px;
+      }
+
+      button.secondary:hover {
+        background: #edf0f4;
+        color: #172033;
+      }
+
       button:disabled {
         background: #c9d2df;
         cursor: default;
@@ -165,8 +191,12 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       </div>
       <div class="actions">
         <span class="status"></span>
-        <div>
-          <button class="secondary" type="button" data-action="close" aria-label="关闭">x</button>
+        <div class="actionButtons">
+          <button class="secondary iconButton" type="button" data-action="close" aria-label="关闭">
+            <svg aria-hidden="true" viewBox="0 0 20 20">
+              <path d="M5.25 5.25l9.5 9.5M14.75 5.25l-9.5 9.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+            </svg>
+          </button>
           <button type="button" data-action="save"${saveDisabled ? ' disabled' : ''}>保存</button>
         </div>
       </div>

@@ -23,11 +23,26 @@ body {
 }
 
 .header {
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   gap: 12px;
   justify-content: space-between;
   margin-bottom: 12px;
+}
+
+.headerTitle {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brandMark {
+  border-radius: 8px;
+  flex: 0 0 auto;
+  height: 34px;
+  object-fit: cover;
+  width: 34px;
 }
 
 h1 {
@@ -366,18 +381,25 @@ select:disabled {
 }
 
 .deleteButton {
+  align-items: center;
   appearance: none;
   background: transparent;
   border: 0;
   border-radius: 6px;
   color: #687386;
   cursor: pointer;
+  display: inline-flex;
   font: inherit;
-  font-size: 16px;
   height: 28px;
+  justify-content: center;
   line-height: 1;
   padding: 0;
   width: 28px;
+}
+
+.deleteButton .icon {
+  height: 18px;
+  width: 18px;
 }
 
 .deleteButton:hover {

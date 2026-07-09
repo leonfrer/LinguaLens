@@ -55,6 +55,7 @@ type SettingsPanelProps = {
   onLoadModels: () => void;
   onSaveSettings: () => void;
   onStartSettingsEdit: () => void;
+  onToggleWordLookup: (wordLookupEnabled: boolean) => void;
 };
 
 function SettingsPanel({
@@ -72,7 +73,8 @@ function SettingsPanel({
   onDraftSettingsChange,
   onLoadModels,
   onSaveSettings,
-  onStartSettingsEdit
+  onStartSettingsEdit,
+  onToggleWordLookup
 }: SettingsPanelProps) {
   return (
     <section className="settingsPanel" aria-label="LinguaLens 设置">
@@ -185,6 +187,24 @@ function SettingsPanel({
         </>
       ) : (
         <dl className="settingsSummary">
+          <div>
+            <dt>划词查询</dt>
+            <dd>
+              <label className="summaryToggleControl">
+                <span>{settings.wordLookupEnabled ? '开启' : '关闭'}</span>
+                <input
+                  aria-label="划词查询"
+                  className="toggleInput"
+                  checked={settings.wordLookupEnabled}
+                  type="checkbox"
+                  onChange={(event) => {
+                    onToggleWordLookup(event.target.checked);
+                  }}
+                />
+                <span className="toggleSwitch" aria-hidden="true" />
+              </label>
+            </dd>
+          </div>
           <div>
             <dt>解释语言</dt>
             <dd>{explanationLanguageLabel}</dd>
@@ -315,6 +335,26 @@ function App() {
     setDraftSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
   }
 
+  async function handleToggleWordLookup(wordLookupEnabled: boolean) {
+    const previousSettings = settings;
+    const nextSettings = { ...settings, wordLookupEnabled };
+
+    setSettings(nextSettings);
+    setDraftSettings((currentSettings) => ({ ...currentSettings, wordLookupEnabled }));
+
+    try {
+      const savedSettings = await updateSettings({ wordLookupEnabled });
+      setSettings(savedSettings);
+      setDraftSettings((currentSettings) => ({ ...currentSettings, ...savedSettings }));
+    } catch {
+      setSettings(previousSettings);
+      setDraftSettings((currentSettings) => ({
+        ...currentSettings,
+        wordLookupEnabled: previousSettings.wordLookupEnabled
+      }));
+    }
+  }
+
   function handleApiKeyChange(apiKey: string) {
     handleDraftSettingsChange({ apiKey });
     setModelOptions([]);
@@ -380,6 +420,9 @@ function App() {
           void handleSaveSettings();
         }}
         onStartSettingsEdit={handleStartSettingsEdit}
+        onToggleWordLookup={(wordLookupEnabled) => {
+          void handleToggleWordLookup(wordLookupEnabled);
+        }}
       />
 
       {isLoading ? <p className="empty">加载中...</p> : null}

@@ -1,4 +1,4 @@
-import { getSettings } from '../shared/storage';
+import { getSettings, SETTINGS_KEY } from '../shared/storage';
 import {
   extractSentenceContainingText,
   isValidSelectionText,
@@ -146,10 +146,26 @@ async function handleSelectionChange(): Promise<void> {
 
   const sentenceContext =
     extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
-  const { explanationLanguage } = await getSettings();
+  const { explanationLanguage, wordLookupEnabled } = await getSettings();
+
+  if (!wordLookupEnabled) {
+    hideCurrentPanel();
+    return;
+  }
+
   const translationPromise = translateSelection(text, explanationLanguage, sentenceContext);
   positionPanel(selection);
   await translationPromise;
+}
+
+function handleStorageChange(changes: Record<string, chrome.storage.StorageChange>): void {
+  const nextSettings = changes[SETTINGS_KEY]?.newValue as
+    | { wordLookupEnabled?: boolean }
+    | undefined;
+
+  if (nextSettings?.wordLookupEnabled === false) {
+    hideCurrentPanel();
+  }
 }
 
 function scheduleSelectionChange(event?: Event): void {
@@ -168,6 +184,7 @@ function startContentScript(): void {
   document.addEventListener('keyup', scheduleSelectionChange);
   document.addEventListener('selectionchange', scheduleSelectionChange);
   window.addEventListener('scroll', hideCurrentPanel, { passive: true });
+  chrome.storage.onChanged.addListener(handleStorageChange);
 }
 
 if (typeof globalThis.document !== 'undefined' && typeof globalThis.window !== 'undefined') {

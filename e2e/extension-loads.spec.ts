@@ -120,6 +120,7 @@ test('loads the extension popup', async ({ extensionId, popupPage }) => {
   await expect(popupPage.getByRole('heading', { name: 'LinguaLens' })).toBeVisible();
   await expect(popupPage.getByRole('heading', { name: '设置' })).toBeVisible();
   await expect(popupPage.getByText('当前配置')).toBeVisible();
+  await expect(popupPage.getByRole('checkbox', { name: /划词查询/ })).toBeChecked();
   await expect(popupPage.getByText('简体中文')).toBeVisible();
   await expect(popupPage.getByText('NVIDIA NIM')).toBeVisible();
   await expect(popupPage.getByText('meta/llama-3.1-8b-instruct')).toBeVisible();
@@ -223,6 +224,50 @@ test('shows an API key setup error from the content script selection flow', asyn
     panel.getByText('Please add your LLM API key in LinguaLens settings before translating.')
   ).toBeVisible();
   await expect(panel.getByRole('button', { name: '保存' })).toBeDisabled();
+
+  await page.close();
+});
+
+test('toggles word lookup from the popup and suppresses selection handling', async ({
+  context,
+  popupPage
+}) => {
+  await popupPage.evaluate(async ([settingsKey]) => {
+    await chrome.storage.local.remove(settingsKey);
+  }, [settingsStorageKey]);
+  await popupPage.reload();
+
+  const wordLookupToggle = popupPage.getByRole('checkbox', { name: /划词查询/ });
+  await expect(wordLookupToggle).toBeChecked();
+
+  await wordLookupToggle.uncheck();
+  await expect(wordLookupToggle).not.toBeChecked();
+  await expect(popupPage.getByText('关闭')).toBeVisible();
+
+  const disabledSettings = await popupPage.evaluate(async ([settingsKey]) => {
+    const result = await chrome.storage.local.get(settingsKey);
+    return result[settingsKey];
+  }, [settingsStorageKey]);
+  expect(disabledSettings).toEqual(expect.objectContaining({ wordLookupEnabled: false }));
+
+  await routeTestArticle(context);
+
+  const page = await context.newPage();
+  await page.goto(testArticleUrl);
+  await page.locator('#article').waitFor();
+  await selectArticleText(page, 'foreign-language reading');
+  await expect(page.locator('#lingualens-selection-panel')).toHaveCount(0);
+
+  await wordLookupToggle.check();
+  await expect(wordLookupToggle).toBeChecked();
+  await expect(popupPage.getByText('开启')).toBeVisible();
+
+  await selectArticleText(page, 'foreign-language reading');
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel).toBeVisible();
+  await expect(
+    panel.getByText('Please add your LLM API key in LinguaLens settings before translating.')
+  ).toBeVisible();
 
   await page.close();
 });

@@ -37,6 +37,7 @@ jobs:
             manifest
             build
             release
+            deps
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
             PR title subject should start with a lowercase letter.

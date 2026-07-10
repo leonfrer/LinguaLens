@@ -1,14 +1,26 @@
 import {
-  DEFAULT_LLM_PROVIDER_CONFIG,
-  SUPPORTED_LLM_PROVIDER
+  DEFAULT_LLM_ENDPOINT_CONFIG,
+  DEFAULT_LLM_ENDPOINT_PRESET,
+  OPENAI_COMPATIBLE_ENDPOINTS,
+  isLlmProvider,
+  isLlmEndpointPreset,
+  normalizeBaseUrl
 } from './providers';
-import type { SavedItem, SaveItemMessage, Settings } from './types';
+import type {
+  LlmEndpointPreset,
+  LlmProvider,
+  SavedItem,
+  SaveItemMessage,
+  Settings
+} from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
   wordLookupEnabled: true,
   explanationLanguage: 'zh-CN',
-  llmProvider: SUPPORTED_LLM_PROVIDER,
-  llmModel: DEFAULT_LLM_PROVIDER_CONFIG.defaultModel,
+  llmProvider: 'openai-compatible',
+  llmEndpointPreset: DEFAULT_LLM_ENDPOINT_PRESET,
+  baseUrl: DEFAULT_LLM_ENDPOINT_CONFIG.baseUrl,
+  llmModel: DEFAULT_LLM_ENDPOINT_CONFIG.defaultModel,
   apiKey: ''
 };
 
@@ -37,30 +49,51 @@ export function createSavedItem(
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get(SETTINGS_KEY);
   const storedSettings = result[SETTINGS_KEY] as
-    | (Partial<Omit<Settings, 'llmProvider'>> & {
+    | (Partial<Omit<Settings, 'llmProvider' | 'baseUrl'>> & {
         llmProvider?: string;
+        llmEndpointPreset?: string;
+        baseUrl?: string;
         targetLanguage?: Settings['explanationLanguage'];
       })
     | undefined;
   const { targetLanguage, ...currentSettings } = storedSettings ?? {};
-  const removedProviderModel =
-    currentSettings.llmProvider && currentSettings.llmProvider !== SUPPORTED_LLM_PROVIDER
-      ? DEFAULT_SETTINGS.llmModel
-      : currentSettings.llmModel;
+  const hasSupportedProvider = isLlmProvider(currentSettings.llmProvider);
+  const llmProvider: LlmProvider = hasSupportedProvider
+    ? (currentSettings.llmProvider as LlmProvider)
+    : DEFAULT_SETTINGS.llmProvider;
+  const migratedEndpointPreset = isLlmEndpointPreset(currentSettings.llmProvider)
+    ? currentSettings.llmProvider
+    : undefined;
+  const hasSupportedEndpointPreset =
+    isLlmEndpointPreset(currentSettings.llmEndpointPreset) || Boolean(migratedEndpointPreset);
+  const llmEndpointPreset: LlmEndpointPreset = isLlmEndpointPreset(
+    currentSettings.llmEndpointPreset
+  )
+    ? currentSettings.llmEndpointPreset
+    : (migratedEndpointPreset ?? DEFAULT_LLM_ENDPOINT_PRESET);
+  const endpointConfig = OPENAI_COMPATIBLE_ENDPOINTS[llmEndpointPreset];
+  const baseUrl =
+    llmEndpointPreset === 'custom' && currentSettings.baseUrl
+      ? normalizeBaseUrl(currentSettings.baseUrl)
+      : endpointConfig.baseUrl;
 
-  const nextSettings = {
+  const nextSettings: Settings = {
     ...DEFAULT_SETTINGS,
     ...currentSettings,
-    llmProvider: SUPPORTED_LLM_PROVIDER,
-    llmModel: removedProviderModel ?? DEFAULT_SETTINGS.llmModel,
+    llmProvider,
+    llmEndpointPreset,
+    baseUrl,
+    llmModel: hasSupportedEndpointPreset
+      ? (currentSettings.llmModel ?? endpointConfig.defaultModel)
+      : endpointConfig.defaultModel,
     explanationLanguage:
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
 
-  if (DEFAULT_LLM_PROVIDER_CONFIG.legacyModels?.includes(nextSettings.llmModel)) {
+  if (endpointConfig.legacyModels?.includes(nextSettings.llmModel)) {
     return {
       ...nextSettings,
-      llmModel: DEFAULT_LLM_PROVIDER_CONFIG.defaultModel
+      llmModel: endpointConfig.defaultModel
     };
   }
 
@@ -68,9 +101,16 @@ export async function getSettings(): Promise<Settings> {
 }
 
 export async function updateSettings(settings: Partial<Settings>): Promise<Settings> {
+  const currentSettings = await getSettings();
+  const llmEndpointPreset = settings.llmEndpointPreset ?? currentSettings.llmEndpointPreset;
+  const endpointConfig = OPENAI_COMPATIBLE_ENDPOINTS[llmEndpointPreset];
   const nextSettings = {
-    ...(await getSettings()),
-    ...settings
+    ...currentSettings,
+    ...settings,
+    baseUrl:
+      llmEndpointPreset === 'custom'
+        ? normalizeBaseUrl(settings.baseUrl ?? currentSettings.baseUrl)
+        : endpointConfig.baseUrl
   };
 
   await chrome.storage.local.set({ [SETTINGS_KEY]: nextSettings });

@@ -23,7 +23,7 @@ export default defineManifest({
     128: 'icons/icon128.png'
   },
   permissions: ['storage'],
-  host_permissions: ['https://integrate.api.nvidia.com/*'],
+  host_permissions: ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'],
   background: {
     service_worker: 'src/background/service-worker.ts',
     type: 'module'

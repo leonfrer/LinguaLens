@@ -26,13 +26,31 @@ describe('fetchModelOptions', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchModelOptions({ apiKey: '', provider: 'nvidia' })).rejects.toThrow(
-      t('modelApiKeyRequired')
-    );
+    await expect(
+      fetchModelOptions({
+        apiKey: '',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        endpointPreset: 'nvidia'
+      })
+    ).rejects.toThrow(t('modelApiKeyRequired'));
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('loads models with the configured provider API key', async () => {
+  it('requires a base URL before making provider requests', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      fetchModelOptions({
+        apiKey: 'test-key',
+        baseUrl: '',
+        endpointPreset: 'custom'
+      })
+    ).rejects.toThrow(t('modelBaseUrlRequired'));
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('loads models with the configured provider API key and base URL', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({
@@ -41,7 +59,13 @@ describe('fetchModelOptions', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchModelOptions({ apiKey: 'test-key', provider: 'nvidia' })).resolves.toEqual([
+    await expect(
+      fetchModelOptions({
+        apiKey: 'test-key',
+        baseUrl: 'https://integrate.api.nvidia.com/v1/',
+        endpointPreset: 'nvidia'
+      })
+    ).resolves.toEqual([
       {
         id: 'meta/llama-3.1-8b-instruct',
         label: 'meta/llama-3.1-8b-instruct'

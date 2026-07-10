@@ -2,7 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
 import { fetchModelOptions, type ModelOption } from '../shared/models';
-import { DEFAULT_LLM_PROVIDER_CONFIG } from '../shared/providers';
+import {
+  LLM_PROVIDER_OPTIONS,
+  OPENAI_COMPATIBLE_ENDPOINTS,
+  OPENAI_COMPATIBLE_ENDPOINT_OPTIONS,
+  getEndpointLabel
+} from '../shared/providers';
 import {
   DEFAULT_SETTINGS,
   deleteSavedItem,
@@ -10,7 +15,13 @@ import {
   getSettings,
   updateSettings
 } from '../shared/storage';
-import type { ExplanationLanguage, SavedItem, Settings } from '../shared/types';
+import type {
+  ExplanationLanguage,
+  LlmEndpointPreset,
+  LlmProvider,
+  SavedItem,
+  Settings
+} from '../shared/types';
 import './styles.css';
 
 const explanationLanguageOptions: Array<{ value: ExplanationLanguage; label: string }> = [
@@ -68,6 +79,9 @@ type SettingsPanelProps = {
   modelOptions: ModelOption[];
   settings: Settings;
   onApiKeyChange: (apiKey: string) => void;
+  onBaseUrlChange: (baseUrl: string) => void;
+  onEndpointPresetChange: (endpointPreset: LlmEndpointPreset) => void;
+  onProviderChange: (provider: LlmProvider) => void;
   onCancelSettingsEdit: () => void;
   onDraftSettingsChange: (nextSettings: Partial<Settings>) => void;
   onLoadModels: () => void;
@@ -87,6 +101,9 @@ function SettingsPanel({
   modelOptions,
   settings,
   onApiKeyChange,
+  onBaseUrlChange,
+  onEndpointPresetChange,
+  onProviderChange,
   onCancelSettingsEdit,
   onDraftSettingsChange,
   onLoadModels,
@@ -151,6 +168,51 @@ function SettingsPanel({
           </label>
 
           <label className="fieldControl">
+            <span>{t('settingsProvider')}</span>
+            <select
+              value={draftSettings.llmProvider}
+              onChange={(event) => {
+                onProviderChange(event.target.value as LlmProvider);
+              }}
+            >
+              {LLM_PROVIDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="fieldControl">
+            <span>{t('settingsEndpoint')}</span>
+            <select
+              value={draftSettings.llmEndpointPreset}
+              onChange={(event) => {
+                onEndpointPresetChange(event.target.value as LlmEndpointPreset);
+              }}
+            >
+              {OPENAI_COMPATIBLE_ENDPOINT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="fieldControl">
+            <span>{t('settingsBaseUrl')}</span>
+            <input
+              autoComplete="off"
+              disabled={draftSettings.llmEndpointPreset !== 'custom'}
+              placeholder={t('settingsBaseUrlPlaceholder')}
+              value={draftSettings.baseUrl}
+              onChange={(event) => {
+                onBaseUrlChange(event.target.value);
+              }}
+            />
+          </label>
+
+          <label className="fieldControl">
             <span>{t('settingsApiKey')}</span>
             <input
               autoComplete="off"
@@ -185,7 +247,9 @@ function SettingsPanel({
             </label>
             <button
               className="secondaryButton loadModelsButton"
-              disabled={isLoadingModels || !draftSettings.apiKey.trim()}
+              disabled={
+                isLoadingModels || !draftSettings.apiKey.trim() || !draftSettings.baseUrl.trim()
+              }
               type="button"
               onClick={onLoadModels}
             >
@@ -229,7 +293,18 @@ function SettingsPanel({
           </div>
           <div>
             <dt>{t('settingsProvider')}</dt>
-            <dd>{DEFAULT_LLM_PROVIDER_CONFIG.label}</dd>
+            <dd>
+              {LLM_PROVIDER_OPTIONS.find((option) => option.value === settings.llmProvider)
+                ?.label ?? settings.llmProvider}
+            </dd>
+          </div>
+          <div>
+            <dt>{t('settingsEndpoint')}</dt>
+            <dd>{getEndpointLabel(settings.llmEndpointPreset, settings.baseUrl)}</dd>
+          </div>
+          <div>
+            <dt>{t('settingsBaseUrl')}</dt>
+            <dd>{settings.baseUrl}</dd>
           </div>
           <div>
             <dt>{t('settingsModel')}</dt>
@@ -377,6 +452,28 @@ function App() {
     setModelLoadError('');
   }
 
+  function handleBaseUrlChange(baseUrl: string) {
+    handleDraftSettingsChange({ baseUrl });
+    setModelOptions([]);
+    setModelLoadError('');
+  }
+
+  function handleProviderChange(llmProvider: LlmProvider) {
+    handleDraftSettingsChange({ llmProvider });
+  }
+
+  function handleEndpointPresetChange(llmEndpointPreset: LlmEndpointPreset) {
+    const endpointConfig = OPENAI_COMPATIBLE_ENDPOINTS[llmEndpointPreset];
+
+    handleDraftSettingsChange({
+      llmEndpointPreset,
+      baseUrl: endpointConfig.baseUrl,
+      llmModel: endpointConfig.defaultModel
+    });
+    setModelOptions([]);
+    setModelLoadError('');
+  }
+
   async function handleLoadModels() {
     setIsLoadingModels(true);
     setModelLoadError('');
@@ -384,7 +481,8 @@ function App() {
     try {
       const models = await fetchModelOptions({
         apiKey: draftSettings.apiKey,
-        provider: draftSettings.llmProvider
+        baseUrl: draftSettings.baseUrl,
+        endpointPreset: draftSettings.llmEndpointPreset
       });
       setModelOptions(models);
 
@@ -430,14 +528,17 @@ function App() {
         modelOptions={modelOptions}
         settings={settings}
         onApiKeyChange={handleApiKeyChange}
+        onBaseUrlChange={handleBaseUrlChange}
         onCancelSettingsEdit={handleCancelSettingsEdit}
         onDraftSettingsChange={handleDraftSettingsChange}
+        onEndpointPresetChange={handleEndpointPresetChange}
         onLoadModels={() => {
           void handleLoadModels();
         }}
         onSaveSettings={() => {
           void handleSaveSettings();
         }}
+        onProviderChange={handleProviderChange}
         onStartSettingsEdit={handleStartSettingsEdit}
         onToggleWordLookup={(wordLookupEnabled) => {
           void handleToggleWordLookup(wordLookupEnabled);

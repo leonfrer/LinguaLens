@@ -54,7 +54,13 @@
     "message": "API key"
   },
   "settingsApiKeyPlaceholder": {
-    "message": "NVIDIA API key"
+    "message": "Provider API key"
+  },
+  "settingsBaseUrl": {
+    "message": "Base URL"
+  },
+  "settingsBaseUrlPlaceholder": {
+    "message": "https://api.example.com/v1"
   },
   "settingsModel": {
     "message": "Model"
@@ -70,6 +76,9 @@
   },
   "settingsProvider": {
     "message": "Provider"
+  },
+  "settingsEndpoint": {
+    "message": "Endpoint"
   },
   "settingsProviderUsageNote": {
     "message": "Selected text and available sentence context are sent to the configured LLM provider and may consume your API quota."
@@ -99,6 +108,9 @@
   },
   "modelApiKeyRequired": {
     "message": "Please add your LLM API key before loading models."
+  },
+  "modelBaseUrlRequired": {
+    "message": "Please add a provider base URL before loading models."
   },
   "modelProviderUnableToLoad": {
     "message": "Unable to load models from $provider$.",
@@ -134,6 +146,9 @@
   },
   "translationApiKeyRequired": {
     "message": "Please add your LLM API key in LinguaLens settings before translating."
+  },
+  "translationBaseUrlRequired": {
+    "message": "Please add a provider base URL in LinguaLens settings before translating."
   },
   "translationEmptyProviderResponse": {
     "message": "The LLM provider returned an empty translation."

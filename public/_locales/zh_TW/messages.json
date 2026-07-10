@@ -54,7 +54,13 @@
     "message": "API 金鑰"
   },
   "settingsApiKeyPlaceholder": {
-    "message": "NVIDIA API 金鑰"
+    "message": "服務商 API 金鑰"
+  },
+  "settingsBaseUrl": {
+    "message": "Base URL"
+  },
+  "settingsBaseUrlPlaceholder": {
+    "message": "https://api.example.com/v1"
   },
   "settingsModel": {
     "message": "模型"
@@ -70,6 +76,9 @@
   },
   "settingsProvider": {
     "message": "服務商"
+  },
+  "settingsEndpoint": {
+    "message": "端點"
   },
   "settingsProviderUsageNote": {
     "message": "選取文字和可用句子上下文會傳送給設定的 LLM 服務商，並可能消耗你的 API 額度。"
@@ -99,6 +108,9 @@
   },
   "modelApiKeyRequired": {
     "message": "請先新增 LLM API 金鑰再載入模型。"
+  },
+  "modelBaseUrlRequired": {
+    "message": "請先填寫服務商 Base URL 再載入模型。"
   },
   "modelProviderUnableToLoad": {
     "message": "無法從 $provider$ 載入模型。",
@@ -134,6 +146,9 @@
   },
   "translationApiKeyRequired": {
     "message": "請先在 LinguaLens 設定中新增 LLM API 金鑰再翻譯。"
+  },
+  "translationBaseUrlRequired": {
+    "message": "請先在 LinguaLens 設定中填寫服務商 Base URL 再翻譯。"
   },
   "translationEmptyProviderResponse": {
     "message": "LLM 服務商返回了空白翻譯。"

@@ -1,7 +1,7 @@
 import { createOpenAI as createOpenAICompatible } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { t } from './i18n';
-import { LLM_PROVIDERS } from './providers';
+import { getEndpointLabel, normalizeBaseUrl } from './providers';
 import type { ExplanationLanguage, Settings, TranslateResponse } from './types';
 
 const languageLabels: Record<ExplanationLanguage, string> = {
@@ -63,7 +63,15 @@ export async function translateWithConfiguredProvider({
   }
 
   try {
-    const providerConfig = LLM_PROVIDERS[settings.llmProvider];
+    const baseUrl = normalizeBaseUrl(settings.baseUrl);
+
+    if (!baseUrl) {
+      return {
+        ok: false,
+        error: t('translationBaseUrlRequired')
+      };
+    }
+
     const languageLabel = languageLabels[settings.explanationLanguage];
     const prompt = [
       `Selected text: ${text}`,
@@ -75,12 +83,12 @@ export async function translateWithConfiguredProvider({
       .filter(Boolean)
       .join('\n');
 
-    const nvidia = createOpenAICompatible({
+    const provider = createOpenAICompatible({
       apiKey: settings.apiKey.trim(),
-      baseURL: providerConfig.baseUrl
+      baseURL: baseUrl
     });
     const result = await generateText({
-      model: nvidia.chat(settings.llmModel),
+      model: provider.chat(settings.llmModel),
       system:
         'You help readers understand foreign-language web text. Never include API keys or private settings in the response.',
       prompt
@@ -104,7 +112,10 @@ export async function translateWithConfiguredProvider({
   } catch {
     return {
       ok: false,
-      error: t('translationUnableWithProvider', LLM_PROVIDERS[settings.llmProvider].label)
+      error: t(
+        'translationUnableWithProvider',
+        getEndpointLabel(settings.llmEndpointPreset, settings.baseUrl)
+      )
     };
   }
 }

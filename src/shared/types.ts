@@ -12,12 +12,25 @@ export type ExplanationLanguage =
   | 'ru'
   | 'ar';
 
-export type LlmProvider = 'nvidia';
+export type LlmProvider = 'openai-compatible';
+
+export type LlmEndpointPreset =
+  | 'nvidia'
+  | 'openai'
+  | 'openrouter'
+  | 'groq'
+  | 'deepinfra'
+  | 'together'
+  | 'local'
+  | 'ollama'
+  | 'custom';
 
 export type Settings = {
   wordLookupEnabled: boolean;
   explanationLanguage: ExplanationLanguage;
   llmProvider: LlmProvider;
+  llmEndpointPreset: LlmEndpointPreset;
+  baseUrl: string;
   llmModel: string;
   apiKey: string;
 };

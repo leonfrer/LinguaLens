@@ -1,6 +1,6 @@
 import { t } from './i18n';
-import { LLM_PROVIDERS } from './providers';
-import type { LlmProvider } from './types';
+import { getEndpointLabel, normalizeBaseUrl } from './providers';
+import type { LlmEndpointPreset, Settings } from './types';
 
 export type ModelOption = {
   id: string;
@@ -35,26 +35,34 @@ export function normalizeModelOptions(response: ProviderModelResponse): ModelOpt
 
 export async function fetchModelOptions({
   apiKey,
-  provider
+  baseUrl,
+  endpointPreset
 }: {
   apiKey: string;
-  provider: LlmProvider;
+  baseUrl: Settings['baseUrl'];
+  endpointPreset: LlmEndpointPreset;
 }): Promise<ModelOption[]> {
   const trimmedApiKey = apiKey.trim();
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
 
   if (!trimmedApiKey) {
     throw new Error(t('modelApiKeyRequired'));
   }
 
-  const providerConfig = LLM_PROVIDERS[provider];
-  const response = await fetch(`${providerConfig.baseUrl}/models`, {
+  if (!normalizedBaseUrl) {
+    throw new Error(t('modelBaseUrlRequired'));
+  }
+
+  const response = await fetch(`${normalizedBaseUrl}/models`, {
     headers: {
       Authorization: `Bearer ${trimmedApiKey}`
     }
   });
 
   if (!response.ok) {
-    throw new Error(t('modelProviderUnableToLoad', providerConfig.label));
+    throw new Error(
+      t('modelProviderUnableToLoad', getEndpointLabel(endpointPreset, normalizedBaseUrl))
+    );
   }
 
   return normalizeModelOptions((await response.json()) as ProviderModelResponse);

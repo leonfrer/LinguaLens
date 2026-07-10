@@ -15,7 +15,7 @@ describe('createSavedItem', () => {
           explanationLanguage: 'zh-CN',
           sentenceContext: 'Well, hello there.',
           explanation: 'A greeting.',
-          provider: 'nvidia',
+          provider: 'openai-compatible',
           model: 'meta/llama-3.1-8b-instruct',
           sourceUrl: 'https://example.com',
           sourceTitle: 'Example'
@@ -29,7 +29,7 @@ describe('createSavedItem', () => {
       explanationLanguage: 'zh-CN',
       sentenceContext: 'Well, hello there.',
       explanation: 'A greeting.',
-      provider: 'nvidia',
+      provider: 'openai-compatible',
       model: 'meta/llama-3.1-8b-instruct',
       sourceUrl: 'https://example.com',
       sourceTitle: 'Example',
@@ -79,13 +79,14 @@ describe('getSettings', () => {
     });
   });
 
-  it('migrates removed provider settings to the supported default provider', async () => {
+  it('keeps supported OpenAI-compatible provider settings', async () => {
     vi.stubGlobal('chrome', {
       storage: {
         local: {
           get: vi.fn().mockResolvedValue({
             [SETTINGS_KEY]: {
-              llmProvider: 'openai',
+              llmProvider: 'openai-compatible',
+              llmEndpointPreset: 'openai',
               llmModel: 'gpt-4o-mini',
               apiKey: 'test-key'
             }
@@ -96,6 +97,83 @@ describe('getSettings', () => {
 
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
+      llmProvider: 'openai-compatible',
+      llmEndpointPreset: 'openai',
+      baseUrl: 'https://api.openai.com/v1',
+      llmModel: 'gpt-4o-mini',
+      apiKey: 'test-key'
+    });
+  });
+
+  it('migrates legacy provider values to OpenAI-compatible endpoint presets', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              llmProvider: 'openrouter',
+              llmModel: 'openai/gpt-4o-mini',
+              apiKey: 'test-key'
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      llmProvider: 'openai-compatible',
+      llmEndpointPreset: 'openrouter',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      llmModel: 'openai/gpt-4o-mini',
+      apiKey: 'test-key'
+    });
+  });
+
+  it('migrates unknown provider settings to the supported default provider', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              llmProvider: 'removed-provider',
+              llmModel: 'removed-model',
+              apiKey: 'test-key'
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      apiKey: 'test-key'
+    });
+  });
+
+  it('normalizes custom base URLs', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              llmProvider: 'custom',
+              llmEndpointPreset: 'custom',
+              baseUrl: ' https://api.example.com/v1/ ',
+              llmModel: 'example-model',
+              apiKey: 'test-key'
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      llmProvider: 'openai-compatible',
+      llmEndpointPreset: 'custom',
+      baseUrl: 'https://api.example.com/v1',
+      llmModel: 'example-model',
       apiKey: 'test-key'
     });
   });

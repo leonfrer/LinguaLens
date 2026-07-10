@@ -18,6 +18,22 @@ describe('translateWithConfiguredProvider', () => {
       error: t('translationApiKeyRequired')
     });
   });
+
+  it('returns a setup error before making LLM calls without a base URL', async () => {
+    await expect(
+      translateWithConfiguredProvider({
+        text: 'hello',
+        settings: {
+          ...DEFAULT_SETTINGS,
+          apiKey: 'test-key',
+          baseUrl: ''
+        }
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: t('translationBaseUrlRequired')
+    });
+  });
 });
 
 describe('parseLlmTranslation', () => {

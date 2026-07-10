@@ -6,7 +6,7 @@ const settingsStorageKey = 'lingualens.settings';
 const testArticleUrl = 'https://lingualens.test/article';
 
 type E2EProviderConfig = {
-  provider: 'nvidia';
+  endpointPreset: 'nvidia';
   label: string;
   apiKey?: string;
   model: string;
@@ -14,7 +14,7 @@ type E2EProviderConfig = {
 
 const providerConfigs: E2EProviderConfig[] = [
   {
-    provider: 'nvidia',
+    endpointPreset: 'nvidia',
     label: 'NVIDIA NIM',
     apiKey: process.env.LINGUALENS_E2E_NVIDIA_API_KEY,
     model: process.env.LINGUALENS_E2E_NVIDIA_MODEL ?? 'meta/llama-3.1-8b-instruct'
@@ -95,7 +95,7 @@ async function seedExtensionSettings(
     apiKey?: string;
     explanationLanguage?: string;
     model?: string;
-    provider?: string;
+    endpointPreset?: string;
   }
 ): Promise<void> {
   await popupPage.evaluate(
@@ -103,7 +103,8 @@ async function seedExtensionSettings(
       await chrome.storage.local.set({
         [settingsKey]: {
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
-          llmProvider: nextSettings.provider ?? 'nvidia',
+          llmProvider: 'openai-compatible',
+          llmEndpointPreset: nextSettings.endpointPreset ?? 'nvidia',
           llmModel: nextSettings.model ?? 'meta/llama-3.1-8b-instruct',
           apiKey: nextSettings.apiKey ?? ''
         }
@@ -154,9 +155,13 @@ test.describe('localized Chrome i18n runtime', () => {
 
     await popupPage.getByRole('button', { name: '设置' }).click();
     await expect(popupPage.getByText('编辑配置')).toBeVisible();
+    await expect(popupPage.getByLabel('Base URL')).toHaveValue(
+      'https://integrate.api.nvidia.com/v1'
+    );
+    await expect(popupPage.getByLabel('Base URL')).toBeDisabled();
     await expect(popupPage.getByLabel('API 密钥')).toHaveAttribute(
       'placeholder',
-      'NVIDIA API 密钥'
+      '服务商 API 密钥'
     );
     await popupPage.getByRole('button', { name: '取消' }).click();
 
@@ -183,10 +188,15 @@ test('edits popup settings', async ({ popupPage }) => {
   await expect(popupPage.getByText('Edit configuration')).toBeVisible();
 
   const languageSelect = popupPage.getByLabel('Explanation language');
+  const endpointSelect = popupPage.getByLabel('Endpoint');
+  const baseUrlInput = popupPage.getByLabel('Base URL');
   const modelSelect = popupPage.locator('.settingsGrid select');
   const apiKeyInput = popupPage.getByLabel('API key');
 
   await expect(languageSelect).toHaveValue('zh-CN');
+  await expect(endpointSelect).toHaveValue('nvidia');
+  await expect(baseUrlInput).toHaveValue('https://integrate.api.nvidia.com/v1');
+  await expect(baseUrlInput).toBeDisabled();
   await expect(modelSelect).toHaveValue('meta/llama-3.1-8b-instruct');
   await expect(apiKeyInput).toHaveValue('');
 
@@ -384,7 +394,7 @@ test('shows saved items in the popup and deletes them', async ({ popupPage }) =>
           explanationLanguage: 'zh-CN',
           sentenceContext: 'bonjour tout le monde',
           explanation: 'A common French greeting.',
-          provider: 'nvidia',
+          provider: 'openai-compatible',
           model: 'meta/llama-3.1-8b-instruct',
           sourceUrl: 'https://lingualens.test/article',
           sourceTitle: 'LinguaLens Test Article',
@@ -418,16 +428,17 @@ for (const providerConfig of providerConfigs) {
   }) => {
     test.skip(
       !providerConfig.apiKey,
-      `Set LINGUALENS_E2E_${providerConfig.provider.toUpperCase()}_API_KEY to run this provider test.`
+      `Set LINGUALENS_E2E_${providerConfig.endpointPreset.toUpperCase()}_API_KEY to run this provider test.`
     );
 
     await popupPage.evaluate(
-      async ([storageKey, settingsKey, provider, model, apiKey]) => {
+      async ([storageKey, settingsKey, endpointPreset, model, apiKey]) => {
         await chrome.storage.local.clear();
         await chrome.storage.local.set({
           [settingsKey]: {
             explanationLanguage: 'zh-CN',
-            llmProvider: provider,
+            llmProvider: 'openai-compatible',
+            llmEndpointPreset: endpointPreset,
             llmModel: model,
             apiKey
           },
@@ -437,7 +448,7 @@ for (const providerConfig of providerConfigs) {
       [
         savedItemsStorageKey,
         settingsStorageKey,
-        providerConfig.provider,
+        providerConfig.endpointPreset,
         providerConfig.model,
         providerConfig.apiKey
       ]
@@ -473,7 +484,7 @@ for (const providerConfig of providerConfigs) {
         text: 'rare comet',
         explanationLanguage: 'zh-CN',
         sentenceContext: 'The patient scientist observed a rare comet before sunrise.',
-        provider: providerConfig.provider,
+        provider: 'openai-compatible',
         model: providerConfig.model,
         sourceUrl: 'https://lingualens.test/real-provider',
         sourceTitle: 'LinguaLens Real Provider Test'

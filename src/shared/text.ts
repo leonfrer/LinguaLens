@@ -33,14 +33,18 @@ export function extractSentenceContainingText(sourceText: string, selectedText: 
     normalizedSource.lastIndexOf('？', selectionStart - 1)
   );
   const sentenceEndCandidates = ['.', '!', '?', '。', '！', '？']
-    .map((punctuation) => normalizedSource.indexOf(punctuation, selectionEnd))
+    .map((punctuation) => normalizedSource.indexOf(punctuation, selectionEnd - 1))
     .filter((index) => index !== -1);
   const sentenceEndBoundary = sentenceEndCandidates.length
     ? Math.min(...sentenceEndCandidates) + 1
     : normalizedSource.length;
 
-  return normalizedSource
+  const sentenceContext = normalizedSource
     .slice(sentenceStartBoundary === -1 ? 0 : sentenceStartBoundary + 1, sentenceEndBoundary)
     .trim()
     .slice(0, 1000);
+
+  return sentenceContext.toLocaleLowerCase() === normalizedSelection.toLocaleLowerCase()
+    ? ''
+    : sentenceContext;
 }

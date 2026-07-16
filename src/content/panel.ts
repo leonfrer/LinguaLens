@@ -121,6 +121,16 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         min-height: 20px;
       }
 
+      .explanation {
+        color: #687386;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .explanation[hidden] {
+        display: none;
+      }
+
       .actions {
         align-items: flex-start;
         border-top: 1px solid #edf0f4;
@@ -195,6 +205,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       <div class="body">
         <div class="source"></div>
         <div class="translation"></div>
+        <div class="explanation"${state.explanation ? '' : ' hidden'}></div>
       </div>
       <div class="actions">
         <span class="status"></span>
@@ -213,6 +224,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
   root.querySelector('.source')!.textContent = state.text;
   root.querySelector('.translation')!.textContent =
     state.status === 'loading' ? t('panelGeneratingTranslation') : state.translation;
+  root.querySelector('.explanation')!.textContent = state.explanation ?? '';
   root.querySelector('.status')!.textContent = statusText;
   root.querySelector('[data-action="close"]')?.addEventListener('click', actions.onClose);
   root.querySelector('[data-action="save"]')?.addEventListener('click', actions.onSave);

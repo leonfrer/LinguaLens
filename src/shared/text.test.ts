@@ -41,6 +41,15 @@ describe('extractSentenceContainingText', () => {
     );
   });
 
+  it('returns empty context when the full sentence is selected', () => {
+    expect(
+      extractSentenceContainingText(
+        'First sentence. This is the selected sentence. Last sentence.',
+        'This is the selected sentence.'
+      )
+    ).toBe('');
+  });
+
   it('returns empty context when the selected text is not in the source text', () => {
     expect(extractSentenceContainingText('Only part of the selection.', 'missing phrase')).toBe('');
   });

@@ -188,6 +188,13 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.pronunciationText {
+  color: #526070;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
 .explanationText {
   color: #7a8494;
   font-size: 13px;

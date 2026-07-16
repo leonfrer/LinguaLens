@@ -44,7 +44,9 @@ test('toggles word lookup from the popup and suppresses selection handling', asy
 
   await wordLookupToggle.uncheck();
   await expect(wordLookupToggle).not.toBeChecked();
-  await expect(popupPage.getByText('Off', { exact: true })).toBeVisible();
+  await expect(
+    wordLookupToggle.locator('xpath=..').getByText('Off', { exact: true })
+  ).toBeVisible();
 
   const disabledSettings = await popupPage.evaluate(async ([settingsKey]) => {
     const result = await chrome.storage.local.get(settingsKey);
@@ -61,7 +63,9 @@ test('toggles word lookup from the popup and suppresses selection handling', asy
 
   await wordLookupToggle.check();
   await expect(wordLookupToggle).toBeChecked();
-  await expect(popupPage.getByText('On', { exact: true })).toBeVisible();
+  await expect(
+    wordLookupToggle.locator('xpath=..').getByText('On', { exact: true })
+  ).toBeVisible();
 
   await selectArticleText(page, 'foreign-language reading');
   const panel = page.locator('#lingualens-selection-panel');

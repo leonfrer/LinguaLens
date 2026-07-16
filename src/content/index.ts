@@ -71,6 +71,7 @@ async function translateSelection(
       ? {
           text,
           translation: response.translation,
+          pronunciation: response.pronunciation,
           explanationLanguage,
           sentenceContext,
           explanation: response.explanation,
@@ -122,6 +123,7 @@ async function saveCurrentSelection(): Promise<void> {
     type: 'LINGUALENS_SAVE_ITEM',
     text: currentState.text,
     translation: currentState.translation,
+    pronunciation: currentState.pronunciation,
     explanationLanguage: currentState.explanationLanguage,
     sentenceContext: currentState.sentenceContext,
     explanation: currentState.explanation,

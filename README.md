@@ -28,6 +28,7 @@ Translation uses Vercel AI SDK with NVIDIA NIM as the supported provider path. U
 
 ```text
 src/
+  config.ts
   background/
     index.ts
     service-worker.ts
@@ -49,6 +50,7 @@ TODO.md
 
 Key entry points:
 
+- `src/config.ts`: project-level behavior settings, including selection debounce duration.
 - `src/content/index.ts`: content-script selection handling and inline panel UI.
 - `src/background/index.ts`: message handling for translation and saving.
 - `src/shared/translation.ts`: LLM translation provider boundary.

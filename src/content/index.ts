@@ -1,3 +1,4 @@
+import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
 import { getSettings, SETTINGS_KEY } from '../shared/storage';
 import {
@@ -177,7 +178,7 @@ function scheduleSelectionChange(event?: Event): void {
   window.clearTimeout(selectionTimer);
   selectionTimer = window.setTimeout(() => {
     void handleSelectionChange();
-  }, 160);
+  }, LINGUALENS_CONFIG.selectionDebounceMs);
 }
 
 function startContentScript(): void {

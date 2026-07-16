@@ -9,9 +9,11 @@ import {
 
 test('loads models from a custom endpoint and shows provider errors', async ({
   context,
-  popupPage
+  extensionId
 }) => {
   let modelsRequestCount = 0;
+  const settingsPage = await context.newPage();
+  await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
 
   await context.route('https://models.example.test/v1/models', async (route) => {
     modelsRequestCount += 1;
@@ -24,13 +26,12 @@ test('loads models from a custom endpoint and shows provider errors', async ({
     });
   });
 
-  await popupPage.getByRole('button', { name: 'Settings' }).click();
-  await popupPage.getByLabel('Endpoint').selectOption('custom');
-  await popupPage.getByLabel('Base URL').fill('https://models.example.test/v1/');
-  await popupPage.getByLabel('API key').fill('model-list-key');
-  await popupPage.getByRole('button', { name: 'Load models' }).click();
+  await settingsPage.getByLabel('Endpoint').selectOption('custom');
+  await settingsPage.getByLabel('Base URL').fill('https://models.example.test/v1/');
+  await settingsPage.getByLabel('API key').fill('model-list-key');
+  await settingsPage.getByRole('button', { name: 'Load models' }).click();
 
-  const modelSelect = popupPage.locator('.settingsGrid select');
+  const modelSelect = settingsPage.locator('.modelRow select');
   await expect(modelSelect).toHaveValue('a-model');
   await expect(modelSelect.locator('option')).toHaveText(['a-model', 'z-model']);
   expect(modelsRequestCount).toBe(1);
@@ -41,10 +42,10 @@ test('loads models from a custom endpoint and shows provider errors', async ({
       body: JSON.stringify({ data: [] })
     });
   });
-  await popupPage.getByLabel('Base URL').fill('https://empty.example.test/v1');
-  await popupPage.getByRole('button', { name: 'Load models' }).click();
+  await settingsPage.getByLabel('Base URL').fill('https://empty.example.test/v1');
+  await settingsPage.getByRole('button', { name: 'Load models' }).click();
   await expect(
-    popupPage.getByText('The provider did not return any available models.')
+    settingsPage.getByText('The provider did not return any available models.')
   ).toBeVisible();
 
   await context.route('https://failure.example.test/v1/models', async (route) => {
@@ -54,17 +55,19 @@ test('loads models from a custom endpoint and shows provider errors', async ({
       body: JSON.stringify({ error: { message: 'Invalid model-list-key' } })
     });
   });
-  await popupPage.getByLabel('Base URL').fill('https://failure.example.test/v1');
-  await popupPage.getByRole('button', { name: 'Load models' }).click();
+  await settingsPage.getByLabel('Base URL').fill('https://failure.example.test/v1');
+  await settingsPage.getByRole('button', { name: 'Load models' }).click();
 
   await expect(
-    popupPage.getByText('Unable to load models from https://failure.example.test/v1.')
+    settingsPage.getByText('Unable to load models from https://failure.example.test/v1.')
   ).toBeVisible();
-  await expect(popupPage.getByText('model-list-key')).toHaveCount(0);
+  await expect(settingsPage.getByText('model-list-key')).toHaveCount(0);
+  await settingsPage.close();
 });
 
 test('translates and saves with a mocked custom OpenAI-compatible endpoint', async ({
   context,
+  extensionId,
   popupPage
 }) => {
   let translationRequestBody: Record<string, unknown> | undefined;
@@ -103,13 +106,15 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
     });
   });
 
-  await popupPage.getByRole('button', { name: 'Settings' }).click();
-  await popupPage.getByLabel('Endpoint').selectOption('custom');
-  await popupPage.getByLabel('Base URL').fill('https://translation.example.test/v1');
-  await popupPage.getByLabel('Manual model ID').fill('mock-translation-model');
-  await popupPage.getByLabel('API key').fill('mocked-translation-key');
-  await popupPage.getByRole('button', { name: 'Save' }).click();
-  await popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  const settingsPage = await context.newPage();
+  await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
+  await settingsPage.getByLabel('Endpoint').selectOption('custom');
+  await settingsPage.getByLabel('Base URL').fill('https://translation.example.test/v1');
+  await settingsPage.getByLabel('Manual model ID').fill('mock-translation-model');
+  await settingsPage.getByLabel('API key').fill('mocked-translation-key');
+  await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  await settingsPage.getByRole('button', { name: 'Save changes' }).click();
+  await settingsPage.close();
 
   await routeTestArticle(context, {
     body: 'The patient scientist observed a rare comet before sunrise.'

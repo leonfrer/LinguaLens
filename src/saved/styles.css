@@ -39,23 +39,6 @@ a {
   margin-bottom: 28px;
 }
 
-.brandRow {
-  align-items: center;
-  color: #526070;
-  display: flex;
-  font-size: 13px;
-  font-weight: 650;
-  gap: 8px;
-  letter-spacing: 0.02em;
-  margin-bottom: 22px;
-}
-
-.brandMark {
-  border-radius: 7px;
-  height: 28px;
-  width: 28px;
-}
-
 .titleRow {
   align-items: flex-end;
   display: flex;

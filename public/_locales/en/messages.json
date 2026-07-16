@@ -32,11 +32,50 @@
   "commonUnknownSource": {
     "message": "Unknown source"
   },
+  "managementNavAriaLabel": {
+    "message": "LinguaLens management"
+  },
   "settingsAriaLabel": {
     "message": "LinguaLens settings"
   },
   "settingsTitle": {
     "message": "Settings"
+  },
+  "settingsPageDescription": {
+    "message": "Manage your reading preferences and AI service connection."
+  },
+  "settingsQuickTitle": {
+    "message": "Quick settings"
+  },
+  "settingsQuickDescription": {
+    "message": "Frequently used reading controls"
+  },
+  "settingsOpenFull": {
+    "message": "Open settings"
+  },
+  "settingsServiceConfigured": {
+    "message": "AI service configured"
+  },
+  "settingsServiceNotConfigured": {
+    "message": "Set up AI service"
+  },
+  "settingsSavedStatus": {
+    "message": "Settings saved"
+  },
+  "settingsSaveChanges": {
+    "message": "Save changes"
+  },
+  "settingsReadingTitle": {
+    "message": "Reading preferences"
+  },
+  "settingsReadingDescription": {
+    "message": "Control what LinguaLens shows when you select text."
+  },
+  "settingsProviderTitle": {
+    "message": "AI service"
+  },
+  "settingsProviderDescription": {
+    "message": "Configure an OpenAI-compatible endpoint, credentials, and model."
   },
   "settingsEditConfig": {
     "message": "Edit configuration"
@@ -50,8 +89,14 @@
   "settingsExplanationLanguage": {
     "message": "Explanation language"
   },
+  "settingsExplanationLanguageDescription": {
+    "message": "The language used for translations and explanations."
+  },
   "settingsApiKey": {
     "message": "API key"
+  },
+  "settingsApiKeyDescription": {
+    "message": "Your API key is stored only in this browser."
   },
   "settingsApiKeyPlaceholder": {
     "message": "Provider API key"
@@ -74,8 +119,14 @@
   "settingsWordLookup": {
     "message": "Selection lookup"
   },
+  "settingsWordLookupDescription": {
+    "message": "Show the translation panel after you select text."
+  },
   "settingsPronunciationLookup": {
     "message": "Pronunciation lookup"
+  },
+  "settingsPronunciationLookupDescription": {
+    "message": "Include a pronunciation when the source language supports one."
   },
   "settingsProvider": {
     "message": "Provider"

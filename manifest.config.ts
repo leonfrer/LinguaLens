@@ -6,6 +6,7 @@ export default defineManifest({
   description: '__MSG_extensionDescription__',
   version: '0.3.1',
   default_locale: 'en',
+  options_page: 'settings.html',
   action: {
     default_popup: 'index.html',
     default_title: '__MSG_extensionName__',

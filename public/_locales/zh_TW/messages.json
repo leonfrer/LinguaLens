@@ -32,11 +32,50 @@
   "commonUnknownSource": {
     "message": "未知來源"
   },
+  "managementNavAriaLabel": {
+    "message": "LinguaLens 管理"
+  },
   "settingsAriaLabel": {
     "message": "LinguaLens 設定"
   },
   "settingsTitle": {
     "message": "設定"
+  },
+  "settingsPageDescription": {
+    "message": "管理閱讀偏好和 AI 服務連線。"
+  },
+  "settingsQuickTitle": {
+    "message": "快捷設定"
+  },
+  "settingsQuickDescription": {
+    "message": "常用的閱讀選項"
+  },
+  "settingsOpenFull": {
+    "message": "開啟設定"
+  },
+  "settingsServiceConfigured": {
+    "message": "AI 服務已設定"
+  },
+  "settingsServiceNotConfigured": {
+    "message": "設定 AI 服務"
+  },
+  "settingsSavedStatus": {
+    "message": "設定已儲存"
+  },
+  "settingsSaveChanges": {
+    "message": "儲存變更"
+  },
+  "settingsReadingTitle": {
+    "message": "閱讀偏好"
+  },
+  "settingsReadingDescription": {
+    "message": "控制選取文字時 LinguaLens 顯示的內容。"
+  },
+  "settingsProviderTitle": {
+    "message": "AI 服務"
+  },
+  "settingsProviderDescription": {
+    "message": "設定相容 OpenAI 的端點、憑證和模型。"
   },
   "settingsEditConfig": {
     "message": "編輯設定"
@@ -50,8 +89,14 @@
   "settingsExplanationLanguage": {
     "message": "解釋語言"
   },
+  "settingsExplanationLanguageDescription": {
+    "message": "翻譯和解釋所使用的語言。"
+  },
   "settingsApiKey": {
     "message": "API 金鑰"
+  },
+  "settingsApiKeyDescription": {
+    "message": "API 金鑰僅儲存在目前瀏覽器中。"
   },
   "settingsApiKeyPlaceholder": {
     "message": "服務商 API 金鑰"
@@ -74,8 +119,14 @@
   "settingsWordLookup": {
     "message": "劃詞查詢"
   },
+  "settingsWordLookupDescription": {
+    "message": "選取文字後顯示翻譯面板。"
+  },
   "settingsPronunciationLookup": {
     "message": "查詢發音"
+  },
+  "settingsPronunciationLookupDescription": {
+    "message": "在原文語言支援時顯示讀音。"
   },
   "settingsProvider": {
     "message": "服務商"

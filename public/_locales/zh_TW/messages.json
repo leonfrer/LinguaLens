@@ -74,6 +74,9 @@
   "settingsWordLookup": {
     "message": "劃詞查詢"
   },
+  "settingsPronunciationLookup": {
+    "message": "查詢發音"
+  },
   "settingsProvider": {
     "message": "服務商"
   },

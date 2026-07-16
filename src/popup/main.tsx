@@ -87,6 +87,7 @@ type SettingsPanelProps = {
   onLoadModels: () => void;
   onSaveSettings: () => void;
   onStartSettingsEdit: () => void;
+  onTogglePronunciationLookup: (pronunciationLookupEnabled: boolean) => void;
   onToggleWordLookup: (wordLookupEnabled: boolean) => void;
 };
 
@@ -109,6 +110,7 @@ function SettingsPanel({
   onLoadModels,
   onSaveSettings,
   onStartSettingsEdit,
+  onTogglePronunciationLookup,
   onToggleWordLookup
 }: SettingsPanelProps) {
   return (
@@ -288,6 +290,28 @@ function SettingsPanel({
             </dd>
           </div>
           <div>
+            <dt>{t('settingsPronunciationLookup')}</dt>
+            <dd>
+              <label className="summaryToggleControl">
+                <span>
+                  {settings.pronunciationLookupEnabled
+                    ? t('commonEnabled')
+                    : t('commonDisabled')}
+                </span>
+                <input
+                  aria-label={t('settingsPronunciationLookup')}
+                  className="toggleInput"
+                  checked={settings.pronunciationLookupEnabled}
+                  type="checkbox"
+                  onChange={(event) => {
+                    onTogglePronunciationLookup(event.target.checked);
+                  }}
+                />
+                <span className="toggleSwitch" aria-hidden="true" />
+              </label>
+            </dd>
+          </div>
+          <div>
             <dt>{t('settingsExplanationLanguage')}</dt>
             <dd>{explanationLanguageLabel}</dd>
           </div>
@@ -335,6 +359,9 @@ function SavedList({
         <article className="savedItem" key={item.id}>
           <div className="savedText">
             <p className="sourceText">{item.text}</p>
+            {item.pronunciation ? (
+              <p className="pronunciationText">{item.pronunciation}</p>
+            ) : null}
             <p className="translationText">{item.translation}</p>
             {item.explanation ? <p className="explanationText">{item.explanation}</p> : null}
             <p className="metaText">
@@ -446,6 +473,29 @@ function App() {
     }
   }
 
+  async function handleTogglePronunciationLookup(pronunciationLookupEnabled: boolean) {
+    const previousSettings = settings;
+    const nextSettings = { ...settings, pronunciationLookupEnabled };
+
+    setSettings(nextSettings);
+    setDraftSettings((currentSettings) => ({
+      ...currentSettings,
+      pronunciationLookupEnabled
+    }));
+
+    try {
+      const savedSettings = await updateSettings({ pronunciationLookupEnabled });
+      setSettings(savedSettings);
+      setDraftSettings((currentSettings) => ({ ...currentSettings, ...savedSettings }));
+    } catch {
+      setSettings(previousSettings);
+      setDraftSettings((currentSettings) => ({
+        ...currentSettings,
+        pronunciationLookupEnabled: previousSettings.pronunciationLookupEnabled
+      }));
+    }
+  }
+
   function handleApiKeyChange(apiKey: string) {
     handleDraftSettingsChange({ apiKey });
     setModelOptions([]);
@@ -544,6 +594,9 @@ function App() {
         }}
         onProviderChange={handleProviderChange}
         onStartSettingsEdit={handleStartSettingsEdit}
+        onTogglePronunciationLookup={(pronunciationLookupEnabled) => {
+          void handleTogglePronunciationLookup(pronunciationLookupEnabled);
+        }}
         onToggleWordLookup={(wordLookupEnabled) => {
           void handleToggleWordLookup(wordLookupEnabled);
         }}

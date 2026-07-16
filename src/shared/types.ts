@@ -27,6 +27,7 @@ export type LlmEndpointPreset =
 
 export type Settings = {
   wordLookupEnabled: boolean;
+  pronunciationLookupEnabled: boolean;
   explanationLanguage: ExplanationLanguage;
   llmProvider: LlmProvider;
   llmEndpointPreset: LlmEndpointPreset;
@@ -39,6 +40,7 @@ export type SavedItem = {
   id: string;
   text: string;
   translation: string;
+  pronunciation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -60,6 +62,7 @@ export type SaveItemMessage = {
   type: 'LINGUALENS_SAVE_ITEM';
   text: string;
   translation: string;
+  pronunciation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -75,6 +78,7 @@ export type TranslateResponse =
   | {
       ok: true;
       translation: string;
+      pronunciation?: string;
       explanation?: string;
       provider: LlmProvider;
       model?: string;

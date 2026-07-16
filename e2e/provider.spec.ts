@@ -87,6 +87,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
               role: 'assistant',
               content: JSON.stringify({
                 translation: '稀有的彗星',
+                pronunciation: '/reər ˈkɒmɪt/',
                 explanation: '用于稳定 E2E 的模拟响应。'
               })
             },
@@ -108,6 +109,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
   await popupPage.getByLabel('Manual model ID').fill('mock-translation-model');
   await popupPage.getByLabel('API key').fill('mocked-translation-key');
   await popupPage.getByRole('button', { name: 'Save' }).click();
+  await popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
 
   await routeTestArticle(context, {
     body: 'The patient scientist observed a rare comet before sunrise.'
@@ -119,6 +121,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
 
   const panel = page.locator('#lingualens-selection-panel');
   await expect(panel.getByText('稀有的彗星')).toBeVisible();
+  await expect(panel.getByText('/reər ˈkɒmɪt/')).toBeVisible();
   const explanation = panel.getByText('用于稳定 E2E 的模拟响应。');
   await expect(explanation).toBeVisible();
   await expect(explanation).toHaveCSS('color', 'rgb(104, 115, 134)');
@@ -140,6 +143,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
     expect.objectContaining({
       text: 'rare comet',
       translation: '稀有的彗星',
+      pronunciation: '/reər ˈkɒmɪt/',
       explanation: '用于稳定 E2E 的模拟响应。',
       provider: 'openai-compatible',
       model: 'mock-translation-model'

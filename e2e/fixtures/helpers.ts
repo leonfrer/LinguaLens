@@ -77,6 +77,7 @@ export async function seedExtensionSettings(
   settings: {
     apiKey?: string;
     explanationLanguage?: string;
+    pronunciationLookupEnabled?: boolean;
     model?: string;
     endpointPreset?: string;
   }
@@ -86,6 +87,7 @@ export async function seedExtensionSettings(
       await chrome.storage.local.set({
         [settingsKey]: {
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
+          pronunciationLookupEnabled: nextSettings.pronunciationLookupEnabled ?? false,
           llmProvider: 'openai-compatible',
           llmEndpointPreset: nextSettings.endpointPreset ?? 'nvidia',
           llmModel: nextSettings.model ?? 'meta/llama-3.1-8b-instruct',

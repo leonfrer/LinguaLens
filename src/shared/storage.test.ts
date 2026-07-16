@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSavedItem, DEFAULT_SETTINGS, getSettings, SETTINGS_KEY } from './storage';
+import {
+  createSavedItem,
+  DEFAULT_SETTINGS,
+  getSavedItems,
+  getSettings,
+  SAVED_ITEMS_KEY,
+  SETTINGS_KEY
+} from './storage';
 
 vi.stubGlobal('crypto', {
   randomUUID: () => 'fixed-id'
@@ -12,6 +19,7 @@ describe('createSavedItem', () => {
         {
           text: 'hello',
           translation: '你好',
+          pronunciation: '/həˈloʊ/',
           explanationLanguage: 'zh-CN',
           sentenceContext: 'Well, hello there.',
           explanation: 'A greeting.',
@@ -26,6 +34,7 @@ describe('createSavedItem', () => {
       id: '123-fixed-id',
       text: 'hello',
       translation: '你好',
+      pronunciation: '/həˈloʊ/',
       explanationLanguage: 'zh-CN',
       sentenceContext: 'Well, hello there.',
       explanation: 'A greeting.',
@@ -39,7 +48,7 @@ describe('createSavedItem', () => {
 });
 
 describe('getSettings', () => {
-  it('defaults word lookup on for existing users', async () => {
+  it('defaults word lookup on and pronunciation lookup off for existing users', async () => {
     vi.stubGlobal('chrome', {
       storage: {
         local: {
@@ -55,6 +64,26 @@ describe('getSettings', () => {
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
       apiKey: 'test-key'
+    });
+    expect(DEFAULT_SETTINGS.pronunciationLookupEnabled).toBe(false);
+  });
+
+  it('migrates the previous IPA lookup setting to pronunciation lookup', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              ipaLookupEnabled: true
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      pronunciationLookupEnabled: true
     });
   });
 
@@ -176,5 +205,43 @@ describe('getSettings', () => {
       llmModel: 'example-model',
       apiKey: 'test-key'
     });
+  });
+});
+
+describe('getSavedItems', () => {
+  it('reads the previous IPA field as pronunciation', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SAVED_ITEMS_KEY]: [
+              {
+                id: 'legacy-item',
+                text: 'hello',
+                translation: '你好',
+                ipa: '/həˈloʊ/',
+                explanationLanguage: 'zh-CN',
+                sourceUrl: 'https://example.com',
+                sourceTitle: 'Example',
+                createdAt: 123
+              }
+            ]
+          })
+        }
+      }
+    });
+
+    await expect(getSavedItems()).resolves.toEqual([
+      {
+        id: 'legacy-item',
+        text: 'hello',
+        translation: '你好',
+        pronunciation: '/həˈloʊ/',
+        explanationLanguage: 'zh-CN',
+        sourceUrl: 'https://example.com',
+        sourceTitle: 'Example',
+        createdAt: 123
+      }
+    ]);
   });
 });

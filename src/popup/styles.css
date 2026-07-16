@@ -373,6 +373,7 @@ select:disabled {
 }
 
 .sourceText,
+.pronunciationText,
 .translationText,
 .explanationText,
 .metaText {
@@ -380,6 +381,12 @@ select:disabled {
 }
 
 .sourceText {
+  color: #526070;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.pronunciationText {
   color: #526070;
   font-size: 12px;
   line-height: 1.4;

@@ -9,6 +9,7 @@ test('shows saved items in the popup and deletes them', async ({ popupPage }) =>
           id: 'saved-item-1',
           text: 'bonjour',
           translation: '你好',
+          pronunciation: '/bɔ̃.ʒuʁ/',
           explanationLanguage: 'zh-CN',
           sentenceContext: 'bonjour tout le monde',
           explanation: 'A common French greeting.',
@@ -24,6 +25,7 @@ test('shows saved items in the popup and deletes them', async ({ popupPage }) =>
 
   await popupPage.reload();
   await expect(popupPage.getByText('bonjour')).toBeVisible();
+  await expect(popupPage.getByText('/bɔ̃.ʒuʁ/')).toBeVisible();
   await expect(popupPage.getByText('你好')).toBeVisible();
   await expect(popupPage.getByText('A common French greeting.')).toBeVisible();
   await expect(
@@ -49,6 +51,7 @@ test('shows sentence context and source links on the saved items page', async ({
           id: 'saved-page-item-1',
           text: 'bonjour',
           translation: '你好',
+          pronunciation: '/bɔ̃.ʒuʁ/',
           explanationLanguage: 'zh-CN',
           sentenceContext: 'She said bonjour to everyone in the room.',
           explanation: 'A common French greeting.',
@@ -76,6 +79,7 @@ test('shows sentence context and source links on the saved items page', async ({
   await expect(savedPage.locator('.contextText mark')).toHaveText('bonjour');
   await expect(savedPage.locator('.contextText mark')).toHaveCSS('font-weight', '700');
   await expect(savedPage.locator('.translationText')).toHaveText('你好');
+  await expect(savedPage.locator('.pronunciationText')).toHaveText('/bɔ̃.ʒuʁ/');
   await expect(savedPage.locator('.explanationText')).toHaveText('A common French greeting.');
 
   const sourceLink = savedPage.getByRole('link', {

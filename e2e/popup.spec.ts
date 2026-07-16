@@ -8,6 +8,9 @@ test('loads the extension popup', async ({ extensionId, popupPage }) => {
   await expect(popupPage.getByRole('heading', { name: 'Settings' })).toBeVisible();
   await expect(popupPage.getByText('Current configuration')).toBeVisible();
   await expect(popupPage.getByRole('checkbox', { name: /Selection lookup/ })).toBeChecked();
+  await expect(
+    popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
+  ).not.toBeChecked();
   await expect(popupPage.getByText('简体中文')).toBeVisible();
   await expect(popupPage.getByText('NVIDIA NIM')).toBeVisible();
   await expect(popupPage.getByText('meta/llama-3.1-8b-instruct')).toBeVisible();
@@ -16,6 +19,19 @@ test('loads the extension popup', async ({ extensionId, popupPage }) => {
     popupPage.getByText('Add an API key, then select text on a web page to translate and save it.')
   ).toBeVisible();
   await expect(popupPage.locator('[aria-label="Recently saved items"]')).toHaveCount(1);
+});
+
+test('enables pronunciation lookup and persists the choice', async ({ popupPage }) => {
+  const pronunciationToggle = popupPage.getByRole('checkbox', {
+    name: 'Pronunciation lookup'
+  });
+  await pronunciationToggle.check();
+  await expect(pronunciationToggle).toBeChecked();
+
+  await popupPage.reload();
+  await expect(
+    popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
+  ).toBeChecked();
 });
 
 test('edits popup settings', async ({ popupPage }) => {

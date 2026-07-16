@@ -74,6 +74,9 @@
   "settingsWordLookup": {
     "message": "Selection lookup"
   },
+  "settingsPronunciationLookup": {
+    "message": "Pronunciation lookup"
+  },
   "settingsProvider": {
     "message": "Provider"
   },

@@ -6,6 +6,7 @@ const PANEL_ID = 'lingualens-selection-panel';
 export type PanelState = {
   text: string;
   translation: string;
+  pronunciation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -121,6 +122,16 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         min-height: 20px;
       }
 
+      .pronunciation {
+        color: #526070;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .pronunciation[hidden] {
+        display: none;
+      }
+
       .explanation {
         color: #687386;
         font-size: 12px;
@@ -204,6 +215,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
     <section class="panel" role="dialog" aria-label="${t('panelTranslationAriaLabel')}">
       <div class="body">
         <div class="source"></div>
+        <div class="pronunciation"${state.pronunciation ? '' : ' hidden'}></div>
         <div class="translation"></div>
         <div class="explanation"${state.explanation ? '' : ' hidden'}></div>
       </div>
@@ -222,6 +234,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
   `;
 
   root.querySelector('.source')!.textContent = state.text;
+  root.querySelector('.pronunciation')!.textContent = state.pronunciation ?? '';
   root.querySelector('.translation')!.textContent =
     state.status === 'loading' ? t('panelGeneratingTranslation') : state.translation;
   root.querySelector('.explanation')!.textContent = state.explanation ?? '';

@@ -16,6 +16,7 @@ import type {
 
 export const DEFAULT_SETTINGS: Settings = {
   wordLookupEnabled: true,
+  pronunciationLookupEnabled: false,
   explanationLanguage: 'zh-CN',
   llmProvider: 'openai-compatible',
   llmEndpointPreset: DEFAULT_LLM_ENDPOINT_PRESET,
@@ -35,6 +36,7 @@ export function createSavedItem(
     id: `${now}-${crypto.randomUUID()}`,
     text: payload.text,
     translation: payload.translation,
+    pronunciation: payload.pronunciation,
     explanationLanguage: payload.explanationLanguage,
     sentenceContext: payload.sentenceContext,
     explanation: payload.explanation,
@@ -53,10 +55,11 @@ export async function getSettings(): Promise<Settings> {
         llmProvider?: string;
         llmEndpointPreset?: string;
         baseUrl?: string;
+        ipaLookupEnabled?: boolean;
         targetLanguage?: Settings['explanationLanguage'];
       })
     | undefined;
-  const { targetLanguage, ...currentSettings } = storedSettings ?? {};
+  const { ipaLookupEnabled, targetLanguage, ...currentSettings } = storedSettings ?? {};
   const hasSupportedProvider = isLlmProvider(currentSettings.llmProvider);
   const llmProvider: LlmProvider = hasSupportedProvider
     ? (currentSettings.llmProvider as LlmProvider)
@@ -86,6 +89,10 @@ export async function getSettings(): Promise<Settings> {
     llmModel: hasSupportedEndpointPreset
       ? (currentSettings.llmModel ?? endpointConfig.defaultModel)
       : endpointConfig.defaultModel,
+    pronunciationLookupEnabled:
+      currentSettings.pronunciationLookupEnabled ??
+      ipaLookupEnabled ??
+      DEFAULT_SETTINGS.pronunciationLookupEnabled,
     explanationLanguage:
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
@@ -120,7 +127,17 @@ export async function updateSettings(settings: Partial<Settings>): Promise<Setti
 export async function getSavedItems(): Promise<SavedItem[]> {
   const result = await chrome.storage.local.get(SAVED_ITEMS_KEY);
   const savedItems = result[SAVED_ITEMS_KEY];
-  return Array.isArray(savedItems) ? (savedItems as SavedItem[]) : [];
+  if (!Array.isArray(savedItems)) {
+    return [];
+  }
+
+  return savedItems.map((savedItem) => {
+    const { ipa, ...item } = savedItem as SavedItem & { ipa?: string };
+    return {
+      ...item,
+      pronunciation: item.pronunciation ?? ipa
+    };
+  });
 }
 
 export async function saveItem(payload: Omit<SaveItemMessage, 'type'>): Promise<SavedItem> {

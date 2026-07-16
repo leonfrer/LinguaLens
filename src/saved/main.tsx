@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
+import { ManagementHeader } from '../shared/ManagementHeader';
 import { deleteSavedItem, getSavedItems } from '../shared/storage';
 import type { SavedItem } from '../shared/types';
 import { findTextRange } from './highlight';
@@ -158,10 +159,7 @@ function App() {
   return (
     <main className="savedPage">
       <header className="pageHeader">
-        <div className="brandRow">
-          <img className="brandMark" src="icons/icon48.png" alt="" />
-          <span>LinguaLens</span>
-        </div>
+        <ManagementHeader activePage="saved" />
         <div className="titleRow">
           <div>
             <h1>{t('savedPageTitle')}</h1>

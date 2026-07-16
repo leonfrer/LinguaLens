@@ -18,26 +18,31 @@ test.describe('localized Chrome i18n runtime', () => {
     }, [settingsStorageKey]);
     await popupPage.reload();
 
-    await expect(popupPage.getByRole('heading', { name: '设置' })).toBeVisible();
-    await expect(popupPage.getByText('当前配置')).toBeVisible();
+    await expect(popupPage.getByRole('heading', { name: '快捷设置' })).toBeVisible();
     await expect(popupPage.getByRole('checkbox', { name: /划词查询/ })).toBeChecked();
-    await expect(popupPage.getByText('未配置', { exact: true })).toBeVisible();
+    await expect(popupPage.getByLabel('解释语言')).toHaveValue('zh-CN');
+    await expect(popupPage.getByText('配置 AI 服务', { exact: true })).toBeVisible();
     await expect(
       popupPage.getByText('配置 API 密钥后，在网页中选中文本即可翻译并保存。')
     ).toBeVisible();
     await expect(popupPage.locator('[aria-label="最近保存的内容"]')).toHaveCount(1);
 
-    await popupPage.getByRole('button', { name: '设置' }).click();
-    await expect(popupPage.getByText('编辑配置')).toBeVisible();
-    await expect(popupPage.getByLabel('Base URL')).toHaveValue(
+    const settingsPagePromise = context.waitForEvent('page');
+    await popupPage.getByRole('link', { name: '打开设置' }).click();
+    const settingsPage = await settingsPagePromise;
+    await settingsPage.waitForLoadState();
+
+    await expect(settingsPage.getByRole('heading', { name: '设置', level: 1 })).toBeVisible();
+    await expect(settingsPage.getByRole('heading', { name: '阅读偏好' })).toBeVisible();
+    await expect(settingsPage.getByLabel('Base URL')).toHaveValue(
       'https://integrate.api.nvidia.com/v1'
     );
-    await expect(popupPage.getByLabel('Base URL')).toBeDisabled();
-    await expect(popupPage.getByLabel('API 密钥')).toHaveAttribute(
+    await expect(settingsPage.getByLabel('Base URL')).toBeDisabled();
+    await expect(settingsPage.getByLabel('API 密钥')).toHaveAttribute(
       'placeholder',
       '服务商 API 密钥'
     );
-    await popupPage.getByRole('button', { name: '取消' }).click();
+    await settingsPage.close();
 
     await routeTestArticle(context);
     const page = await context.newPage();

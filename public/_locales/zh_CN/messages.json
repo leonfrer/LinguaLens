@@ -89,6 +89,27 @@
   "savedRecent": {
     "message": "最近保存"
   },
+  "savedViewAll": {
+    "message": "查看全部"
+  },
+  "savedPageTitle": {
+    "message": "保存的内容"
+  },
+  "savedPageDescription": {
+    "message": "回顾阅读时收集的单词和句子。"
+  },
+  "savedCountLabel": {
+    "message": "条"
+  },
+  "savedPageListAriaLabel": {
+    "message": "所有保存的内容"
+  },
+  "savedOpenSource": {
+    "message": "打开来源"
+  },
+  "savedEmptyTitle": {
+    "message": "还没有保存内容"
+  },
   "savedDeleteLabel": {
     "message": "删除 $itemText$",
     "placeholders": {

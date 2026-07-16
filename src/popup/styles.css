@@ -67,6 +67,30 @@ p {
   margin-top: 2px;
 }
 
+.viewSavedLink {
+  align-items: center;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  color: #526070;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 9px;
+  text-decoration: none;
+}
+
+.viewSavedLink:hover {
+  background: #edf0f4;
+  color: #172033;
+}
+
+.viewSavedLink:focus-visible {
+  outline: 2px solid #5b7cff;
+  outline-offset: 2px;
+}
+
 .settingsPanel {
   background: #ffffff;
   border: 1px solid #e3e7ee;

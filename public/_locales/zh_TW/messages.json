@@ -89,6 +89,27 @@
   "savedRecent": {
     "message": "最近儲存"
   },
+  "savedViewAll": {
+    "message": "查看全部"
+  },
+  "savedPageTitle": {
+    "message": "儲存的內容"
+  },
+  "savedPageDescription": {
+    "message": "回顧閱讀時收集的單字和句子。"
+  },
+  "savedCountLabel": {
+    "message": "筆"
+  },
+  "savedPageListAriaLabel": {
+    "message": "所有儲存的內容"
+  },
+  "savedOpenSource": {
+    "message": "開啟來源"
+  },
+  "savedEmptyTitle": {
+    "message": "還沒有儲存內容"
+  },
   "savedDeleteLabel": {
     "message": "刪除 $itemText$",
     "placeholders": {

@@ -515,6 +515,10 @@ function App() {
             <p>{t('savedRecent')}</p>
           </div>
         </div>
+        <a className="viewSavedLink" href="saved.html" rel="noreferrer" target="_blank">
+          {t('savedViewAll')}
+          <span aria-hidden="true">↗</span>
+        </a>
       </header>
 
       <SettingsPanel

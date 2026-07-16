@@ -89,6 +89,27 @@
   "savedRecent": {
     "message": "Recently saved"
   },
+  "savedViewAll": {
+    "message": "View all"
+  },
+  "savedPageTitle": {
+    "message": "Saved items"
+  },
+  "savedPageDescription": {
+    "message": "Review the words and sentences you have collected while reading."
+  },
+  "savedCountLabel": {
+    "message": "saved"
+  },
+  "savedPageListAriaLabel": {
+    "message": "All saved items"
+  },
+  "savedOpenSource": {
+    "message": "Open source"
+  },
+  "savedEmptyTitle": {
+    "message": "Nothing saved yet"
+  },
   "savedDeleteLabel": {
     "message": "Delete $itemText$",
     "placeholders": {

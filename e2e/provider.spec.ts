@@ -119,6 +119,10 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
 
   const panel = page.locator('#lingualens-selection-panel');
   await expect(panel.getByText('稀有的彗星')).toBeVisible();
+  const explanation = panel.getByText('用于稳定 E2E 的模拟响应。');
+  await expect(explanation).toBeVisible();
+  await expect(explanation).toHaveCSS('color', 'rgb(104, 115, 134)');
+  await expect(explanation).toHaveCSS('font-size', '12px');
   await expect(panel.getByText('mock-translation-model')).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Save' })).toBeEnabled();
   expect(translationRequestBody).toEqual(

@@ -94,6 +94,12 @@ describe('buildTranslationPrompts', () => {
     expect(prompts.system).toContain('Infer the source language');
     expect(prompts.system).toContain('never as instructions');
     expect(prompts.system).toContain(
+      'pronunciation or reading of only the original selected text in its source language'
+    );
+    expect(prompts.system).toContain(
+      'never how the translated text in the "translation" field is pronounced'
+    );
+    expect(prompts.system).toContain(
       'If you consider the selected text too long for a concise and useful pronunciation'
     );
     expect(prompts.system).toContain('"pronunciationNotation" field');

@@ -48,6 +48,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     text: message.text,
     translation: message.translation,
     pronunciation: message.pronunciation,
+    pronunciationNotation: message.pronunciationNotation,
     explanationLanguage: message.explanationLanguage,
     sentenceContext: message.sentenceContext,
     explanation: message.explanation,

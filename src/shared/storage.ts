@@ -6,6 +6,10 @@ import {
   isLlmEndpointPreset,
   normalizeBaseUrl
 } from './providers';
+import {
+  DEFAULT_PRONUNCIATION_PREFERENCES,
+  normalizePronunciationPreferences
+} from './pronunciation';
 import type {
   LlmEndpointPreset,
   LlmProvider,
@@ -17,6 +21,7 @@ import type {
 export const DEFAULT_SETTINGS: Settings = {
   wordLookupEnabled: true,
   pronunciationLookupEnabled: false,
+  pronunciationPreferences: DEFAULT_PRONUNCIATION_PREFERENCES,
   explanationLanguage: 'zh-CN',
   llmProvider: 'openai-compatible',
   llmEndpointPreset: DEFAULT_LLM_ENDPOINT_PRESET,
@@ -37,6 +42,7 @@ export function createSavedItem(
     text: payload.text,
     translation: payload.translation,
     pronunciation: payload.pronunciation,
+    pronunciationNotation: payload.pronunciationNotation,
     explanationLanguage: payload.explanationLanguage,
     sentenceContext: payload.sentenceContext,
     explanation: payload.explanation,
@@ -93,6 +99,9 @@ export async function getSettings(): Promise<Settings> {
       currentSettings.pronunciationLookupEnabled ??
       ipaLookupEnabled ??
       DEFAULT_SETTINGS.pronunciationLookupEnabled,
+    pronunciationPreferences: normalizePronunciationPreferences(
+      currentSettings.pronunciationPreferences
+    ),
     explanationLanguage:
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
@@ -114,6 +123,9 @@ export async function updateSettings(settings: Partial<Settings>): Promise<Setti
   const nextSettings = {
     ...currentSettings,
     ...settings,
+    pronunciationPreferences: normalizePronunciationPreferences(
+      settings.pronunciationPreferences ?? currentSettings.pronunciationPreferences
+    ),
     baseUrl:
       llmEndpointPreset === 'custom'
         ? normalizeBaseUrl(settings.baseUrl ?? currentSettings.baseUrl)

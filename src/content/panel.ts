@@ -7,6 +7,7 @@ export type PanelState = {
   text: string;
   translation: string;
   pronunciation?: string;
+  pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -122,13 +123,31 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         min-height: 20px;
       }
 
-      .pronunciation {
+      .pronunciationRow {
+        align-items: center;
         color: #526070;
+        display: flex;
         font-size: 13px;
+        gap: 7px;
         line-height: 1.45;
       }
 
-      .pronunciation[hidden] {
+      .pronunciationRow[hidden] {
+        display: none;
+      }
+
+      .pronunciationNotation {
+        background: #eef2ff;
+        border-radius: 999px;
+        color: #4158b8;
+        flex: 0 0 auto;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 4px 6px;
+      }
+
+      .pronunciationNotation:empty {
         display: none;
       }
 
@@ -215,7 +234,10 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
     <section class="panel" role="dialog" aria-label="${t('panelTranslationAriaLabel')}">
       <div class="body">
         <div class="source"></div>
-        <div class="pronunciation"${state.pronunciation ? '' : ' hidden'}></div>
+        <div class="pronunciationRow"${state.pronunciation ? '' : ' hidden'}>
+          <span class="pronunciationNotation"></span>
+          <span class="pronunciation"></span>
+        </div>
         <div class="translation"></div>
         <div class="explanation"${state.explanation ? '' : ' hidden'}></div>
       </div>
@@ -235,6 +257,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
   root.querySelector('.source')!.textContent = state.text;
   root.querySelector('.pronunciation')!.textContent = state.pronunciation ?? '';
+  root.querySelector('.pronunciationNotation')!.textContent = state.pronunciationNotation ?? '';
   root.querySelector('.translation')!.textContent =
     state.status === 'loading' ? t('panelGeneratingTranslation') : state.translation;
   root.querySelector('.explanation')!.textContent = state.explanation ?? '';

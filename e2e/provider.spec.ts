@@ -91,6 +91,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
               content: JSON.stringify({
                 translation: '稀有的彗星',
                 pronunciation: '/reər ˈkɒmɪt/',
+                pronunciationNotation: 'IPA',
                 explanation: '用于稳定 E2E 的模拟响应。'
               })
             },
@@ -113,6 +114,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
   await settingsPage.getByLabel('Manual model ID').fill('mock-translation-model');
   await settingsPage.getByLabel('API key').fill('mocked-translation-key');
   await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  await settingsPage.getByRole('checkbox', { name: 'Enabled: Japanese' }).uncheck();
   await settingsPage.getByRole('button', { name: 'Save changes' }).click();
   await settingsPage.close();
 
@@ -127,6 +129,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
   const panel = page.locator('#lingualens-selection-panel');
   await expect(panel.getByText('稀有的彗星')).toBeVisible();
   await expect(panel.getByText('/reər ˈkɒmɪt/')).toBeVisible();
+  await expect(panel.getByText('IPA', { exact: true })).toBeVisible();
   const explanation = panel.getByText('用于稳定 E2E 的模拟响应。');
   await expect(explanation).toBeVisible();
   await expect(explanation).toHaveCSS('color', 'rgb(104, 115, 134)');
@@ -136,6 +139,16 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
   expect(translationRequestBody).toEqual(
     expect.objectContaining({ model: 'mock-translation-model' })
   );
+  const requestMessages = translationRequestBody?.messages as
+    | Array<{ role: string; content: string }>
+    | undefined;
+  const systemMessage = requestMessages?.find((message) => message.role === 'system');
+  const userMessage = requestMessages?.find((message) => message.role === 'user');
+  expect(systemMessage?.content).toContain(
+    '"English":"IPA","Chinese":"Hanyu Pinyin","Korean":"Hangul"'
+  );
+  expect(systemMessage?.content).not.toContain('"Japanese"');
+  expect(userMessage?.content).not.toContain('pronunciationPreferences');
 
   await panel.getByRole('button', { name: 'Save' }).click();
   await expect(panel.getByText('Saved')).toBeVisible();
@@ -149,6 +162,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
       text: 'rare comet',
       translation: '稀有的彗星',
       pronunciation: '/reər ˈkɒmɪt/',
+      pronunciationNotation: 'IPA',
       explanation: '用于稳定 E2E 的模拟响应。',
       provider: 'openai-compatible',
       model: 'mock-translation-model'

@@ -20,6 +20,7 @@ describe('createSavedItem', () => {
           text: 'hello',
           translation: '你好',
           pronunciation: '/həˈloʊ/',
+          pronunciationNotation: 'IPA',
           explanationLanguage: 'zh-CN',
           sentenceContext: 'Well, hello there.',
           explanation: 'A greeting.',
@@ -35,6 +36,7 @@ describe('createSavedItem', () => {
       text: 'hello',
       translation: '你好',
       pronunciation: '/həˈloʊ/',
+      pronunciationNotation: 'IPA',
       explanationLanguage: 'zh-CN',
       sentenceContext: 'Well, hello there.',
       explanation: 'A greeting.',
@@ -84,6 +86,50 @@ describe('getSettings', () => {
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
       pronunciationLookupEnabled: true
+    });
+  });
+
+  it('normalizes saved common and custom pronunciation preferences', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              pronunciationPreferences: {
+                English: 'Auto',
+                Japanese: 'Custom Kana',
+                Cantonese: 'Jyutping',
+                Empty: '   ',
+                Invalid: 123
+              }
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      pronunciationPreferences: [
+        {
+          id: 'legacy-preference-1',
+          languageLabel: 'English',
+          notationLabel: 'IPA',
+          enabled: true
+        },
+        {
+          id: 'legacy-preference-2',
+          languageLabel: 'Japanese',
+          notationLabel: 'Custom Kana',
+          enabled: true
+        },
+        {
+          id: 'legacy-preference-3',
+          languageLabel: 'Cantonese',
+          notationLabel: 'Jyutping',
+          enabled: true
+        }
+      ]
     });
   });
 

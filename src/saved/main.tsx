@@ -100,7 +100,12 @@ function SavedCard({ item, onDelete }: { item: SavedItem; onDelete: (itemId: str
 
       <div className="cardMeaning">
         {item.pronunciation ? (
-          <p className="pronunciationText">{item.pronunciation}</p>
+          <p className="pronunciationRow">
+            {item.pronunciationNotation ? (
+              <span className="pronunciationNotation">{item.pronunciationNotation}</span>
+            ) : null}
+            <span className="pronunciationText">{item.pronunciation}</span>
+          </p>
         ) : null}
         <p className="translationText">{item.translation}</p>
         {item.explanation ? <p className="explanationText">{item.explanation}</p> : null}

@@ -128,6 +128,45 @@
   "settingsPronunciationLookupDescription": {
     "message": "Include a pronunciation when the source language supports one."
   },
+  "settingsPronunciationPreferencesTitle": {
+    "message": "Pronunciation notation preferences"
+  },
+  "settingsPronunciationPreferencesDescription": {
+    "message": "Edit the source-language and pronunciation-notation pairs sent to the AI. Disabled rows are not sent."
+  },
+  "settingsPronunciationLanguage": {
+    "message": "Language"
+  },
+  "settingsPronunciationLanguagePlaceholder": {
+    "message": "Enter a language"
+  },
+  "settingsPronunciationNotationLabel": {
+    "message": "Pronunciation notation"
+  },
+  "settingsPronunciationNotationPlaceholder": {
+    "message": "Enter a notation"
+  },
+  "settingsPronunciationEnabled": {
+    "message": "Enabled"
+  },
+  "settingsPronunciationAdd": {
+    "message": "Add notation"
+  },
+  "settingsPronunciationRemove": {
+    "message": "Remove"
+  },
+  "settingsPronunciationEmpty": {
+    "message": "No pronunciation notation preferences. Add a row to configure one."
+  },
+  "settingsPronunciationRowsInvalid": {
+    "message": "Every row needs a unique language and a pronunciation notation."
+  },
+  "settingsPronunciationRestoreDefaults": {
+    "message": "Restore defaults"
+  },
+  "settingsPronunciationRestoreConfirm": {
+    "message": "Restore the default pronunciation notation preferences? Your current rows will be replaced."
+  },
   "settingsProvider": {
     "message": "Provider"
   },

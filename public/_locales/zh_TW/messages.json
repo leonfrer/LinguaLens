@@ -128,6 +128,51 @@
   "settingsPronunciationLookupDescription": {
     "message": "在原文語言支援時顯示讀音。"
   },
+  "settingsPronunciationPreferencesTitle": {
+    "message": "發音標註偏好"
+  },
+  "settingsPronunciationPreferencesDescription": {
+    "message": "編輯傳送給 AI 的原文語言和發音標註組合。已停用的行不會傳送。"
+  },
+  "settingsSkipLongTextPronunciation": {
+    "message": "過長文字不提供發音"
+  },
+  "settingsSkipLongTextPronunciationDescription": {
+    "message": "是否過長由模型判斷。不同模型的定義可能不同，因此此設定不一定總能生效。"
+  },
+  "settingsPronunciationLanguage": {
+    "message": "語言"
+  },
+  "settingsPronunciationLanguagePlaceholder": {
+    "message": "輸入語言名稱"
+  },
+  "settingsPronunciationNotationLabel": {
+    "message": "發音標註方式"
+  },
+  "settingsPronunciationNotationPlaceholder": {
+    "message": "輸入發音標註方式"
+  },
+  "settingsPronunciationEnabled": {
+    "message": "啟用"
+  },
+  "settingsPronunciationAdd": {
+    "message": "新增標註方式"
+  },
+  "settingsPronunciationRemove": {
+    "message": "移除"
+  },
+  "settingsPronunciationEmpty": {
+    "message": "目前沒有發音標註偏好。新增一行即可進行設定。"
+  },
+  "settingsPronunciationRowsInvalid": {
+    "message": "每一行都需要填寫不重複的語言和發音標註方式。"
+  },
+  "settingsPronunciationRestoreDefaults": {
+    "message": "恢復預設值"
+  },
+  "settingsPronunciationRestoreConfirm": {
+    "message": "要恢復預設發音標註偏好嗎？目前的設定行將被取代。"
+  },
   "settingsProvider": {
     "message": "服務商"
   },

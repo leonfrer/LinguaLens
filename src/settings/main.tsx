@@ -9,11 +9,17 @@ import {
   OPENAI_COMPATIBLE_ENDPOINTS,
   OPENAI_COMPATIBLE_ENDPOINT_OPTIONS
 } from '../shared/providers';
+import {
+  createDefaultPronunciationPreferences,
+  getPronunciationNotationSuggestions,
+  MAX_PRONUNCIATION_LABEL_LENGTH
+} from '../shared/pronunciation';
 import { DEFAULT_SETTINGS, getSettings, updateSettings } from '../shared/storage';
 import type {
   ExplanationLanguage,
   LlmEndpointPreset,
   LlmProvider,
+  PronunciationPreference,
   Settings
 } from '../shared/types';
 import './styles.css';
@@ -63,6 +69,20 @@ function App() {
     () => JSON.stringify(settings) !== JSON.stringify(draftSettings),
     [draftSettings, settings]
   );
+  const hasInvalidPronunciationPreferences = useMemo(() => {
+    const normalizedLanguageLabels = draftSettings.pronunciationPreferences
+      .map(({ languageLabel }) => languageLabel.trim().toLocaleLowerCase())
+      .filter(Boolean);
+
+    return (
+      draftSettings.pronunciationPreferences.some(
+        ({ languageLabel, notationLabel }) =>
+          !languageLabel.trim() || !notationLabel.trim()
+      ) || new Set(normalizedLanguageLabels).size !== normalizedLanguageLabels.length
+    );
+  }, [draftSettings.pronunciationPreferences]);
+  const hasBlockingPronunciationPreferenceError =
+    draftSettings.pronunciationLookupEnabled && hasInvalidPronunciationPreferences;
 
   useEffect(() => {
     let isMounted = true;
@@ -85,6 +105,49 @@ function App() {
   function updateDraft(nextSettings: Partial<Settings>) {
     setDraftSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
     setSavedStatus('');
+  }
+
+  function updatePronunciationPreference(
+    preferenceId: string,
+    changes: Partial<Omit<PronunciationPreference, 'id'>>
+  ) {
+    updateDraft({
+      pronunciationPreferences: draftSettings.pronunciationPreferences.map((preference) =>
+        preference.id === preferenceId ? { ...preference, ...changes } : preference
+      )
+    });
+  }
+
+  function handleAddPronunciationPreference() {
+    updateDraft({
+      pronunciationPreferences: [
+        ...draftSettings.pronunciationPreferences,
+        {
+          id: crypto.randomUUID(),
+          languageLabel: '',
+          notationLabel: '',
+          enabled: true
+        }
+      ]
+    });
+  }
+
+  function handleRemovePronunciationPreference(preferenceId: string) {
+    updateDraft({
+      pronunciationPreferences: draftSettings.pronunciationPreferences.filter(
+        ({ id }) => id !== preferenceId
+      )
+    });
+  }
+
+  function handleRestorePronunciationDefaults() {
+    if (!window.confirm(t('settingsPronunciationRestoreConfirm'))) {
+      return;
+    }
+
+    updateDraft({
+      pronunciationPreferences: createDefaultPronunciationPreferences()
+    });
   }
 
   function handleApiKeyChange(apiKey: string) {
@@ -138,6 +201,10 @@ function App() {
   }
 
   async function handleSave() {
+    if (hasBlockingPronunciationPreferenceError) {
+      return;
+    }
+
     setIsSaving(true);
     setSavedStatus('');
 
@@ -212,6 +279,137 @@ function App() {
                 }}
               />
             </div>
+
+            {draftSettings.pronunciationLookupEnabled ? (
+              <div className="pronunciationPreferences">
+                <div className="preferenceHeader">
+                  <div>
+                    <h3>{t('settingsPronunciationPreferencesTitle')}</h3>
+                    <p>{t('settingsPronunciationPreferencesDescription')}</p>
+                  </div>
+                  <button
+                    className="secondaryButton restorePreferencesButton"
+                    type="button"
+                    onClick={handleRestorePronunciationDefaults}
+                  >
+                    {t('settingsPronunciationRestoreDefaults')}
+                  </button>
+                </div>
+
+                <div className="toggleGroup longTextPronunciationToggle">
+                  <ToggleField
+                    checked={draftSettings.skipLongTextPronunciation}
+                    description={t('settingsSkipLongTextPronunciationDescription')}
+                    label={t('settingsSkipLongTextPronunciation')}
+                    onChange={(skipLongTextPronunciation) => {
+                      updateDraft({ skipLongTextPronunciation });
+                    }}
+                  />
+                </div>
+
+                <div className="preferenceList">
+                  {draftSettings.pronunciationPreferences.length > 0 ? (
+                    <div className="preferenceColumnHeaders" aria-hidden="true">
+                      <span>{t('settingsPronunciationLanguage')}</span>
+                      <span>{t('settingsPronunciationNotationLabel')}</span>
+                      <span>{t('settingsPronunciationEnabled')}</span>
+                      <span />
+                    </div>
+                  ) : (
+                    <p className="emptyPreferences">{t('settingsPronunciationEmpty')}</p>
+                  )}
+
+                  {draftSettings.pronunciationPreferences.map((preference, index) => {
+                    const rowLabel = preference.languageLabel.trim() || String(index + 1);
+                    const notationSuggestions = getPronunciationNotationSuggestions(
+                      preference.languageLabel
+                    );
+                    const notationListId = `pronunciation-notation-options-${index + 1}`;
+
+                    return (
+                      <div
+                        className={`preferenceRow ${preference.enabled ? '' : 'isDisabled'}`}
+                        key={preference.id}
+                      >
+                        <label className="preferenceField">
+                          <span>{t('settingsPronunciationLanguage')}</span>
+                          <input
+                            aria-label={`${t('settingsPronunciationLanguage')}: ${index + 1}`}
+                            maxLength={MAX_PRONUNCIATION_LABEL_LENGTH}
+                            placeholder={t('settingsPronunciationLanguagePlaceholder')}
+                            value={preference.languageLabel}
+                            onChange={(event) => {
+                              updatePronunciationPreference(preference.id, {
+                                languageLabel: event.target.value
+                              });
+                            }}
+                          />
+                        </label>
+                        <label className="preferenceField">
+                          <span>{t('settingsPronunciationNotationLabel')}</span>
+                          <input
+                            aria-label={`${t('settingsPronunciationNotationLabel')}: ${index + 1}`}
+                            list={notationSuggestions.length > 0 ? notationListId : undefined}
+                            maxLength={MAX_PRONUNCIATION_LABEL_LENGTH}
+                            placeholder={t('settingsPronunciationNotationPlaceholder')}
+                            value={preference.notationLabel}
+                            onChange={(event) => {
+                              updatePronunciationPreference(preference.id, {
+                                notationLabel: event.target.value
+                              });
+                            }}
+                          />
+                          {notationSuggestions.length > 0 ? (
+                            <datalist id={notationListId}>
+                              {notationSuggestions.map((notationLabel) => (
+                                <option key={notationLabel} value={notationLabel} />
+                              ))}
+                            </datalist>
+                          ) : null}
+                        </label>
+                        <label className="preferenceEnabledControl">
+                          <input
+                            aria-label={`${t('settingsPronunciationEnabled')}: ${rowLabel}`}
+                            checked={preference.enabled}
+                            type="checkbox"
+                            onChange={(event) => {
+                              updatePronunciationPreference(preference.id, {
+                                enabled: event.target.checked
+                              });
+                            }}
+                          />
+                          <span aria-hidden="true" />
+                        </label>
+                        <button
+                          aria-label={`${t('settingsPronunciationRemove')}: ${rowLabel}`}
+                          className="removePreferenceButton"
+                          type="button"
+                          onClick={() => {
+                            handleRemovePronunciationPreference(preference.id);
+                          }}
+                        >
+                          {t('settingsPronunciationRemove')}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {hasInvalidPronunciationPreferences ? (
+                  <p className="settingsError">{t('settingsPronunciationRowsInvalid')}</p>
+                ) : null}
+
+                <div className="preferenceActions">
+                  <button
+                    className="secondaryButton addPreferenceButton"
+                    type="button"
+                    onClick={handleAddPronunciationPreference}
+                  >
+                    {t('settingsPronunciationAdd')}
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             <label className="fieldControl compactField">
               <span>{t('settingsExplanationLanguage')}</span>
@@ -365,7 +563,7 @@ function App() {
               </button>
               <button
                 className="primaryButton"
-                disabled={!hasChanges || isSaving}
+                disabled={!hasChanges || hasBlockingPronunciationPreferenceError || isSaving}
                 type="submit"
               >
                 {isSaving ? t('commonSaving') : t('settingsSaveChanges')}

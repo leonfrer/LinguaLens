@@ -4,6 +4,7 @@ import zhTWMessages from '../../public/_locales/zh_TW/messages.json';
 
 type LocaleMessages = typeof enMessages;
 type LocaleCode = 'en' | 'zh-CN' | 'zh-TW';
+export type MessageKey = keyof LocaleMessages;
 
 function flattenMessages(messages: LocaleMessages): Record<keyof LocaleMessages, string> {
   return Object.fromEntries(
@@ -11,7 +12,7 @@ function flattenMessages(messages: LocaleMessages): Record<keyof LocaleMessages,
   ) as Record<keyof LocaleMessages, string>;
 }
 
-export const defaultMessages = {
+export const defaultMessages: Record<MessageKey, string> = {
   ...flattenMessages(enMessages),
   savedDeleteLabel: 'Delete $1',
   modelProviderUnableToLoad: 'Unable to load models from $1.',
@@ -33,8 +34,6 @@ const localeMessages: Record<LocaleCode, Record<MessageKey, string>> = {
     translationUnableWithProvider: '無法使用 $1 翻譯。'
   }
 };
-
-export type MessageKey = keyof typeof defaultMessages;
 
 function normalizeLocale(locale: string): LocaleCode {
   const normalizedLocale = locale.replace('_', '-').toLowerCase();

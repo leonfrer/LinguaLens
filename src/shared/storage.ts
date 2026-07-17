@@ -6,6 +6,10 @@ import {
   isLlmEndpointPreset,
   normalizeBaseUrl
 } from './providers';
+import {
+  DEFAULT_PRONUNCIATION_PREFERENCES,
+  normalizePronunciationPreferences
+} from './pronunciation';
 import type {
   LlmEndpointPreset,
   LlmProvider,
@@ -17,6 +21,8 @@ import type {
 export const DEFAULT_SETTINGS: Settings = {
   wordLookupEnabled: true,
   pronunciationLookupEnabled: false,
+  skipLongTextPronunciation: true,
+  pronunciationPreferences: DEFAULT_PRONUNCIATION_PREFERENCES,
   explanationLanguage: 'zh-CN',
   llmProvider: 'openai-compatible',
   llmEndpointPreset: DEFAULT_LLM_ENDPOINT_PRESET,
@@ -37,6 +43,7 @@ export function createSavedItem(
     text: payload.text,
     translation: payload.translation,
     pronunciation: payload.pronunciation,
+    pronunciationNotation: payload.pronunciationNotation,
     explanationLanguage: payload.explanationLanguage,
     sentenceContext: payload.sentenceContext,
     explanation: payload.explanation,
@@ -56,10 +63,16 @@ export async function getSettings(): Promise<Settings> {
         llmEndpointPreset?: string;
         baseUrl?: string;
         ipaLookupEnabled?: boolean;
+        skipSentencePronunciation?: boolean;
         targetLanguage?: Settings['explanationLanguage'];
       })
     | undefined;
-  const { ipaLookupEnabled, targetLanguage, ...currentSettings } = storedSettings ?? {};
+  const {
+    ipaLookupEnabled,
+    skipSentencePronunciation,
+    targetLanguage,
+    ...currentSettings
+  } = storedSettings ?? {};
   const hasSupportedProvider = isLlmProvider(currentSettings.llmProvider);
   const llmProvider: LlmProvider = hasSupportedProvider
     ? (currentSettings.llmProvider as LlmProvider)
@@ -93,6 +106,13 @@ export async function getSettings(): Promise<Settings> {
       currentSettings.pronunciationLookupEnabled ??
       ipaLookupEnabled ??
       DEFAULT_SETTINGS.pronunciationLookupEnabled,
+    skipLongTextPronunciation:
+      currentSettings.skipLongTextPronunciation ??
+      skipSentencePronunciation ??
+      DEFAULT_SETTINGS.skipLongTextPronunciation,
+    pronunciationPreferences: normalizePronunciationPreferences(
+      currentSettings.pronunciationPreferences
+    ),
     explanationLanguage:
       currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
   };
@@ -114,6 +134,9 @@ export async function updateSettings(settings: Partial<Settings>): Promise<Setti
   const nextSettings = {
     ...currentSettings,
     ...settings,
+    pronunciationPreferences: normalizePronunciationPreferences(
+      settings.pronunciationPreferences ?? currentSettings.pronunciationPreferences
+    ),
     baseUrl:
       llmEndpointPreset === 'custom'
         ? normalizeBaseUrl(settings.baseUrl ?? currentSettings.baseUrl)

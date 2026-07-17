@@ -11,6 +11,12 @@ test('shows all settings and links back to saved items', async ({ context, exten
   await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).not.toBeChecked();
+  await expect(
+    settingsPage.getByRole('heading', { name: 'Pronunciation notation preferences' })
+  ).toHaveCount(0);
+  await expect(
+    settingsPage.getByRole('checkbox', { name: 'Skip pronunciation for long text' })
+  ).toHaveCount(0);
   await expect(settingsPage.getByLabel('Explanation language')).toHaveValue('zh-CN');
   await expect(settingsPage.getByLabel('Endpoint')).toHaveValue('nvidia');
   await expect(settingsPage.getByLabel('Base URL')).toHaveValue(
@@ -33,6 +39,41 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
 
   await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  const skipLongTextPronunciation = settingsPage.getByRole('checkbox', {
+    name: 'Skip pronunciation for long text'
+  });
+  await expect(skipLongTextPronunciation).toBeChecked();
+  await expect(
+    settingsPage.getByText(
+      'Definitions vary by model, so this setting may not always take effect.'
+    )
+  ).toBeVisible();
+  await skipLongTextPronunciation.uncheck();
+  await expect(settingsPage.locator('.preferenceRow')).toHaveCount(4);
+  await expect(settingsPage.getByLabel('Language: 1')).toHaveValue('English');
+  await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue('IPA');
+  await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveAttribute(
+    'list',
+    'pronunciation-notation-options-1'
+  );
+  expect(
+    await settingsPage
+      .locator('#pronunciation-notation-options-1 option')
+      .evaluateAll((options) =>
+        options.map((option) => (option as HTMLOptionElement).value)
+      )
+  ).toEqual(['IPA', 'KK']);
+  await expect(settingsPage.getByLabel('Language: 2')).toHaveValue('Japanese');
+  await expect(settingsPage.getByLabel('Pronunciation notation: 2')).toHaveValue('Kana');
+  await expect(settingsPage.getByText('Auto', { exact: true })).toHaveCount(0);
+
+  await settingsPage.getByLabel('Pronunciation notation: 1').fill('Custom English Notation');
+  await settingsPage.getByRole('checkbox', { name: 'Enabled: Japanese' }).uncheck();
+  await settingsPage.getByRole('button', { name: 'Remove: Korean' }).click();
+  await settingsPage.getByRole('button', { name: 'Add notation' }).click();
+  await settingsPage.getByLabel('Language: 4').fill('Cantonese');
+  await expect(settingsPage.getByLabel('Pronunciation notation: 4')).not.toHaveAttribute('list');
+  await settingsPage.getByLabel('Pronunciation notation: 4').fill('Jyutping');
   await settingsPage.getByLabel('Explanation language').selectOption('en');
   await settingsPage.getByLabel('API key').fill('test-api-key');
   await settingsPage.getByRole('button', { name: 'Save changes' }).click();
@@ -45,8 +86,48 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).toBeChecked();
+  await expect(
+    settingsPage.getByRole('checkbox', { name: 'Skip pronunciation for long text' })
+  ).not.toBeChecked();
+  await expect(settingsPage.locator('.preferenceRow')).toHaveCount(4);
+  await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue(
+    'Custom English Notation'
+  );
+  await expect(settingsPage.getByRole('checkbox', { name: 'Enabled: Japanese' })).not.toBeChecked();
+  await expect(settingsPage.getByRole('button', { name: 'Remove: Korean' })).toHaveCount(0);
+  await expect(settingsPage.getByLabel('Language: 4')).toHaveValue('Cantonese');
+  await expect(settingsPage.getByLabel('Pronunciation notation: 4')).toHaveValue('Jyutping');
   await expect(settingsPage.getByLabel('Explanation language')).toHaveValue('en');
   await expect(settingsPage.getByLabel('API key')).toHaveValue('test-api-key');
+  await settingsPage.close();
+});
+
+test('restores pronunciation defaults only after confirmation', async ({
+  context,
+  extensionId
+}) => {
+  const settingsPage = await context.newPage();
+  await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
+  await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  await settingsPage.getByLabel('Pronunciation notation: 1').fill('KK');
+  await settingsPage.getByRole('button', { name: 'Remove: Chinese' }).click();
+
+  settingsPage.once('dialog', async (dialog) => {
+    expect(dialog.message()).toContain('Restore the default pronunciation notation preferences?');
+    await dialog.dismiss();
+  });
+  await settingsPage.getByRole('button', { name: 'Restore defaults' }).click();
+  await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue('KK');
+  await expect(settingsPage.locator('.preferenceRow')).toHaveCount(3);
+
+  settingsPage.once('dialog', async (dialog) => {
+    await dialog.accept();
+  });
+  await settingsPage.getByRole('button', { name: 'Restore defaults' }).click();
+  await expect(settingsPage.locator('.preferenceRow')).toHaveCount(4);
+  await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue('IPA');
+  await expect(settingsPage.getByLabel('Language: 3')).toHaveValue('Chinese');
+  await expect(settingsPage.getByRole('checkbox', { name: 'Enabled: Japanese' })).toBeChecked();
   await settingsPage.close();
 });
 

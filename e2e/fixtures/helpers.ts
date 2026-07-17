@@ -78,6 +78,13 @@ export async function seedExtensionSettings(
     apiKey?: string;
     explanationLanguage?: string;
     pronunciationLookupEnabled?: boolean;
+    skipLongTextPronunciation?: boolean;
+    pronunciationPreferences?: Array<{
+      id: string;
+      languageLabel: string;
+      notationLabel: string;
+      enabled: boolean;
+    }>;
     model?: string;
     endpointPreset?: string;
   }
@@ -88,6 +95,33 @@ export async function seedExtensionSettings(
         [settingsKey]: {
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
           pronunciationLookupEnabled: nextSettings.pronunciationLookupEnabled ?? false,
+          skipLongTextPronunciation: nextSettings.skipLongTextPronunciation ?? true,
+          pronunciationPreferences: nextSettings.pronunciationPreferences ?? [
+            {
+              id: 'english',
+              languageLabel: 'English',
+              notationLabel: 'IPA',
+              enabled: true
+            },
+            {
+              id: 'japanese',
+              languageLabel: 'Japanese',
+              notationLabel: 'Kana',
+              enabled: true
+            },
+            {
+              id: 'chinese',
+              languageLabel: 'Chinese',
+              notationLabel: 'Hanyu Pinyin',
+              enabled: true
+            },
+            {
+              id: 'korean',
+              languageLabel: 'Korean',
+              notationLabel: 'Hangul',
+              enabled: true
+            }
+          ],
           llmProvider: 'openai-compatible',
           llmEndpointPreset: nextSettings.endpointPreset ?? 'nvidia',
           llmModel: nextSettings.model ?? 'meta/llama-3.1-8b-instruct',

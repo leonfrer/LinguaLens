@@ -313,6 +313,7 @@ p {
 }
 
 .sourceText,
+.pronunciationRow,
 .pronunciationText,
 .translationText,
 .explanationText,
@@ -326,10 +327,24 @@ p {
   line-height: 1.4;
 }
 
-.pronunciationText {
+.pronunciationRow {
+  align-items: center;
   color: #526070;
+  display: flex;
   font-size: 12px;
+  gap: 6px;
   line-height: 1.4;
+}
+
+.pronunciationNotation {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #4158b8;
+  flex: 0 0 auto;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 5px;
 }
 
 .translationText {

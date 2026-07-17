@@ -25,9 +25,21 @@ export type LlmEndpointPreset =
   | 'ollama'
   | 'custom';
 
+export type PronunciationPreference = {
+  id: string;
+  languageLabel: string;
+  notationLabel: string;
+  enabled: boolean;
+};
+
+export type PronunciationPreferences = PronunciationPreference[];
+export type PronunciationPromptPreferences = Record<string, string>;
+
 export type Settings = {
   wordLookupEnabled: boolean;
   pronunciationLookupEnabled: boolean;
+  skipLongTextPronunciation: boolean;
+  pronunciationPreferences: PronunciationPreferences;
   explanationLanguage: ExplanationLanguage;
   llmProvider: LlmProvider;
   llmEndpointPreset: LlmEndpointPreset;
@@ -41,6 +53,7 @@ export type SavedItem = {
   text: string;
   translation: string;
   pronunciation?: string;
+  pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -63,6 +76,7 @@ export type SaveItemMessage = {
   text: string;
   translation: string;
   pronunciation?: string;
+  pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
   explanation?: string;
@@ -79,6 +93,7 @@ export type TranslateResponse =
       ok: true;
       translation: string;
       pronunciation?: string;
+      pronunciationNotation?: string;
       explanation?: string;
       provider: LlmProvider;
       model?: string;

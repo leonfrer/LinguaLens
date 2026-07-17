@@ -20,6 +20,7 @@ describe('createSavedItem', () => {
           text: 'hello',
           translation: '你好',
           pronunciation: '/həˈloʊ/',
+          pronunciationNotation: 'IPA',
           explanationLanguage: 'zh-CN',
           sentenceContext: 'Well, hello there.',
           explanation: 'A greeting.',
@@ -35,6 +36,7 @@ describe('createSavedItem', () => {
       text: 'hello',
       translation: '你好',
       pronunciation: '/həˈloʊ/',
+      pronunciationNotation: 'IPA',
       explanationLanguage: 'zh-CN',
       sentenceContext: 'Well, hello there.',
       explanation: 'A greeting.',
@@ -66,6 +68,7 @@ describe('getSettings', () => {
       apiKey: 'test-key'
     });
     expect(DEFAULT_SETTINGS.pronunciationLookupEnabled).toBe(false);
+    expect(DEFAULT_SETTINGS.skipLongTextPronunciation).toBe(true);
   });
 
   it('migrates the previous IPA lookup setting to pronunciation lookup', async () => {
@@ -74,7 +77,8 @@ describe('getSettings', () => {
         local: {
           get: vi.fn().mockResolvedValue({
             [SETTINGS_KEY]: {
-              ipaLookupEnabled: true
+              ipaLookupEnabled: true,
+              skipSentencePronunciation: false
             }
           })
         }
@@ -83,7 +87,52 @@ describe('getSettings', () => {
 
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
-      pronunciationLookupEnabled: true
+      pronunciationLookupEnabled: true,
+      skipLongTextPronunciation: false
+    });
+  });
+
+  it('normalizes saved common and custom pronunciation preferences', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {
+              pronunciationPreferences: {
+                English: 'Auto',
+                Japanese: 'Custom Kana',
+                Cantonese: 'Jyutping',
+                Empty: '   ',
+                Invalid: 123
+              }
+            }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      pronunciationPreferences: [
+        {
+          id: 'legacy-preference-1',
+          languageLabel: 'English',
+          notationLabel: 'IPA',
+          enabled: true
+        },
+        {
+          id: 'legacy-preference-2',
+          languageLabel: 'Japanese',
+          notationLabel: 'Custom Kana',
+          enabled: true
+        },
+        {
+          id: 'legacy-preference-3',
+          languageLabel: 'Cantonese',
+          notationLabel: 'Jyutping',
+          enabled: true
+        }
+      ]
     });
   });
 

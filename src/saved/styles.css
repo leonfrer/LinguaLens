@@ -171,11 +171,25 @@ h1 {
   overflow-wrap: anywhere;
 }
 
-.pronunciationText {
+.pronunciationRow {
+  align-items: center;
   color: #526070;
+  display: flex;
   font-size: 14px;
+  gap: 8px;
   line-height: 1.55;
   overflow-wrap: anywhere;
+}
+
+.pronunciationNotation {
+  background: #eef2ff;
+  border-radius: 999px;
+  color: #4158b8;
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 6px;
 }
 
 .explanationText {

@@ -1,6 +1,6 @@
 ---
 name: lingualens-release
-description: Use only in the LinguaLens repository when preparing, PRing, tagging, or verifying a Chrome extension release such as v0.1.0.
+description: Use only in the LinguaLens repository when preparing, squash-merging, tagging, documenting, or verifying a Chrome extension release such as v0.1.0.
 ---
 
 # LinguaLens Release
@@ -18,7 +18,10 @@ Throughout the workflow:
 ## Release Model
 
 - Source changes land through a PR into `main`.
+- Release PRs must be squash-merged into `main`; do not use a merge commit or rebase merge.
 - GitHub Release is created by `.github/workflows/release.yml` only when a pushed tag matches `v*`.
+- Every GitHub Release must include manually prepared release notes; the workflow creates the
+  release and zip asset but does not populate the notes.
 - Package and Chrome manifest versions use plain semver, for example `0.1.0`.
 - Git tags use a leading `v`, for example `v0.1.0`.
 - Do not commit local `release/` zips. GitHub Actions packages `dist/` and uploads `lingualens-extension.zip` after the tag is pushed.
@@ -101,6 +104,32 @@ Throughout the workflow:
    - npm run build
    - npm run test:e2e
    ```
+10. Wait for required checks, then squash-merge the release PR. Never use a merge commit or
+    rebase merge. If merging in the GitHub UI, select **Squash and merge**:
+    ```bash
+    gh pr checks <number> --watch
+    gh pr merge <number> --squash
+    ```
+
+## Prepare Release Notes
+
+Prepare release notes before pushing the tag and keep them in a temporary Markdown file for the
+publish steps. Release notes are required; do not rely on an empty or automatically generated body.
+
+1. Identify the previous release tag and review every merged change since it:
+   ```bash
+   git describe --tags --abbrev=0 origin/main
+   git log --first-parent --oneline <previous-tag>..origin/main
+   ```
+   Review relevant merged PR descriptions when commit subjects do not contain enough user-facing
+   detail.
+2. Write accurate, user-facing notes to `<release-notes-file>`. Include:
+   - `## What's New` for notable user-visible changes.
+   - `## Improvements`, `## Compatibility`, or `## Maintenance` when relevant.
+   - `## Validation` with the actual test results from this release.
+   - A full changelog link in the form
+     `https://github.com/leonfrer/LinguaLens/compare/<previous-tag>...<tag>`.
+3. Keep API keys, secrets, internal-only details, and unsupported claims out of the notes.
 
 ## Publish After PR Merge
 
@@ -132,9 +161,18 @@ Throughout the workflow:
    gh run list --workflow "Build and Release Extension" --branch <tag> --limit 5
    gh run watch <run-id> --exit-status
    ```
-7. Confirm the GitHub Release and asset:
+7. Confirm the GitHub Release and `lingualens-extension.zip` asset exist:
    ```bash
    gh release view <tag> --json url,tagName,name,isDraft,isPrerelease,assets
+   ```
+8. Add the required release notes after the workflow creates the GitHub Release:
+   ```bash
+   gh release edit <tag> --notes-file <release-notes-file>
+   ```
+9. Verify the final Release, including its non-empty `body` and zip asset. The release is not
+   complete until both are present:
+   ```bash
+   gh release view <tag> --json url,tagName,name,body,isDraft,isPrerelease,assets
    ```
 
 ## Safety Notes
@@ -142,4 +180,6 @@ Throughout the workflow:
 - If the worktree contains unrelated changes, stage only the release files explicitly.
 - If there is a local untracked `release/` directory, leave it untracked unless the user explicitly asks otherwise.
 - Do not push tags before the release PR is merged.
+- Do not merge a release PR with a merge commit or rebase merge; always squash-merge it.
+- Do not leave a GitHub Release with an empty notes body.
 - Do not create a draft PR unless the user specifically asks for one.

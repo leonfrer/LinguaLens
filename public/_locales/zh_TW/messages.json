@@ -134,6 +134,12 @@
   "settingsPronunciationPreferencesDescription": {
     "message": "編輯傳送給 AI 的原文語言和發音標註組合。已停用的行不會傳送。"
   },
+  "settingsSkipLongTextPronunciation": {
+    "message": "過長文字不提供發音"
+  },
+  "settingsSkipLongTextPronunciationDescription": {
+    "message": "是否過長由模型判斷。不同模型的定義可能不同，因此此設定不一定總能生效。"
+  },
   "settingsPronunciationLanguage": {
     "message": "語言"
   },

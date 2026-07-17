@@ -21,6 +21,7 @@ import type {
 export const DEFAULT_SETTINGS: Settings = {
   wordLookupEnabled: true,
   pronunciationLookupEnabled: false,
+  skipLongTextPronunciation: true,
   pronunciationPreferences: DEFAULT_PRONUNCIATION_PREFERENCES,
   explanationLanguage: 'zh-CN',
   llmProvider: 'openai-compatible',
@@ -62,10 +63,16 @@ export async function getSettings(): Promise<Settings> {
         llmEndpointPreset?: string;
         baseUrl?: string;
         ipaLookupEnabled?: boolean;
+        skipSentencePronunciation?: boolean;
         targetLanguage?: Settings['explanationLanguage'];
       })
     | undefined;
-  const { ipaLookupEnabled, targetLanguage, ...currentSettings } = storedSettings ?? {};
+  const {
+    ipaLookupEnabled,
+    skipSentencePronunciation,
+    targetLanguage,
+    ...currentSettings
+  } = storedSettings ?? {};
   const hasSupportedProvider = isLlmProvider(currentSettings.llmProvider);
   const llmProvider: LlmProvider = hasSupportedProvider
     ? (currentSettings.llmProvider as LlmProvider)
@@ -99,6 +106,10 @@ export async function getSettings(): Promise<Settings> {
       currentSettings.pronunciationLookupEnabled ??
       ipaLookupEnabled ??
       DEFAULT_SETTINGS.pronunciationLookupEnabled,
+    skipLongTextPronunciation:
+      currentSettings.skipLongTextPronunciation ??
+      skipSentencePronunciation ??
+      DEFAULT_SETTINGS.skipLongTextPronunciation,
     pronunciationPreferences: normalizePronunciationPreferences(
       currentSettings.pronunciationPreferences
     ),

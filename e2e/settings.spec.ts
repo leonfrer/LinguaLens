@@ -14,6 +14,9 @@ test('shows all settings and links back to saved items', async ({ context, exten
   await expect(
     settingsPage.getByRole('heading', { name: 'Pronunciation notation preferences' })
   ).toHaveCount(0);
+  await expect(
+    settingsPage.getByRole('checkbox', { name: 'Skip pronunciation for long text' })
+  ).toHaveCount(0);
   await expect(settingsPage.getByLabel('Explanation language')).toHaveValue('zh-CN');
   await expect(settingsPage.getByLabel('Endpoint')).toHaveValue('nvidia');
   await expect(settingsPage.getByLabel('Base URL')).toHaveValue(
@@ -36,6 +39,16 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
 
   await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
+  const skipLongTextPronunciation = settingsPage.getByRole('checkbox', {
+    name: 'Skip pronunciation for long text'
+  });
+  await expect(skipLongTextPronunciation).toBeChecked();
+  await expect(
+    settingsPage.getByText(
+      'Definitions vary by model, so this setting may not always take effect.'
+    )
+  ).toBeVisible();
+  await skipLongTextPronunciation.uncheck();
   await expect(settingsPage.locator('.preferenceRow')).toHaveCount(4);
   await expect(settingsPage.getByLabel('Language: 1')).toHaveValue('English');
   await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue('IPA');
@@ -73,6 +86,9 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).toBeChecked();
+  await expect(
+    settingsPage.getByRole('checkbox', { name: 'Skip pronunciation for long text' })
+  ).not.toBeChecked();
   await expect(settingsPage.locator('.preferenceRow')).toHaveCount(4);
   await expect(settingsPage.getByLabel('Pronunciation notation: 1')).toHaveValue(
     'Custom English Notation'

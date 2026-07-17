@@ -296,6 +296,17 @@ function App() {
                   </button>
                 </div>
 
+                <div className="toggleGroup longTextPronunciationToggle">
+                  <ToggleField
+                    checked={draftSettings.skipLongTextPronunciation}
+                    description={t('settingsSkipLongTextPronunciationDescription')}
+                    label={t('settingsSkipLongTextPronunciation')}
+                    onChange={(skipLongTextPronunciation) => {
+                      updateDraft({ skipLongTextPronunciation });
+                    }}
+                  />
+                </div>
+
                 <div className="preferenceList">
                   {draftSettings.pronunciationPreferences.length > 0 ? (
                     <div className="preferenceColumnHeaders" aria-hidden="true">

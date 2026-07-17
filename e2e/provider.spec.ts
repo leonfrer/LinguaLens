@@ -148,6 +148,9 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
     '"English":"IPA","Chinese":"Hanyu Pinyin","Korean":"Hangul"'
   );
   expect(systemMessage?.content).not.toContain('"Japanese"');
+  expect(systemMessage?.content).toContain(
+    'If you consider the selected text too long for a concise and useful pronunciation'
+  );
   expect(userMessage?.content).not.toContain('pronunciationPreferences');
 
   await panel.getByRole('button', { name: 'Save' }).click();

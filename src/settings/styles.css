@@ -263,6 +263,10 @@ h1 {
   white-space: nowrap;
 }
 
+.longTextPronunciationToggle {
+  background: #ffffff;
+}
+
 .preferenceList {
   background: #ffffff;
   border: 1px solid #e3e7ee;

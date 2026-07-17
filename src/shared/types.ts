@@ -38,6 +38,7 @@ export type PronunciationPromptPreferences = Record<string, string>;
 export type Settings = {
   wordLookupEnabled: boolean;
   pronunciationLookupEnabled: boolean;
+  skipLongTextPronunciation: boolean;
   pronunciationPreferences: PronunciationPreferences;
   explanationLanguage: ExplanationLanguage;
   llmProvider: LlmProvider;

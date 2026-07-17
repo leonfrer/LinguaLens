@@ -68,6 +68,7 @@ describe('getSettings', () => {
       apiKey: 'test-key'
     });
     expect(DEFAULT_SETTINGS.pronunciationLookupEnabled).toBe(false);
+    expect(DEFAULT_SETTINGS.skipLongTextPronunciation).toBe(true);
   });
 
   it('migrates the previous IPA lookup setting to pronunciation lookup', async () => {
@@ -76,7 +77,8 @@ describe('getSettings', () => {
         local: {
           get: vi.fn().mockResolvedValue({
             [SETTINGS_KEY]: {
-              ipaLookupEnabled: true
+              ipaLookupEnabled: true,
+              skipSentencePronunciation: false
             }
           })
         }
@@ -85,7 +87,8 @@ describe('getSettings', () => {
 
     await expect(getSettings()).resolves.toEqual({
       ...DEFAULT_SETTINGS,
-      pronunciationLookupEnabled: true
+      pronunciationLookupEnabled: true,
+      skipLongTextPronunciation: false
     });
   });
 

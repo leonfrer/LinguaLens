@@ -78,6 +78,7 @@ export async function seedExtensionSettings(
     apiKey?: string;
     explanationLanguage?: string;
     pronunciationLookupEnabled?: boolean;
+    skipLongTextPronunciation?: boolean;
     pronunciationPreferences?: Array<{
       id: string;
       languageLabel: string;
@@ -94,6 +95,7 @@ export async function seedExtensionSettings(
         [settingsKey]: {
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
           pronunciationLookupEnabled: nextSettings.pronunciationLookupEnabled ?? false,
+          skipLongTextPronunciation: nextSettings.skipLongTextPronunciation ?? true,
           pronunciationPreferences: nextSettings.pronunciationPreferences ?? [
             {
               id: 'english',

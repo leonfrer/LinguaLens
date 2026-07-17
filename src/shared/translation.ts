@@ -48,6 +48,7 @@ export function buildTranslationPrompts(
   sentenceContext: string | undefined,
   explanationLanguage: ExplanationLanguage,
   pronunciationLookupEnabled: boolean,
+  skipLongTextPronunciation: boolean,
   pronunciationPreferences: PronunciationPromptPreferences
 ): TranslationPrompts {
   const languageLabel = languageLabels[explanationLanguage];
@@ -59,6 +60,9 @@ export function buildTranslationPrompts(
         `pronunciationPreferences: ${JSON.stringify(pronunciationPreferences)}`,
         'Infer the source language from the selected text and sentence context, then use this configuration when generating the pronunciation.',
         'For a source language without a configured value, choose an established notation automatically.',
+        skipLongTextPronunciation
+          ? 'If you consider the selected text too long for a concise and useful pronunciation, do not return the "pronunciation" or "pronunciationNotation" field.'
+          : 'Generate pronunciation for meaningful selected text regardless of its length when a useful pronunciation can be provided.',
         'Also return a "pronunciationNotation" field. When a configured notation is used, return its notation label exactly; when choosing automatically, return the concise conventional name of the notation actually used.',
         'Omit both pronunciation fields only when the selected text has no meaningful pronunciation.'
       ].join(' ')
@@ -141,6 +145,7 @@ export async function translateWithConfiguredProvider({
       sentenceContext,
       settings.explanationLanguage,
       settings.pronunciationLookupEnabled,
+      settings.skipLongTextPronunciation,
       getEnabledPronunciationPreferences(settings.pronunciationPreferences)
     );
 

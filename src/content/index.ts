@@ -1,17 +1,25 @@
 import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
 import { getSettings, SETTINGS_KEY } from '../shared/storage';
+import { getStoredAppearance } from '../shared/theme';
 import {
   extractSentenceContainingText,
   isValidSelectionText,
   normalizeSelectedText
 } from '../shared/text';
-import type { ExplanationLanguage, SaveItemResponse, TranslateResponse } from '../shared/types';
+import type {
+  Appearance,
+  ExplanationLanguage,
+  SaveItemResponse,
+  TranslateResponse
+} from '../shared/types';
 import {
   hidePanel,
   isPanelEventTarget,
   positionPanel,
+  refreshPanelAppearance,
   renderPanel,
+  setPanelAppearance,
   type PanelState
 } from './panel';
 
@@ -152,7 +160,8 @@ async function handleSelectionChange(): Promise<void> {
 
   const sentenceContext =
     extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
-  const { explanationLanguage, wordLookupEnabled } = await getSettings();
+  const { appearance, explanationLanguage, wordLookupEnabled } = await getSettings();
+  setPanelAppearance(appearance);
 
   if (!wordLookupEnabled) {
     hideCurrentPanel();
@@ -166,8 +175,12 @@ async function handleSelectionChange(): Promise<void> {
 
 function handleStorageChange(changes: Record<string, chrome.storage.StorageChange>): void {
   const nextSettings = changes[SETTINGS_KEY]?.newValue as
-    | { wordLookupEnabled?: boolean }
+    | { appearance?: Appearance; wordLookupEnabled?: boolean }
     | undefined;
+
+  if (changes[SETTINGS_KEY]) {
+    setPanelAppearance(getStoredAppearance(nextSettings?.appearance));
+  }
 
   if (nextSettings?.wordLookupEnabled === false) {
     hideCurrentPanel();
@@ -186,11 +199,15 @@ function scheduleSelectionChange(event?: Event): void {
 }
 
 function startContentScript(): void {
+  const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
   document.addEventListener('mouseup', scheduleSelectionChange);
   document.addEventListener('keyup', scheduleSelectionChange);
   document.addEventListener('selectionchange', scheduleSelectionChange);
   window.addEventListener('scroll', hideCurrentPanel, { passive: true });
   chrome.storage.onChanged.addListener(handleStorageChange);
+  colorScheme.addEventListener('change', refreshPanelAppearance);
+  void getSettings().then(({ appearance }) => setPanelAppearance(appearance));
 }
 
 if (typeof globalThis.document !== 'undefined' && typeof globalThis.window !== 'undefined') {

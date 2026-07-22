@@ -8,7 +8,7 @@
 .managementBrand {
   align-items: center;
   border-radius: 8px;
-  color: #526070;
+  color: var(--theme-text-secondary);
   display: inline-flex;
   font-size: 13px;
   font-weight: 650;
@@ -23,10 +23,16 @@
   width: 28px;
 }
 
+.managementActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
 .managementNav {
   align-items: center;
-  background: rgb(255 255 255 / 0.78);
-  border: 1px solid #e1e5ec;
+  background: var(--theme-surface-translucent);
+  border: 1px solid var(--theme-border);
   border-radius: 10px;
   display: flex;
   gap: 3px;
@@ -35,7 +41,7 @@
 
 .managementNavLink {
   border-radius: 7px;
-  color: #687386;
+  color: var(--theme-text-muted);
   font-size: 12px;
   font-weight: 600;
   padding: 7px 11px;
@@ -43,18 +49,18 @@
 }
 
 .managementNavLink:hover {
-  background: #f0f2f6;
-  color: #172033;
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
 }
 
 .managementNavLink[aria-current='page'] {
-  background: #172033;
-  color: #ffffff;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
 }
 
 .managementBrand:focus-visible,
 .managementNavLink:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
@@ -66,7 +72,16 @@
   }
 
   .managementNav {
+    flex: 1;
+  }
+
+  .managementActions {
+    align-items: stretch;
     width: 100%;
+  }
+
+  .managementActions .themeSwitcherButton {
+    height: 100%;
   }
 
   .managementNavLink {

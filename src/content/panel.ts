@@ -1,5 +1,6 @@
 import { t } from '../shared/i18n';
-import type { ExplanationLanguage, LlmProvider } from '../shared/types';
+import { resolveAppearance } from '../shared/theme';
+import type { Appearance, ExplanationLanguage, LlmProvider } from '../shared/types';
 
 const PANEL_ID = 'lingualens-selection-panel';
 
@@ -24,6 +25,23 @@ type PanelActions = {
 
 let panelHost: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
+let currentAppearance: Appearance = 'system';
+
+export function setPanelAppearance(appearance: Appearance): void {
+  currentAppearance = appearance;
+  refreshPanelAppearance();
+}
+
+export function refreshPanelAppearance(): void {
+  if (!panelHost) {
+    return;
+  }
+
+  panelHost.dataset.theme = resolveAppearance(
+    currentAppearance,
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+}
 
 export function isPanelEventTarget(target: EventTarget | null): boolean {
   return target instanceof Node && Boolean(panelHost?.contains(target));
@@ -39,6 +57,7 @@ function ensurePanel(): ShadowRoot {
   panelHost.style.position = 'absolute';
   panelHost.style.zIndex = '2147483647';
   panelHost.style.width = 'min(320px, calc(100vw - 24px))';
+  refreshPanelAppearance();
   panelHost.addEventListener('mousedown', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -89,16 +108,46 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
   root.innerHTML = `
     <style>
       :host {
+        --panel-surface: #ffffff;
+        --panel-text: #172033;
+        --panel-text-secondary: #526070;
+        --panel-text-muted: #687386;
+        --panel-border: #d8dee8;
+        --panel-border-soft: #edf0f4;
+        --panel-hover: #edf0f4;
+        --panel-accent-bg: #eef2ff;
+        --panel-accent: #4158b8;
+        --panel-primary: #1769e0;
+        --panel-on-primary: #ffffff;
+        --panel-disabled: #c9d2df;
+        --panel-danger: #b42318;
         color-scheme: light;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
+      :host([data-theme='dark']) {
+        --panel-surface: #181e29;
+        --panel-text: #edf2fa;
+        --panel-text-secondary: #c3ccda;
+        --panel-text-muted: #a3aec0;
+        --panel-border: #3b4659;
+        --panel-border-soft: #283140;
+        --panel-hover: #252d3b;
+        --panel-accent-bg: #252e50;
+        --panel-accent: #a8b8ff;
+        --panel-primary: #7795ff;
+        --panel-on-primary: #10141d;
+        --panel-disabled: #4a5568;
+        --panel-danger: #ff9b95;
+        color-scheme: dark;
+      }
+
       .panel {
-        background: #ffffff;
-        border: 1px solid #d8dee8;
+        background: var(--panel-surface);
+        border: 1px solid var(--panel-border);
         border-radius: 8px;
         box-shadow: 0 12px 32px rgba(20, 31, 48, 0.18);
-        color: #172033;
+        color: var(--panel-text);
         overflow: hidden;
       }
 
@@ -109,7 +158,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .source {
-        color: #526070;
+        color: var(--panel-text-secondary);
         font-size: 12px;
         line-height: 1.45;
         max-height: 54px;
@@ -125,7 +174,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
       .pronunciationRow {
         align-items: center;
-        color: #526070;
+        color: var(--panel-text-secondary);
         display: flex;
         font-size: 13px;
         gap: 7px;
@@ -137,9 +186,9 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .pronunciationNotation {
-        background: #eef2ff;
+        background: var(--panel-accent-bg);
         border-radius: 999px;
-        color: #4158b8;
+        color: var(--panel-accent);
         flex: 0 0 auto;
         font-size: 10px;
         font-weight: 700;
@@ -152,7 +201,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .explanation {
-        color: #687386;
+        color: var(--panel-text-muted);
         font-size: 12px;
         line-height: 1.45;
       }
@@ -163,7 +212,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
       .actions {
         align-items: flex-start;
-        border-top: 1px solid #edf0f4;
+        border-top: 1px solid var(--panel-border-soft);
         display: flex;
         gap: 8px;
         justify-content: space-between;
@@ -178,7 +227,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .status {
-        color: ${state.status === 'error' ? '#b42318' : '#687386'};
+        color: ${state.status === 'error' ? 'var(--panel-danger)' : 'var(--panel-text-muted)'};
         flex: 1 1 auto;
         font-size: 12px;
         line-height: 1.35;
@@ -188,10 +237,10 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
       button {
         appearance: none;
-        background: #1769e0;
+        background: var(--panel-primary);
         border: 0;
         border-radius: 6px;
-        color: #ffffff;
+        color: var(--panel-on-primary);
         cursor: pointer;
         font: inherit;
         font-size: 13px;
@@ -203,7 +252,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
 
       button.secondary {
         background: transparent;
-        color: #526070;
+        color: var(--panel-text-secondary);
       }
 
       button.iconButton {
@@ -222,12 +271,12 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       button.secondary:hover {
-        background: #edf0f4;
-        color: #172033;
+        background: var(--panel-hover);
+        color: var(--panel-text);
       }
 
       button:disabled {
-        background: #c9d2df;
+        background: var(--panel-disabled);
         cursor: default;
       }
     </style>

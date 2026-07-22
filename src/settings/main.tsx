@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
 import { EXPLANATION_LANGUAGE_OPTIONS } from '../shared/languages';
 import { ManagementHeader } from '../shared/ManagementHeader';
+import { initializeTheme } from '../shared/theme';
 import { fetchModelOptions, type ModelOption } from '../shared/models';
 import {
   LLM_PROVIDER_OPTIONS,
@@ -209,7 +210,8 @@ function App() {
     setSavedStatus('');
 
     try {
-      const savedSettings = await updateSettings(draftSettings);
+      const { appearance } = await getSettings();
+      const savedSettings = await updateSettings({ ...draftSettings, appearance });
       setSettings(savedSettings);
       setDraftSettings(savedSettings);
       setSavedStatus(t('settingsSavedStatus'));
@@ -576,8 +578,12 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+function renderApp() {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
+
+void initializeTheme().catch(() => undefined).finally(renderApp);

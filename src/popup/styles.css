@@ -3,8 +3,8 @@
 }
 
 body {
-  background: #f6f7f9;
-  color: #172033;
+  background: var(--theme-page);
+  color: var(--theme-text);
   margin: 0;
   font-family:
     system-ui,
@@ -37,6 +37,18 @@ body {
   min-width: 0;
 }
 
+.headerActions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.headerActions .themeSwitcherButton {
+  height: 28px;
+  width: 28px;
+}
+
 .brandMark {
   border-radius: 8px;
   flex: 0 0 auto;
@@ -62,16 +74,16 @@ p {
 }
 
 .header p {
-  color: #687386;
+  color: var(--theme-text-muted);
   font-size: 12px;
   margin-top: 2px;
 }
 
 .viewSavedLink {
   align-items: center;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--theme-border-control);
   border-radius: 6px;
-  color: #526070;
+  color: var(--theme-text-secondary);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 12px;
@@ -82,18 +94,18 @@ p {
 }
 
 .viewSavedLink:hover {
-  background: #edf0f4;
-  color: #172033;
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
 }
 
 .viewSavedLink:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
 .settingsPanel {
-  background: #ffffff;
-  border: 1px solid #e3e7ee;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 8px;
   display: grid;
   gap: 12px;
@@ -109,13 +121,13 @@ p {
 }
 
 .settingsHeader p {
-  color: #687386;
+  color: var(--theme-text-muted);
   font-size: 11px;
   margin-top: 2px;
 }
 
 .quickSettingsList {
-  border: 1px solid #e8ebf0;
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -135,12 +147,12 @@ p {
 .quickToggleControl + .quickToggleControl,
 .quickToggleControl + .quickSelectControl,
 .quickSelectControl + .quickToggleControl {
-  border-top: 1px solid #eef0f4;
+  border-top: 1px solid var(--theme-border-soft);
 }
 
 .quickToggleControl > span:first-child,
 .quickSelectControl > span:first-child {
-  color: #344054;
+  color: var(--theme-text);
   font-weight: 550;
 }
 
@@ -163,8 +175,8 @@ p {
 }
 
 .toggleSwitch {
-  background: #cbd3df;
-  border: 1px solid #b8c2d0;
+  background: var(--theme-toggle-off);
+  border: 1px solid var(--theme-toggle-border);
   border-radius: 999px;
   box-shadow: inset 0 1px 2px rgb(23 32 51 / 0.08);
   inset: 0;
@@ -177,7 +189,7 @@ p {
 }
 
 .toggleSwitch::after {
-  background: #ffffff;
+  background: var(--theme-surface);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(23 32 51 / 0.24);
   content: '';
@@ -190,8 +202,8 @@ p {
 }
 
 .toggleControl input:checked + .toggleSwitch {
-  background: #172033;
-  border-color: #172033;
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
   box-shadow: 0 0 0 2px rgb(23 32 51 / 0.08);
 }
 
@@ -200,20 +212,20 @@ p {
 }
 
 .toggleControl input:focus-visible + .toggleSwitch {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
 .quickToggleControl:hover .toggleSwitch {
-  border-color: #8a94a5;
+  border-color: var(--theme-text-subtle);
 }
 
 .quickSelectControl select {
   appearance: none;
-  background: #ffffff;
-  border: 1px solid #d8dee8;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
   border-radius: 6px;
-  color: #172033;
+  color: var(--theme-text);
   font: inherit;
   max-width: 150px;
   min-height: 28px;
@@ -221,13 +233,13 @@ p {
 }
 
 .quickSelectControl select:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
 .configurationStatus {
   align-items: center;
-  border-top: 1px solid #eef0f4;
+  border-top: 1px solid var(--theme-border-soft);
   display: flex;
   gap: 10px;
   justify-content: space-between;
@@ -236,7 +248,7 @@ p {
 
 .configurationStatusLabel {
   align-items: center;
-  color: #147a46;
+  color: var(--theme-success);
   display: inline-flex;
   font-size: 11px;
   font-weight: 600;
@@ -244,7 +256,7 @@ p {
 }
 
 .configurationStatus.missing .configurationStatusLabel {
-  color: #b54708;
+  color: var(--theme-warning);
 }
 
 .statusDot {
@@ -257,7 +269,7 @@ p {
 .fullSettingsLink {
   align-items: center;
   border-radius: 5px;
-  color: #526070;
+  color: var(--theme-text-secondary);
   display: inline-flex;
   font-size: 11px;
   gap: 4px;
@@ -266,12 +278,12 @@ p {
 }
 
 .fullSettingsLink:hover {
-  background: #edf0f4;
-  color: #172033;
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
 }
 
 .fullSettingsLink:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
@@ -281,10 +293,10 @@ p {
 }
 
 .empty {
-  background: #ffffff;
-  border: 1px solid #e3e7ee;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 8px;
-  color: #526070;
+  color: var(--theme-text-secondary);
   font-size: 13px;
   line-height: 1.5;
   padding: 14px;
@@ -297,8 +309,8 @@ p {
 
 .savedItem {
   align-items: flex-start;
-  background: #ffffff;
-  border: 1px solid #e3e7ee;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 8px;
   display: grid;
   gap: 8px;
@@ -322,14 +334,14 @@ p {
 }
 
 .sourceText {
-  color: #526070;
+  color: var(--theme-text-secondary);
   font-size: 12px;
   line-height: 1.4;
 }
 
 .pronunciationRow {
   align-items: center;
-  color: #526070;
+  color: var(--theme-text-secondary);
   display: flex;
   font-size: 12px;
   gap: 6px;
@@ -337,9 +349,9 @@ p {
 }
 
 .pronunciationNotation {
-  background: #eef2ff;
+  background: var(--theme-accent-soft);
   border-radius: 999px;
-  color: #4158b8;
+  color: var(--theme-accent);
   flex: 0 0 auto;
   font-size: 9px;
   font-weight: 700;
@@ -348,20 +360,20 @@ p {
 }
 
 .translationText {
-  color: #172033;
+  color: var(--theme-text);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .explanationText {
-  color: #526070;
+  color: var(--theme-text-secondary);
   font-size: 12px;
   line-height: 1.4;
 }
 
 .metaText {
-  color: #8a94a5;
+  color: var(--theme-text-subtle);
   font-size: 11px;
   line-height: 1.3;
 }
@@ -372,7 +384,7 @@ p {
   background: transparent;
   border: 0;
   border-radius: 6px;
-  color: #687386;
+  color: var(--theme-text-muted);
   cursor: pointer;
   display: inline-flex;
   font: inherit;
@@ -389,6 +401,6 @@ p {
 }
 
 .deleteButton:hover {
-  background: #edf0f4;
-  color: #172033;
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
 }

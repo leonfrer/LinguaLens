@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
+import { ThemeSwitcher } from '../shared/ThemeSwitcher';
+import { initializeTheme } from '../shared/theme';
 import { EXPLANATION_LANGUAGE_OPTIONS } from '../shared/languages';
 import {
   DEFAULT_SETTINGS,
@@ -226,10 +228,13 @@ function App() {
             <p>{t('savedRecent')}</p>
           </div>
         </div>
-        <a className="viewSavedLink" href="saved.html" rel="noreferrer" target="_blank">
-          {t('savedViewAll')}
-          <span aria-hidden="true">↗</span>
-        </a>
+        <div className="headerActions">
+          <a className="viewSavedLink" href="saved.html" rel="noreferrer" target="_blank">
+            {t('savedViewAll')}
+            <span aria-hidden="true">↗</span>
+          </a>
+          <ThemeSwitcher />
+        </div>
       </header>
 
       <QuickSettingsPanel
@@ -255,8 +260,12 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+function renderApp() {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
+
+void initializeTheme().catch(() => undefined).finally(renderApp);

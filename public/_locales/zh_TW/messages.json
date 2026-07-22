@@ -32,6 +32,24 @@
   "commonUnknownSource": {
     "message": "未知來源"
   },
+  "themeSwitcherLabel": {
+    "message": "外觀：$1"
+  },
+  "themeMenuLabel": {
+    "message": "選擇外觀"
+  },
+  "themeLight": {
+    "message": "淺色"
+  },
+  "themeDark": {
+    "message": "深色"
+  },
+  "themeSystem": {
+    "message": "跟隨系統"
+  },
+  "themeSaveError": {
+    "message": "無法儲存外觀設定"
+  },
   "managementNavAriaLabel": {
     "message": "LinguaLens 管理"
   },

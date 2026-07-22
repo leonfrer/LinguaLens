@@ -1,0 +1,171 @@
+:root {
+  --theme-page: #f6f7f9;
+  --theme-surface: #ffffff;
+  --theme-surface-translucent: rgb(255 255 255 / 0.94);
+  --theme-surface-soft: #f7f8fa;
+  --theme-surface-subtle: #f3f5f8;
+  --theme-surface-hover: #edf0f4;
+  --theme-text: #172033;
+  --theme-text-secondary: #526070;
+  --theme-text-muted: #687386;
+  --theme-text-subtle: #7a8494;
+  --theme-text-faint: #98a2b3;
+  --theme-border: #e1e5ec;
+  --theme-border-control: #d8dee8;
+  --theme-border-soft: #eef0f4;
+  --theme-border-subtle: #e3e7ee;
+  --theme-primary: #172033;
+  --theme-primary-hover: #2b3447;
+  --theme-on-primary: #ffffff;
+  --theme-focus: #5b7cff;
+  --theme-accent: #4158b8;
+  --theme-accent-strong: #3d5ad6;
+  --theme-accent-soft: #eef2ff;
+  --theme-toggle-off: #cbd3df;
+  --theme-toggle-border: #b8c2d0;
+  --theme-success: #147a46;
+  --theme-success-bg: #ecfdf3;
+  --theme-success-border: #c6f0d5;
+  --theme-warning: #b54708;
+  --theme-warning-bg: #fff7ed;
+  --theme-warning-border: #fed7aa;
+  --theme-danger: #b42318;
+  --theme-danger-bg: #fff1f0;
+  --theme-shadow: 23 32 51;
+  --theme-glow: 91 124 255;
+}
+
+:root[data-theme='dark'] {
+  --theme-page: #10141d;
+  --theme-surface: #181e29;
+  --theme-surface-translucent: rgb(24 30 41 / 0.96);
+  --theme-surface-soft: #141a24;
+  --theme-surface-subtle: #202735;
+  --theme-surface-hover: #252d3b;
+  --theme-text: #edf2fa;
+  --theme-text-secondary: #c3ccda;
+  --theme-text-muted: #a3aec0;
+  --theme-text-subtle: #929db0;
+  --theme-text-faint: #7f8a9c;
+  --theme-border: #30394a;
+  --theme-border-control: #3b4659;
+  --theme-border-soft: #283140;
+  --theme-border-subtle: #343e50;
+  --theme-primary: #e5ebf4;
+  --theme-primary-hover: #ffffff;
+  --theme-on-primary: #172033;
+  --theme-focus: #8199ff;
+  --theme-accent: #a8b8ff;
+  --theme-accent-strong: #b7c4ff;
+  --theme-accent-soft: #252e50;
+  --theme-toggle-off: #4a5568;
+  --theme-toggle-border: #5a667a;
+  --theme-success: #78d7a5;
+  --theme-success-bg: #183426;
+  --theme-success-border: #27543b;
+  --theme-warning: #f1b873;
+  --theme-warning-bg: #3a2a19;
+  --theme-warning-border: #654625;
+  --theme-danger: #ff9b95;
+  --theme-danger-bg: #3d2223;
+  --theme-shadow: 0 0 0;
+  --theme-glow: 91 124 255;
+}
+
+html:not([data-theme-ready='true']) body {
+  visibility: hidden;
+}
+
+.themeSwitcher {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.themeSwitcherButton {
+  align-items: center;
+  appearance: none;
+  background: var(--theme-surface-translucent);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  color: var(--theme-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+}
+
+.themeSwitcherButton:hover,
+.themeSwitcherButton[aria-expanded='true'] {
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
+}
+
+.themeSwitcherButton:focus-visible,
+.themeMenuItem:focus-visible {
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 2px;
+}
+
+.themeSwitcherButton svg,
+.themeMenuItem svg {
+  height: 18px;
+  width: 18px;
+}
+
+.themeMenu {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgb(var(--theme-shadow) / 0.2);
+  display: grid;
+  gap: 2px;
+  min-width: 154px;
+  padding: 5px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 100;
+}
+
+.themeMenuItem {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--theme-text-secondary);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 12px;
+  gap: 9px;
+  grid-template-columns: 18px minmax(0, 1fr) 14px;
+  min-height: 34px;
+  padding: 0 9px;
+  text-align: left;
+  width: 100%;
+}
+
+.themeMenuItem:hover,
+.themeMenuItem[aria-checked='true'] {
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
+}
+
+.themeMenuCheck {
+  color: var(--theme-accent);
+  font-weight: 700;
+  text-align: center;
+}
+
+.themeSwitcherError {
+  color: var(--theme-danger);
+  font-size: 11px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  white-space: nowrap;
+  z-index: 101;
+}

@@ -50,6 +50,17 @@ describe('createSavedItem', () => {
 });
 
 describe('getSettings', () => {
+  it('restores a supported appearance and defaults invalid values to system', async () => {
+    const get = vi
+      .fn()
+      .mockResolvedValueOnce({ [SETTINGS_KEY]: { appearance: 'dark' } })
+      .mockResolvedValueOnce({ [SETTINGS_KEY]: { appearance: 'sepia' } });
+    vi.stubGlobal('chrome', { storage: { local: { get } } });
+
+    await expect(getSettings()).resolves.toMatchObject({ appearance: 'dark' });
+    await expect(getSettings()).resolves.toMatchObject({ appearance: 'system' });
+  });
+
   it('defaults word lookup on and pronunciation lookup off for existing users', async () => {
     vi.stubGlobal('chrome', {
       storage: {

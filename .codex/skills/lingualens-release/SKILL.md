@@ -122,14 +122,53 @@ publish steps. Release notes are required; do not rely on an empty or automatica
    git log --first-parent --oneline <previous-tag>..origin/main
    ```
    Review relevant merged PR descriptions when commit subjects do not contain enough user-facing
-   detail.
-2. Write accurate, user-facing notes to `<release-notes-file>`. Include:
-   - `## What's New` for notable user-visible changes.
-   - `## Improvements`, `## Compatibility`, or `## Maintenance` when relevant.
-   - `## Validation` with the actual test results from this release.
-   - A full changelog link in the form
-     `https://github.com/leonfrer/LinguaLens/compare/<previous-tag>...<tag>`.
-3. Keep API keys, secrets, internal-only details, and unsupported claims out of the notes.
+   detail. Base the notes on the changes that actually landed; do not copy commit subjects or list
+   every commit or PR.
+2. Write `<release-notes-file>` in English for extension users. Organize changes under only the
+   headings that apply:
+   - `## What's New`: new user-visible capabilities.
+   - `## Improvements`: fixes and usability, performance, or reliability improvements.
+   - `## Compatibility`: compatibility changes, migrations, or actions users must take.
+   - `## Maintenance`: dependency, build, or release-process changes worth calling out.
+   - `## Validation`: the checks actually completed for this release and their accurate results.
+3. Follow these writing rules:
+   - Include at least one change section, then `## Validation` and the full changelog link.
+   - Omit empty change sections; do not add `None` or placeholder bullets to the final notes.
+   - Start each change bullet with a past-tense action verb and describe the user or maintainer
+     outcome, not implementation details.
+   - Combine related work into one coherent bullet. Avoid commit jargon, PR numbers, exhaustive
+     change lists, marketing language, and unsupported claims.
+   - Omit routine dependency updates and internal refactors unless they affect security,
+     compatibility, or user-visible behavior.
+   - Report exact test counts when available. Do not claim a check passed if it was not run, and
+     mention end-to-end or live-provider validation only when it was actually performed.
+   - Keep API keys, secrets, sensitive values, and internal-only details out of the notes.
+4. Use this template. Replace every angle-bracket placeholder and remove unused change sections
+   before publishing:
+   ```markdown
+   ## What's New
+
+   - Added <user-visible capability and outcome>.
+
+   ## Improvements
+
+   - Improved <behavior and user-visible benefit>.
+
+   ## Compatibility
+
+   - Preserved or changed <compatibility behavior and any required user action>.
+
+   ## Maintenance
+
+   - Updated <maintenance area and why it matters>.
+
+   ## Validation
+
+   - <actual validation result, including an exact test count when available>.
+   - Production build completed successfully.
+
+   **Full changelog:** https://github.com/leonfrer/LinguaLens/compare/<previous-tag>...<tag>
+   ```
 
 ## Publish After PR Merge
 

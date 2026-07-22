@@ -1,10 +1,13 @@
 import { expect, test } from './fixtures/extension';
+import { routeTestArticle, selectArticleText, testArticleUrl } from './fixtures/helpers';
 
 test('shows all settings and links back to saved items', async ({ context, extensionId }) => {
   const settingsPage = await context.newPage();
   await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
 
   await expect(settingsPage.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+  await expect(settingsPage.getByRole('heading', { name: 'Interface' })).toBeVisible();
+  await expect(settingsPage.getByLabel('Interface language')).toHaveValue('system');
   await expect(settingsPage.getByRole('heading', { name: 'Reading preferences' })).toBeVisible();
   await expect(settingsPage.getByRole('heading', { name: 'AI service' })).toBeVisible();
   await expect(settingsPage.getByRole('checkbox', { name: 'Selection lookup' })).toBeChecked();
@@ -187,5 +190,54 @@ test('discards unsaved changes', async ({ context, extensionId }) => {
   await expect(settingsPage.getByLabel('Explanation language')).toHaveValue('zh-CN');
   await expect(settingsPage.getByLabel('API key')).toHaveValue('');
   await expect(settingsPage.getByText('Set up AI service')).toBeVisible();
+  await settingsPage.close();
+});
+
+test('previews, discards, and saves the interface language', async ({
+  context,
+  extensionId,
+  popupPage
+}) => {
+  const settingsPage = await context.newPage();
+  await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
+  const savedPage = await context.newPage();
+  await savedPage.goto(`chrome-extension://${extensionId}/saved.html`);
+
+  await settingsPage.getByLabel('Interface language').selectOption('zh-CN');
+  await expect(settingsPage.getByRole('heading', { name: '设置', level: 1 })).toBeVisible();
+  await expect(settingsPage.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(settingsPage).toHaveTitle('LinguaLens — 设置');
+  await expect(settingsPage.getByText('当前仅为预览，保存后应用到所有 LinguaLens 界面。')).toBeVisible();
+  await expect(settingsPage.getByText('有未保存的更改')).toBeVisible();
+  await expect(settingsPage.locator('.formActions')).toHaveCSS('position', 'fixed');
+
+  await settingsPage.getByRole('button', { name: '取消' }).click();
+  await expect(settingsPage.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+  await expect(settingsPage.getByLabel('Interface language')).toHaveValue('system');
+  await expect(settingsPage.locator('.formActions')).toHaveCount(0);
+
+  await settingsPage.getByLabel('Interface language').selectOption('zh-CN');
+  await settingsPage.getByRole('button', { name: '保存更改' }).click();
+  await expect(settingsPage.getByText('设置已保存')).toBeVisible();
+  await expect(popupPage.getByRole('heading', { name: '快捷设置' })).toBeVisible();
+  await expect(savedPage.getByRole('heading', { name: '保存的内容', level: 1 })).toBeVisible();
+  await expect(savedPage.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(savedPage).toHaveTitle('LinguaLens — 保存的内容');
+
+  await routeTestArticle(context);
+  const articlePage = await context.newPage();
+  await articlePage.goto(testArticleUrl);
+  await articlePage.locator('#article').waitFor();
+  await selectArticleText(articlePage, 'foreign-language reading');
+  const panel = articlePage.locator('#lingualens-selection-panel');
+  await expect(panel).toHaveAttribute('lang', 'zh-CN');
+  await expect(panel.getByRole('button', { name: '保存' })).toBeDisabled();
+  await expect(panel.getByText('请先在 LinguaLens 设置中添加 LLM API 密钥再翻译。')).toBeVisible();
+  await expect(settingsPage.locator('.formActions')).toHaveCount(0, { timeout: 4000 });
+
+  await settingsPage.reload();
+  await expect(settingsPage.getByLabel('界面语言')).toHaveValue('zh-CN');
+  await articlePage.close();
+  await savedPage.close();
   await settingsPage.close();
 });

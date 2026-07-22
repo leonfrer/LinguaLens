@@ -61,6 +61,19 @@ describe('getSettings', () => {
     await expect(getSettings()).resolves.toMatchObject({ appearance: 'system' });
   });
 
+  it('keeps supported interface languages and defaults missing or invalid values to system', async () => {
+    const get = vi
+      .fn()
+      .mockResolvedValueOnce({ [SETTINGS_KEY]: { interfaceLanguage: 'zh-TW' } })
+      .mockResolvedValueOnce({ [SETTINGS_KEY]: { interfaceLanguage: 'fr' } })
+      .mockResolvedValueOnce({ [SETTINGS_KEY]: {} });
+    vi.stubGlobal('chrome', { storage: { local: { get } } });
+
+    await expect(getSettings()).resolves.toMatchObject({ interfaceLanguage: 'zh-TW' });
+    await expect(getSettings()).resolves.toMatchObject({ interfaceLanguage: 'system' });
+    await expect(getSettings()).resolves.toMatchObject({ interfaceLanguage: 'system' });
+  });
+
   it('defaults word lookup on and pronunciation lookup off for existing users', async () => {
     vi.stubGlobal('chrome', {
       storage: {

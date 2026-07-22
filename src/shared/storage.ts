@@ -14,6 +14,7 @@ import type {
   LlmEndpointPreset,
   LlmProvider,
   Appearance,
+  InterfaceLanguage,
   SavedItem,
   SaveItemMessage,
   Settings
@@ -21,6 +22,7 @@ import type {
 
 export const DEFAULT_SETTINGS: Settings = {
   appearance: 'system',
+  interfaceLanguage: 'system',
   wordLookupEnabled: true,
   pronunciationLookupEnabled: false,
   skipLongTextPronunciation: true,
@@ -38,6 +40,10 @@ export const SETTINGS_KEY = 'lingualens.settings';
 
 export function isAppearance(value: unknown): value is Appearance {
   return value === 'light' || value === 'dark' || value === 'system';
+}
+
+export function isInterfaceLanguage(value: unknown): value is InterfaceLanguage {
+  return value === 'system' || value === 'en' || value === 'zh-CN' || value === 'zh-TW';
 }
 
 export function createSavedItem(
@@ -105,6 +111,9 @@ export async function getSettings(): Promise<Settings> {
     appearance: isAppearance(currentSettings.appearance)
       ? currentSettings.appearance
       : DEFAULT_SETTINGS.appearance,
+    interfaceLanguage: isInterfaceLanguage(currentSettings.interfaceLanguage)
+      ? currentSettings.interfaceLanguage
+      : DEFAULT_SETTINGS.interfaceLanguage,
     llmProvider,
     llmEndpointPreset,
     baseUrl,

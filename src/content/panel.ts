@@ -1,4 +1,4 @@
-import { t } from '../shared/i18n';
+import { getInterfaceLocale, t } from '../shared/i18n';
 import { resolveAppearance } from '../shared/theme';
 import type { Appearance, ExplanationLanguage, LlmProvider } from '../shared/types';
 
@@ -95,6 +95,7 @@ export function positionPanel(selection: Selection): void {
 
 export function renderPanel(state: PanelState, actions: PanelActions): void {
   const root = ensurePanel();
+  panelHost?.setAttribute('lang', getInterfaceLocale());
   const saveDisabled = state.status !== 'ready';
   const statusText =
     state.status === 'loading'

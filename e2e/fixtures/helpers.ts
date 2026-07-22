@@ -75,6 +75,7 @@ export async function selectArticleText(
 export async function seedExtensionSettings(
   popupPage: Page,
   settings: {
+    appearance?: 'light' | 'dark' | 'system';
     apiKey?: string;
     explanationLanguage?: string;
     pronunciationLookupEnabled?: boolean;
@@ -93,6 +94,7 @@ export async function seedExtensionSettings(
     async ([settingsKey, nextSettings]) => {
       await chrome.storage.local.set({
         [settingsKey]: {
+          appearance: nextSettings.appearance ?? 'system',
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
           pronunciationLookupEnabled: nextSettings.pronunciationLookupEnabled ?? false,
           skipLongTextPronunciation: nextSettings.skipLongTextPronunciation ?? true,

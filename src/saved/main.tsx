@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
 import { ManagementHeader } from '../shared/ManagementHeader';
+import { initializeTheme } from '../shared/theme';
 import { deleteSavedItem, getSavedItems } from '../shared/storage';
 import type { SavedItem } from '../shared/types';
 import { findTextRange } from './highlight';
@@ -204,8 +205,12 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+function renderApp() {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
+
+void initializeTheme().catch(() => undefined).finally(renderApp);

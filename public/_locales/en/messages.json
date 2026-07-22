@@ -32,6 +32,24 @@
   "commonUnknownSource": {
     "message": "Unknown source"
   },
+  "themeSwitcherLabel": {
+    "message": "Appearance: $1"
+  },
+  "themeMenuLabel": {
+    "message": "Choose appearance"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "themeSystem": {
+    "message": "System"
+  },
+  "themeSaveError": {
+    "message": "Unable to save appearance"
+  },
   "managementNavAriaLabel": {
     "message": "LinguaLens management"
   },

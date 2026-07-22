@@ -1,5 +1,5 @@
 :root {
-  color: #172033;
+  color: var(--theme-text);
   font-family:
     Inter,
     ui-sans-serif,
@@ -16,8 +16,8 @@
 
 body {
   background:
-    radial-gradient(circle at top left, rgb(91 124 255 / 0.08), transparent 28rem),
-    #f6f7f9;
+    radial-gradient(circle at top left, rgb(var(--theme-glow) / 0.08), transparent 28rem),
+    var(--theme-page);
   margin: 0;
   min-width: 320px;
 }
@@ -67,7 +67,7 @@ h1 {
 
 .titleRow p,
 .sectionHeader p {
-  color: #687386;
+  color: var(--theme-text-muted);
   font-size: 14px;
   line-height: 1.5;
   margin-top: 8px;
@@ -75,10 +75,10 @@ h1 {
 
 .configurationBadge {
   align-items: center;
-  background: #ecfdf3;
-  border: 1px solid #c6f0d5;
+  background: var(--theme-success-bg);
+  border: 1px solid var(--theme-success-border);
   border-radius: 999px;
-  color: #147a46;
+  color: var(--theme-success);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 12px;
@@ -95,9 +95,9 @@ h1 {
 }
 
 .configurationBadge.missing {
-  background: #fff7ed;
-  border-color: #fed7aa;
-  color: #b54708;
+  background: var(--theme-warning-bg);
+  border-color: var(--theme-warning-border);
+  color: var(--theme-warning);
 }
 
 .settingsForm {
@@ -107,8 +107,8 @@ h1 {
 
 .settingsCard,
 .statusCard {
-  background: rgb(255 255 255 / 0.94);
-  border: 1px solid #e1e5ec;
+  background: var(--theme-surface-translucent);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 10px 35px rgb(23 32 51 / 0.045);
 }
@@ -120,13 +120,13 @@ h1 {
 }
 
 .statusCard {
-  color: #687386;
+  color: var(--theme-text-muted);
   padding: 28px;
   text-align: center;
 }
 
 .sectionHeader {
-  border-bottom: 1px solid #eef0f4;
+  border-bottom: 1px solid var(--theme-border-soft);
   padding-bottom: 18px;
 }
 
@@ -141,7 +141,7 @@ h1 {
 }
 
 .toggleGroup {
-  border: 1px solid #e3e7ee;
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -156,7 +156,7 @@ h1 {
 }
 
 .toggleField + .toggleField {
-  border-top: 1px solid #eef0f4;
+  border-top: 1px solid var(--theme-border-soft);
 }
 
 .toggleCopy {
@@ -165,14 +165,14 @@ h1 {
 }
 
 .toggleCopy strong {
-  color: #344054;
+  color: var(--theme-text);
   font-size: 13px;
   font-weight: 650;
 }
 
 .toggleCopy small,
 .fieldControl small {
-  color: #7a8494;
+  color: var(--theme-text-subtle);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -195,7 +195,7 @@ h1 {
 }
 
 .toggleTrack {
-  background: #cbd3df;
+  background: var(--theme-toggle-off);
   border-radius: 999px;
   inset: 0;
   pointer-events: none;
@@ -204,7 +204,7 @@ h1 {
 }
 
 .toggleTrack::after {
-  background: #ffffff;
+  background: var(--theme-surface);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(23 32 51 / 0.25);
   content: '';
@@ -217,7 +217,7 @@ h1 {
 }
 
 .toggleControl input:checked + .toggleTrack {
-  background: #172033;
+  background: var(--theme-primary);
 }
 
 .toggleControl input:checked + .toggleTrack::after {
@@ -225,13 +225,13 @@ h1 {
 }
 
 .toggleControl input:focus-visible + .toggleTrack {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
 .pronunciationPreferences {
-  background: #f8f9fb;
-  border: 1px solid #e3e7ee;
+  background: var(--theme-surface-soft);
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 12px;
   display: grid;
   gap: 18px;
@@ -246,13 +246,13 @@ h1 {
 }
 
 .preferenceHeader h3 {
-  color: #344054;
+  color: var(--theme-text);
   font-size: 14px;
   margin: 0;
 }
 
 .preferenceHeader p {
-  color: #7a8494;
+  color: var(--theme-text-subtle);
   font-size: 12px;
   line-height: 1.5;
   margin-top: 4px;
@@ -264,12 +264,12 @@ h1 {
 }
 
 .longTextPronunciationToggle {
-  background: #ffffff;
+  background: var(--theme-surface);
 }
 
 .preferenceList {
-  background: #ffffff;
-  border: 1px solid #e3e7ee;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-subtle);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -283,8 +283,8 @@ h1 {
 }
 
 .preferenceColumnHeaders {
-  background: #f5f7fa;
-  color: #687386;
+  background: var(--theme-surface-subtle);
+  color: var(--theme-text-muted);
   font-size: 11px;
   font-weight: 650;
   min-height: 34px;
@@ -299,11 +299,11 @@ h1 {
 
 .preferenceColumnHeaders + .preferenceRow,
 .preferenceRow + .preferenceRow {
-  border-top: 1px solid #eef0f4;
+  border-top: 1px solid var(--theme-border-soft);
 }
 
 .preferenceRow.isDisabled {
-  background: #fafafa;
+  background: var(--theme-surface-soft);
 }
 
 .preferenceRow.isDisabled .preferenceField {
@@ -320,10 +320,10 @@ h1 {
 }
 
 .preferenceField input {
-  background: #ffffff;
-  border: 1px solid #d8dee8;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
   border-radius: 8px;
-  color: #172033;
+  color: var(--theme-text);
   font: inherit;
   font-size: 13px;
   min-height: 38px;
@@ -332,7 +332,7 @@ h1 {
 }
 
 .preferenceField input:focus {
-  border-color: #7c95ff;
+  border-color: var(--theme-focus);
   box-shadow: 0 0 0 3px rgb(91 124 255 / 0.12);
   outline: 0;
 }
@@ -356,7 +356,7 @@ h1 {
 }
 
 .preferenceEnabledControl > span {
-  background: #cbd3df;
+  background: var(--theme-toggle-off);
   border-radius: 999px;
   inset: 0;
   position: absolute;
@@ -364,7 +364,7 @@ h1 {
 }
 
 .preferenceEnabledControl > span::after {
-  background: #ffffff;
+  background: var(--theme-surface);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(23 32 51 / 0.25);
   content: '';
@@ -377,7 +377,7 @@ h1 {
 }
 
 .preferenceEnabledControl input:checked + span {
-  background: #172033;
+  background: var(--theme-primary);
 }
 
 .preferenceEnabledControl input:checked + span::after {
@@ -385,7 +385,7 @@ h1 {
 }
 
 .preferenceEnabledControl input:focus-visible + span {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
@@ -393,7 +393,7 @@ h1 {
   appearance: none;
   background: transparent;
   border: 0;
-  color: #b42318;
+  color: var(--theme-danger);
   cursor: pointer;
   flex: 0 0 auto;
   font-size: 12px;
@@ -402,17 +402,17 @@ h1 {
 }
 
 .removePreferenceButton:hover {
-  background: #fff1f0;
+  background: var(--theme-danger-bg);
   border-radius: 7px;
 }
 
 .removePreferenceButton:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
 .emptyPreferences {
-  color: #7a8494;
+  color: var(--theme-text-subtle);
   font-size: 12px;
   line-height: 1.5;
   padding: 18px;
@@ -435,7 +435,7 @@ h1 {
 }
 
 .fieldControl {
-  color: #526070;
+  color: var(--theme-text-secondary);
   display: grid;
   font-size: 13px;
   font-weight: 600;
@@ -445,10 +445,10 @@ h1 {
 .fieldControl input,
 .fieldControl select {
   appearance: none;
-  background: #ffffff;
-  border: 1px solid #d8dee8;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
   border-radius: 9px;
-  color: #172033;
+  color: var(--theme-text);
   min-height: 42px;
   padding: 0 36px 0 12px;
   width: 100%;
@@ -460,15 +460,15 @@ h1 {
 
 .fieldControl input:focus,
 .fieldControl select:focus {
-  border-color: #7c95ff;
+  border-color: var(--theme-focus);
   box-shadow: 0 0 0 3px rgb(91 124 255 / 0.12);
   outline: 0;
 }
 
 .fieldControl input:disabled,
 .fieldControl select:disabled {
-  background: #f3f5f8;
-  color: #7a8494;
+  background: var(--theme-surface-subtle);
+  color: var(--theme-text-subtle);
 }
 
 .compactField {
@@ -494,28 +494,28 @@ h1 {
 }
 
 .primaryButton {
-  background: #172033;
-  border: 1px solid #172033;
-  color: #ffffff;
+  background: var(--theme-primary);
+  border: 1px solid var(--theme-primary);
+  color: var(--theme-on-primary);
 }
 
 .secondaryButton {
-  background: #ffffff;
-  border: 1px solid #d8dee8;
-  color: #526070;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
+  color: var(--theme-text-secondary);
 }
 
 .primaryButton:hover {
-  background: #2b3447;
+  background: var(--theme-primary-hover);
 }
 
 .secondaryButton:hover {
-  background: #f3f5f8;
+  background: var(--theme-surface-subtle);
 }
 
 .primaryButton:focus-visible,
 .secondaryButton:focus-visible {
-  outline: 2px solid #5b7cff;
+  outline: 2px solid var(--theme-focus);
   outline-offset: 2px;
 }
 
@@ -530,15 +530,15 @@ h1 {
 }
 
 .settingsError {
-  color: #b42318;
+  color: var(--theme-danger);
   font-size: 12px;
   line-height: 1.45;
 }
 
 .privacyNote {
-  background: #f7f8fa;
+  background: var(--theme-surface-soft);
   border-radius: 10px;
-  color: #687386;
+  color: var(--theme-text-muted);
   font-size: 12px;
   line-height: 1.55;
   padding: 12px 14px;
@@ -558,7 +558,7 @@ h1 {
 }
 
 .savedStatus {
-  color: #147a46;
+  color: var(--theme-success);
   font-size: 13px;
   font-weight: 600;
 }
@@ -604,7 +604,7 @@ h1 {
   }
 
   .preferenceRow + .preferenceRow {
-    border-top: 1px solid #eef0f4;
+    border-top: 1px solid var(--theme-border-soft);
   }
 
   .preferenceField {
@@ -612,7 +612,7 @@ h1 {
   }
 
   .preferenceField > span {
-    color: #687386;
+    color: var(--theme-text-muted);
     display: block;
     font-size: 11px;
     font-weight: 650;

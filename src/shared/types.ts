@@ -14,6 +14,8 @@ export type ExplanationLanguage =
 
 export type LlmProvider = 'openai-compatible';
 
+export type Appearance = 'light' | 'dark' | 'system';
+
 export type LlmEndpointPreset =
   | 'nvidia'
   | 'openai'
@@ -36,6 +38,7 @@ export type PronunciationPreferences = PronunciationPreference[];
 export type PronunciationPromptPreferences = Record<string, string>;
 
 export type Settings = {
+  appearance: Appearance;
   wordLookupEnabled: boolean;
   pronunciationLookupEnabled: boolean;
   skipLongTextPronunciation: boolean;

@@ -13,12 +13,14 @@ import {
 import type {
   LlmEndpointPreset,
   LlmProvider,
+  Appearance,
   SavedItem,
   SaveItemMessage,
   Settings
 } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
+  appearance: 'system',
   wordLookupEnabled: true,
   pronunciationLookupEnabled: false,
   skipLongTextPronunciation: true,
@@ -33,6 +35,10 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
 export const SETTINGS_KEY = 'lingualens.settings';
+
+export function isAppearance(value: unknown): value is Appearance {
+  return value === 'light' || value === 'dark' || value === 'system';
+}
 
 export function createSavedItem(
   payload: Omit<SaveItemMessage, 'type'>,
@@ -96,6 +102,9 @@ export async function getSettings(): Promise<Settings> {
   const nextSettings: Settings = {
     ...DEFAULT_SETTINGS,
     ...currentSettings,
+    appearance: isAppearance(currentSettings.appearance)
+      ? currentSettings.appearance
+      : DEFAULT_SETTINGS.appearance,
     llmProvider,
     llmEndpointPreset,
     baseUrl,

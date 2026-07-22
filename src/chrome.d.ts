@@ -42,6 +42,9 @@ declare namespace chrome {
       function addListener(
         callback: (changes: Record<string, StorageChange>, areaName: string) => void
       ): void;
+      function removeListener(
+        callback: (changes: Record<string, StorageChange>, areaName: string) => void
+      ): void;
     }
   }
 }

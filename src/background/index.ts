@@ -1,7 +1,39 @@
 import { t } from '../shared/i18n';
-import { getSettings, saveItem } from '../shared/storage';
+import { getSettings, saveItem, SETTINGS_KEY } from '../shared/storage';
 import { translateWithConfiguredProvider } from '../shared/translation';
-import type { LinguaLensMessage, SaveItemResponse, TranslateResponse } from '../shared/types';
+import type {
+  LinguaLensMessage,
+  SaveItemResponse,
+  Settings,
+  TranslateResponse
+} from '../shared/types';
+import { updateActionIcon } from './action-icon';
+
+async function syncActionIcon(): Promise<void> {
+  const { wordLookupEnabled } = await getSettings();
+  await updateActionIcon(wordLookupEnabled);
+}
+
+function handleSettingsChange(
+  changes: Record<string, chrome.storage.StorageChange>,
+  areaName: string
+): void {
+  if (areaName !== 'local' || !(SETTINGS_KEY in changes)) {
+    return;
+  }
+
+  const nextSettings = changes[SETTINGS_KEY]?.newValue as Partial<Settings> | undefined;
+
+  if (typeof nextSettings?.wordLookupEnabled === 'boolean') {
+    void updateActionIcon(nextSettings.wordLookupEnabled).catch(() => undefined);
+    return;
+  }
+
+  void syncActionIcon().catch(() => undefined);
+}
+
+chrome.storage.onChanged.addListener(handleSettingsChange);
+void syncActionIcon().catch(() => undefined);
 
 function isLinguaLensMessage(message: unknown): message is LinguaLensMessage {
   if (!message || typeof message !== 'object') {

@@ -1,10 +1,13 @@
 import enMessages from '../../public/_locales/en/messages.json';
 import zhCNMessages from '../../public/_locales/zh_CN/messages.json';
 import zhTWMessages from '../../public/_locales/zh_TW/messages.json';
+import type { InterfaceLanguage } from './types';
 
 type LocaleMessages = typeof enMessages;
-type LocaleCode = 'en' | 'zh-CN' | 'zh-TW';
+export type InterfaceLocale = Exclude<InterfaceLanguage, 'system'>;
 export type MessageKey = keyof LocaleMessages;
+
+let currentInterfaceLanguage: InterfaceLanguage = 'system';
 
 function flattenMessages(messages: LocaleMessages): Record<keyof LocaleMessages, string> {
   return Object.fromEntries(
@@ -19,7 +22,7 @@ export const defaultMessages: Record<MessageKey, string> = {
   translationUnableWithProvider: 'Unable to translate with $1.'
 };
 
-const localeMessages: Record<LocaleCode, Record<MessageKey, string>> = {
+const localeMessages: Record<InterfaceLocale, Record<MessageKey, string>> = {
   en: defaultMessages,
   'zh-CN': {
     ...flattenMessages(zhCNMessages),
@@ -35,7 +38,7 @@ const localeMessages: Record<LocaleCode, Record<MessageKey, string>> = {
   }
 };
 
-function normalizeLocale(locale: string): LocaleCode {
+function normalizeLocale(locale: string): InterfaceLocale {
   const normalizedLocale = locale.replace('_', '-').toLowerCase();
 
   if (normalizedLocale === 'zh-cn' || normalizedLocale.startsWith('zh-hans')) {
@@ -49,17 +52,38 @@ function normalizeLocale(locale: string): LocaleCode {
   return 'en';
 }
 
-function getRuntimeMessages(): Record<MessageKey, string> | undefined {
-  const uiLanguage =
-    typeof chrome !== 'undefined' && chrome.i18n?.getUILanguage
-      ? chrome.i18n.getUILanguage()
-      : '';
+function getBrowserUiLanguage(): string {
+  return typeof chrome !== 'undefined' && chrome.i18n?.getUILanguage
+    ? chrome.i18n.getUILanguage()
+    : '';
+}
 
-  if (!uiLanguage) {
+export function resolveInterfaceLocale(
+  interfaceLanguage: InterfaceLanguage,
+  browserUiLanguage = getBrowserUiLanguage()
+): InterfaceLocale {
+  return interfaceLanguage === 'system'
+    ? normalizeLocale(browserUiLanguage)
+    : interfaceLanguage;
+}
+
+export function setInterfaceLanguage(interfaceLanguage: InterfaceLanguage): InterfaceLocale {
+  currentInterfaceLanguage = interfaceLanguage;
+  return resolveInterfaceLocale(interfaceLanguage);
+}
+
+export function getInterfaceLocale(): InterfaceLocale {
+  return resolveInterfaceLocale(currentInterfaceLanguage);
+}
+
+function getRuntimeMessages(): Record<MessageKey, string> | undefined {
+  const uiLanguage = getBrowserUiLanguage();
+
+  if (currentInterfaceLanguage === 'system' && !uiLanguage) {
     return undefined;
   }
 
-  return localeMessages[normalizeLocale(uiLanguage)];
+  return localeMessages[getInterfaceLocale()];
 }
 
 export function t(key: MessageKey, substitutions?: string | string[]): string {

@@ -1,5 +1,6 @@
 import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
+import { applyInterfaceLanguage } from '../shared/localization';
 import { getSettings, SETTINGS_KEY } from '../shared/storage';
 import { getStoredAppearance } from '../shared/theme';
 import {
@@ -11,6 +12,7 @@ import type {
   Appearance,
   ExplanationLanguage,
   SaveItemResponse,
+  Settings,
   TranslateResponse
 } from '../shared/types';
 import {
@@ -160,7 +162,9 @@ async function handleSelectionChange(): Promise<void> {
 
   const sentenceContext =
     extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
-  const { appearance, explanationLanguage, wordLookupEnabled } = await getSettings();
+  const { appearance, explanationLanguage, interfaceLanguage, wordLookupEnabled } =
+    await getSettings();
+  applyInterfaceLanguage(interfaceLanguage);
   setPanelAppearance(appearance);
 
   if (!wordLookupEnabled) {
@@ -175,11 +179,17 @@ async function handleSelectionChange(): Promise<void> {
 
 function handleStorageChange(changes: Record<string, chrome.storage.StorageChange>): void {
   const nextSettings = changes[SETTINGS_KEY]?.newValue as
-    | { appearance?: Appearance; wordLookupEnabled?: boolean }
+    | {
+        appearance?: Appearance;
+        interfaceLanguage?: Settings['interfaceLanguage'];
+        wordLookupEnabled?: boolean;
+      }
     | undefined;
 
   if (changes[SETTINGS_KEY]) {
     setPanelAppearance(getStoredAppearance(nextSettings?.appearance));
+    applyInterfaceLanguage(nextSettings?.interfaceLanguage ?? 'system');
+    renderCurrentPanel();
   }
 
   if (nextSettings?.wordLookupEnabled === false) {
@@ -207,7 +217,10 @@ function startContentScript(): void {
   window.addEventListener('scroll', hideCurrentPanel, { passive: true });
   chrome.storage.onChanged.addListener(handleStorageChange);
   colorScheme.addEventListener('change', refreshPanelAppearance);
-  void getSettings().then(({ appearance }) => setPanelAppearance(appearance));
+  void getSettings().then(({ appearance, interfaceLanguage }) => {
+    setPanelAppearance(appearance);
+    applyInterfaceLanguage(interfaceLanguage);
+  });
 }
 
 if (typeof globalThis.document !== 'undefined' && typeof globalThis.window !== 'undefined') {

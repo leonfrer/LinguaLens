@@ -2,10 +2,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import enMessages from '../../public/_locales/en/messages.json';
 import zhCNMessages from '../../public/_locales/zh_CN/messages.json';
 import zhTWMessages from '../../public/_locales/zh_TW/messages.json';
-import { defaultMessages, t } from './i18n';
+import {
+  defaultMessages,
+  getInterfaceLocale,
+  resolveInterfaceLocale,
+  setInterfaceLanguage,
+  t
+} from './i18n';
 
 describe('t', () => {
   afterEach(() => {
+    setInterfaceLanguage('system');
     vi.unstubAllGlobals();
   });
 
@@ -46,6 +53,27 @@ describe('t', () => {
 
     expect(t('settingsTitle')).toBe('设置');
     expect(t('savedDeleteLabel', 'bonjour')).toBe('删除 bonjour');
+  });
+
+  it('lets an explicit interface language override the Chrome UI language', () => {
+    vi.stubGlobal('chrome', {
+      i18n: {
+        getMessage: vi.fn().mockReturnValue('设置'),
+        getUILanguage: vi.fn().mockReturnValue('zh-CN')
+      }
+    });
+
+    setInterfaceLanguage('en');
+
+    expect(getInterfaceLocale()).toBe('en');
+    expect(t('settingsTitle')).toBe('Settings');
+  });
+
+  it('resolves supported Chinese variants and falls unknown locales back to English', () => {
+    expect(resolveInterfaceLocale('system', 'zh-Hans')).toBe('zh-CN');
+    expect(resolveInterfaceLocale('system', 'zh-Hant-TW')).toBe('zh-TW');
+    expect(resolveInterfaceLocale('system', 'fr-FR')).toBe('en');
+    expect(resolveInterfaceLocale('zh-TW', 'en-US')).toBe('zh-TW');
   });
 });
 

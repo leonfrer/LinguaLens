@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { t } from '../shared/i18n';
+import { getInterfaceLocale, t } from '../shared/i18n';
+import {
+  initializeInterfaceLanguage,
+  subscribeToInterfaceLanguage
+} from '../shared/localization';
 import { ManagementHeader } from '../shared/ManagementHeader';
 import { initializeTheme } from '../shared/theme';
 import { deleteSavedItem, getSavedItems } from '../shared/storage';
@@ -53,7 +57,7 @@ function getSourceLabel(item: SavedItem): string {
 }
 
 function formatSavedDate(createdAt: number): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(getInterfaceLocale(), {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -137,6 +141,7 @@ function SavedCard({ item, onDelete }: { item: SavedItem; onDelete: (itemId: str
 function App() {
   const [items, setItems] = useState<SavedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [localeVersion, setLocaleVersion] = useState(0);
   const sortedItems = useMemo(
     () => [...items].sort((first, second) => second.createdAt - first.createdAt),
     [items]
@@ -156,6 +161,15 @@ function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(
+    () => subscribeToInterfaceLanguage(() => setLocaleVersion((version) => version + 1)),
+    []
+  );
+
+  useEffect(() => {
+    document.title = t('savedDocumentTitle');
+  }, [localeVersion]);
 
   async function handleDelete(itemId: string) {
     await deleteSavedItem(itemId);
@@ -213,4 +227,6 @@ function renderApp() {
   );
 }
 
-void initializeTheme().catch(() => undefined).finally(renderApp);
+void Promise.all([initializeTheme(), initializeInterfaceLanguage()])
+  .catch(() => undefined)
+  .finally(renderApp);

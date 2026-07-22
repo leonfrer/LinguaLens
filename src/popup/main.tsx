@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
+import {
+  initializeInterfaceLanguage,
+  subscribeToInterfaceLanguage
+} from '../shared/localization';
 import { ThemeSwitcher } from '../shared/ThemeSwitcher';
 import { initializeTheme } from '../shared/theme';
 import { EXPLANATION_LANGUAGE_OPTIONS } from '../shared/languages';
@@ -177,6 +181,7 @@ function App() {
   const [items, setItems] = useState<SavedItem[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const [, setLocaleVersion] = useState(0);
   const recentItems = useMemo(() => items.slice(0, 20), [items]);
 
   useEffect(() => {
@@ -200,6 +205,11 @@ function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(
+    () => subscribeToInterfaceLanguage(() => setLocaleVersion((version) => version + 1)),
+    []
+  );
 
   async function handleQuickSettingsChange(nextSettings: Partial<Settings>) {
     const previousSettings = settings;
@@ -268,4 +278,6 @@ function renderApp() {
   );
 }
 
-void initializeTheme().catch(() => undefined).finally(renderApp);
+void Promise.all([initializeTheme(), initializeInterfaceLanguage()])
+  .catch(() => undefined)
+  .finally(renderApp);

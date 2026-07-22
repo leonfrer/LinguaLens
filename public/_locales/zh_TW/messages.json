@@ -59,8 +59,41 @@
   "settingsTitle": {
     "message": "設定"
   },
+  "settingsDocumentTitle": {
+    "message": "LinguaLens — 設定"
+  },
   "settingsPageDescription": {
     "message": "管理閱讀偏好和 AI 服務連線。"
+  },
+  "settingsInterfaceTitle": {
+    "message": "介面"
+  },
+  "settingsInterfaceDescription": {
+    "message": "選擇 LinguaLens 控制項和提示訊息所使用的語言。"
+  },
+  "settingsInterfaceLanguage": {
+    "message": "介面語言"
+  },
+  "settingsInterfaceLanguageDescription": {
+    "message": "此設定不會變更翻譯和解釋所使用的語言。"
+  },
+  "settingsInterfaceLanguagePreview": {
+    "message": "目前僅為預覽，儲存後套用到所有 LinguaLens 介面。"
+  },
+  "settingsUnsavedChanges": {
+    "message": "有尚未儲存的變更"
+  },
+  "interfaceLanguageSystem": {
+    "message": "跟隨瀏覽器"
+  },
+  "interfaceLanguageEnglish": {
+    "message": "English"
+  },
+  "interfaceLanguageSimplifiedChinese": {
+    "message": "简体中文"
+  },
+  "interfaceLanguageTraditionalChinese": {
+    "message": "繁體中文"
   },
   "settingsQuickTitle": {
     "message": "快捷設定"
@@ -211,6 +244,9 @@
   },
   "savedPageTitle": {
     "message": "儲存的內容"
+  },
+  "savedDocumentTitle": {
+    "message": "LinguaLens — 儲存的內容"
   },
   "savedPageDescription": {
     "message": "回顧閱讀時收集的單字和句子。"

@@ -1,4 +1,5 @@
 import { t } from '../shared/i18n';
+import { applyInterfaceLanguage, initializeInterfaceLanguage } from '../shared/localization';
 import { getSettings, saveItem, SETTINGS_KEY } from '../shared/storage';
 import { translateWithConfiguredProvider } from '../shared/translation';
 import type {
@@ -24,6 +25,10 @@ function handleSettingsChange(
 
   const nextSettings = changes[SETTINGS_KEY]?.newValue as Partial<Settings> | undefined;
 
+  if (nextSettings?.interfaceLanguage) {
+    applyInterfaceLanguage(nextSettings.interfaceLanguage);
+  }
+
   if (typeof nextSettings?.wordLookupEnabled === 'boolean') {
     void updateActionIcon(nextSettings.wordLookupEnabled).catch(() => undefined);
     return;
@@ -33,6 +38,7 @@ function handleSettingsChange(
 }
 
 chrome.storage.onChanged.addListener(handleSettingsChange);
+void initializeInterfaceLanguage().catch(() => undefined);
 void syncActionIcon().catch(() => undefined);
 
 function isLinguaLensMessage(message: unknown): message is LinguaLensMessage {
@@ -53,16 +59,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.type === 'LINGUALENS_TRANSLATE') {
     void getSettings()
-      .then((settings) =>
-        translateWithConfiguredProvider({
+      .then((settings) => {
+        applyInterfaceLanguage(settings.interfaceLanguage);
+        return translateWithConfiguredProvider({
           text: message.text,
           sentenceContext: message.sentenceContext,
           settings: {
             ...settings,
             explanationLanguage: message.explanationLanguage
           }
-        })
-      )
+        });
+      })
       .then((response) => {
         sendResponse(response);
       })

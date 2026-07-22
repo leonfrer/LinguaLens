@@ -59,8 +59,41 @@
   "settingsTitle": {
     "message": "Settings"
   },
+  "settingsDocumentTitle": {
+    "message": "LinguaLens — Settings"
+  },
   "settingsPageDescription": {
     "message": "Manage your reading preferences and AI service connection."
+  },
+  "settingsInterfaceTitle": {
+    "message": "Interface"
+  },
+  "settingsInterfaceDescription": {
+    "message": "Choose the language used by LinguaLens controls and messages."
+  },
+  "settingsInterfaceLanguage": {
+    "message": "Interface language"
+  },
+  "settingsInterfaceLanguageDescription": {
+    "message": "This does not change the language used for translations and explanations."
+  },
+  "settingsInterfaceLanguagePreview": {
+    "message": "Preview only. Save to apply this language across LinguaLens."
+  },
+  "settingsUnsavedChanges": {
+    "message": "You have unsaved changes"
+  },
+  "interfaceLanguageSystem": {
+    "message": "Follow browser"
+  },
+  "interfaceLanguageEnglish": {
+    "message": "English"
+  },
+  "interfaceLanguageSimplifiedChinese": {
+    "message": "Simplified Chinese"
+  },
+  "interfaceLanguageTraditionalChinese": {
+    "message": "Traditional Chinese"
   },
   "settingsQuickTitle": {
     "message": "Quick settings"
@@ -211,6 +244,9 @@
   },
   "savedPageTitle": {
     "message": "Saved items"
+  },
+  "savedDocumentTitle": {
+    "message": "LinguaLens — Saved items"
   },
   "savedPageDescription": {
     "message": "Review the words and sentences you have collected while reading."

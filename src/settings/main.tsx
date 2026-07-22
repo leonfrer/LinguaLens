@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
+import { applyInterfaceLanguage, initializeInterfaceLanguage } from '../shared/localization';
 import { EXPLANATION_LANGUAGE_OPTIONS } from '../shared/languages';
 import { ManagementHeader } from '../shared/ManagementHeader';
 import { initializeTheme } from '../shared/theme';
@@ -18,6 +19,7 @@ import {
 import { DEFAULT_SETTINGS, getSettings, updateSettings } from '../shared/storage';
 import type {
   ExplanationLanguage,
+  InterfaceLanguage,
   LlmEndpointPreset,
   LlmProvider,
   PronunciationPreference,
@@ -103,7 +105,29 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    document.title = t('settingsDocumentTitle');
+  }, [draftSettings.interfaceLanguage]);
+
+  useEffect(() => {
+    if (!savedStatus) {
+      return;
+    }
+
+    const statusTimer = window.setTimeout(() => {
+      setSavedStatus('');
+    }, 2400);
+
+    return () => {
+      window.clearTimeout(statusTimer);
+    };
+  }, [savedStatus]);
+
   function updateDraft(nextSettings: Partial<Settings>) {
+    if (nextSettings.interfaceLanguage) {
+      applyInterfaceLanguage(nextSettings.interfaceLanguage);
+    }
+
     setDraftSettings((currentSettings) => ({ ...currentSettings, ...nextSettings }));
     setSavedStatus('');
   }
@@ -221,6 +245,7 @@ function App() {
   }
 
   function handleDiscard() {
+    applyInterfaceLanguage(settings.interfaceLanguage);
     setDraftSettings(settings);
     setModelOptions([]);
     setModelLoadError('');
@@ -255,6 +280,36 @@ function App() {
             void handleSave();
           }}
         >
+          <section className="settingsCard" aria-labelledby="interface-settings-title">
+            <div className="sectionHeader">
+              <div>
+                <h2 id="interface-settings-title">{t('settingsInterfaceTitle')}</h2>
+                <p>{t('settingsInterfaceDescription')}</p>
+              </div>
+            </div>
+
+            <label className="fieldControl compactField">
+              <span>{t('settingsInterfaceLanguage')}</span>
+              <select
+                value={draftSettings.interfaceLanguage}
+                onChange={(event) => {
+                  updateDraft({
+                    interfaceLanguage: event.target.value as InterfaceLanguage
+                  });
+                }}
+              >
+                <option value="system">{t('interfaceLanguageSystem')}</option>
+                <option value="en">{t('interfaceLanguageEnglish')}</option>
+                <option value="zh-CN">{t('interfaceLanguageSimplifiedChinese')}</option>
+                <option value="zh-TW">{t('interfaceLanguageTraditionalChinese')}</option>
+              </select>
+              <small>{t('settingsInterfaceLanguageDescription')}</small>
+              {draftSettings.interfaceLanguage !== settings.interfaceLanguage ? (
+                <small className="previewHint">{t('settingsInterfaceLanguagePreview')}</small>
+              ) : null}
+            </label>
+          </section>
+
           <section className="settingsCard" aria-labelledby="reading-settings-title">
             <div className="sectionHeader">
               <div>
@@ -550,28 +605,32 @@ function App() {
             <p className="privacyNote">{t('settingsProviderUsageNote')}</p>
           </section>
 
-          <div className="formActions">
-            <span aria-live="polite" className="savedStatus">
-              {savedStatus}
-            </span>
-            <div>
-              <button
-                className="secondaryButton"
-                disabled={!hasChanges || isSaving}
-                type="button"
-                onClick={handleDiscard}
-              >
-                {t('commonCancel')}
-              </button>
-              <button
-                className="primaryButton"
-                disabled={!hasChanges || hasBlockingPronunciationPreferenceError || isSaving}
-                type="submit"
-              >
-                {isSaving ? t('commonSaving') : t('settingsSaveChanges')}
-              </button>
+          {hasChanges || savedStatus ? (
+            <div className={`formActions ${savedStatus ? 'isSaved' : ''}`}>
+              <span aria-live="polite" className="changeStatus">
+                {savedStatus || t('settingsUnsavedChanges')}
+              </span>
+              {hasChanges ? (
+                <div>
+                  <button
+                    className="secondaryButton"
+                    disabled={isSaving}
+                    type="button"
+                    onClick={handleDiscard}
+                  >
+                    {t('commonCancel')}
+                  </button>
+                  <button
+                    className="primaryButton"
+                    disabled={hasBlockingPronunciationPreferenceError || isSaving}
+                    type="submit"
+                  >
+                    {isSaving ? t('commonSaving') : t('settingsSaveChanges')}
+                  </button>
+                </div>
+              ) : null}
             </div>
-          </div>
+          ) : null}
         </form>
       ) : null}
     </main>
@@ -586,4 +645,6 @@ function renderApp() {
   );
 }
 
-void initializeTheme().catch(() => undefined).finally(renderApp);
+void Promise.all([initializeTheme(), initializeInterfaceLanguage()])
+  .catch(() => undefined)
+  .finally(renderApp);

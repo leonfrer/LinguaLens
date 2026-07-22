@@ -4,7 +4,7 @@ export default defineManifest({
   manifest_version: 3,
   name: '__MSG_extensionName__',
   description: '__MSG_extensionDescription__',
-  version: '0.4.1',
+  version: '0.5.0',
   default_locale: 'en',
   options_page: 'settings.html',
   action: {

@@ -24,7 +24,6 @@ Throughout the workflow:
   release and zip asset but does not populate the notes.
 - Package and Chrome manifest versions use plain semver, for example `0.1.0`.
 - Git tags use a leading `v`, for example `v0.1.0`.
-- Do not commit local `release/` zips. GitHub Actions packages `dist/` and uploads `lingualens-extension.zip` after the tag is pushed.
 
 ## Prerequisites
 
@@ -45,8 +44,7 @@ Throughout the workflow:
    ```bash
    git status --short --branch
    ```
-   If unrelated tracked changes are present, stop and ask how to handle them. Leave an untracked
-   local `release/` directory alone unless the user explicitly asks to remove or commit it.
+   If unrelated tracked changes are present, stop and ask how to handle them.
 
 ## Prepare A Release PR
 
@@ -71,7 +69,7 @@ Throughout the workflow:
    - `manifest.config.ts`: `version: '<version>'`
 6. Check for missed project version references. Replace `<version>` and `<tag>` before running:
    ```bash
-   rg -n "<version>|<tag>|\"version\": \"v|version: '0\\.0|v[0-9]+\\.[0-9]+\\.[0-9]+" package.json package-lock.json manifest.config.ts README.md TESTING.md TODO.md AGENTS.md .github src e2e
+   rg -n "<version>|<tag>|\"version\": \"v|version: '0\\.0|v[0-9]+\\.[0-9]+\\.[0-9]+" package.json package-lock.json manifest.config.ts README.md AGENTS.md .github src e2e
    ```
 7. Run validation:
    ```bash
@@ -217,7 +215,6 @@ publish steps. Release notes are required; do not rely on an empty or automatica
 ## Safety Notes
 
 - If the worktree contains unrelated changes, stage only the release files explicitly.
-- If there is a local untracked `release/` directory, leave it untracked unless the user explicitly asks otherwise.
 - Do not push tags before the release PR is merged.
 - Do not merge a release PR with a merge commit or rebase merge; always squash-merge it.
 - Do not leave a GitHub Release with an empty notes body.

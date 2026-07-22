@@ -1,130 +1,55 @@
 # LinguaLens
 
-LinguaLens is a Chrome extension MVP for helping Chinese-speaking users read foreign-language web pages. Select text on a page, view a lightweight inline translation panel, and save useful words or phrases for later review in the extension popup.
+LinguaLens is a Chrome extension for reading foreign-language web pages. Select text to see an inline translation and optional pronunciation, then save useful words or phrases for later review.
 
-## Current Status
+## Features
 
-The main MVP reading loop is in place:
+- Translate and explain selected text with its sentence context.
+- Optionally include pronunciation with configurable notation preferences.
+- Save translations, context, pronunciation, source details, and model metadata locally.
+- Review recent items in the popup or browse all saved items on a dedicated page.
+- Switch word lookup and pronunciation lookup from the popup.
+- Choose light, dark, or system appearance.
+- Use the interface in English, Simplified Chinese, Traditional Chinese, or the system language.
+- Configure an OpenAI-compatible service, model, and user-managed API key on a dedicated settings page.
 
-- Detect selected text on web pages.
-- Show an inline translation panel near the selection.
-- Route translation and save requests through the background service worker.
-- Save selected text, translation, sentence context, source URL, source title, explanation language, provider/model metadata, and timestamp to `chrome.storage.local`.
-- Review and delete recently saved items in the popup.
-- Persist explanation-language, model, provider, and user-managed API key settings.
+Supported endpoint presets include NVIDIA NIM, OpenAI, OpenRouter, Groq, DeepInfra, Together AI, LM Studio, and Ollama. A custom OpenAI-compatible endpoint can also be used.
 
-Translation uses Vercel AI SDK with NVIDIA NIM as the supported provider path. Users enter their own NVIDIA API key in extension settings; the key is stored locally in Chrome extension storage and saved reading items do not include it. The UI makes clear that selected text and available sentence context are sent to the configured LLM provider and may consume the user's own API quota.
+Settings and saved items are stored in `chrome.storage.local`. API keys are never included in saved items. Selected text and available sentence context are sent to the configured service and may consume the user's API quota.
 
 ## Tech Stack
 
-- Vite
-- React
-- TypeScript
-- Chrome Extension Manifest V3
-- `@crxjs/vite-plugin`
-- Vitest
-
-## Project Structure
-
-```text
-src/
-  config.ts
-  background/
-    index.ts
-    service-worker.ts
-  content/
-    index.ts
-    selection.ts
-  popup/
-    main.tsx
-    styles.css
-  shared/
-    storage.ts
-    text.ts
-    translation.ts
-    types.ts
-manifest.config.ts
-TESTING.md
-TODO.md
-```
-
-Key entry points:
-
-- `src/config.ts`: project-level behavior settings, including selection debounce duration.
-- `src/content/index.ts`: content-script selection handling and inline panel UI.
-- `src/background/index.ts`: message handling for translation and saving.
-- `src/shared/translation.ts`: LLM translation provider boundary.
-- `src/shared/storage.ts`: saved items and settings storage helpers.
-- `src/popup/main.tsx`: popup UI for recent saved items and minimal LLM settings.
-- `manifest.config.ts`: Chrome extension manifest configuration.
+- Vite, React, and TypeScript
+- Chrome Extension Manifest V3 with `@crxjs/vite-plugin`
+- Vercel AI SDK
+- Vitest and Playwright
 
 ## Getting Started
 
-Install dependencies:
-
 ```bash
 npm install
-```
-
-Start the Vite/CRXJS development server:
-
-```bash
 npm run dev
 ```
 
-Then load the extension in Chrome using the development output path shown by the dev server.
+Load the development output path shown by Vite in `chrome://extensions` with Developer mode enabled.
 
-## Available Scripts
-
-```bash
-npm run dev
-```
-
-Starts the Vite/CRXJS development server.
-
-```bash
-npm test
-```
-
-Runs Vitest unit tests.
+For a production build:
 
 ```bash
 npm run build
 ```
 
-Runs TypeScript checking and builds the extension into `dist/`.
+Load or refresh the unpacked extension from `dist/`.
 
-```bash
-npm run preview
-```
+## Scripts
 
-Previews the built Vite app.
-
-## Loading The Extension In Chrome
-
-For production-style verification:
-
-1. Run `npm run build`.
-2. Open `chrome://extensions`.
-3. Enable Developer mode.
-4. Load or refresh the unpacked extension from `dist/`.
-5. Confirm Chrome shows no manifest or service-worker errors.
-6. Test the popup at real extension popup size.
-7. Test text selection on article-like pages and dynamic web apps.
-
-See [TESTING.md](./TESTING.md) for the fuller verification checklist.
-
-## Development Notes
-
-- Keep DOM-heavy content-script behavior thin and move pure logic into `src/shared` where practical.
-- Prefer small unit tests for text normalization, storage helpers, message payload shapes, settings, and translation boundary behavior.
-- Use Vercel AI SDK as the default library for LLM-backed translation and explanation calls.
-- Treat user-provided LLM API keys as sensitive local settings: never hard-code them, commit them, include them in saved items or exports, show them outside settings, include them in errors, or log them.
-- Run `npm run build` before considering code changes complete.
-- Manually verify in Chrome after changes to manifest config, permissions, content-script injection, background messaging, popup behavior, or storage behavior.
-
-## Roadmap
-
-- Manually verify the real extension workflow in Chrome with a configured NVIDIA API key.
-- Refine user-facing error behavior for provider-specific auth, quota, and network failures.
-- Decide whether saved-item storage should enforce a maximum item count.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite/CRXJS development server. |
+| `npm run build` | Type-check and build into `dist/`. |
+| `npm test` | Run Vitest unit tests. |
+| `npm run test:watch` | Run Vitest in watch mode. |
+| `npm run test:e2e` | Build and run Playwright extension tests. |
+| `npm run test:e2e:headed` | Run extension tests in a headed browser. |
+| `npm run test:e2e:ui` | Open the Playwright test UI. |
+| `npm run preview` | Preview the production build. |

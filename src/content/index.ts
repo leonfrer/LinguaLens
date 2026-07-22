@@ -1,18 +1,17 @@
 import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
 import { applyInterfaceLanguage } from '../shared/localization';
-import { getSettings, SETTINGS_KEY } from '../shared/storage';
-import { getStoredAppearance } from '../shared/theme';
+import { CONTENT_SETTINGS_KEY, DEFAULT_CONTENT_SETTINGS } from '../shared/storage';
 import {
   extractSentenceContainingText,
   isValidSelectionText,
   normalizeSelectedText
 } from '../shared/text';
 import type {
-  Appearance,
+  ContentSettings,
+  ContentSettingsResponse,
   ExplanationLanguage,
   SaveItemResponse,
-  Settings,
   TranslateResponse
 } from '../shared/types';
 import {
@@ -28,6 +27,8 @@ import {
 let currentState: PanelState | null = null;
 let selectionTimer: number | undefined;
 let lastRequestedText = '';
+let contentSettings = DEFAULT_CONTENT_SETTINGS;
+let contentSettingsReady: Promise<void> = Promise.resolve();
 
 function sendRuntimeMessage<TResponse>(message: unknown): Promise<TResponse> {
   return new Promise((resolve, reject) => {
@@ -46,6 +47,29 @@ function hideCurrentPanel(): void {
   hidePanel();
   currentState = null;
   lastRequestedText = '';
+}
+
+function applyContentSettings(settings: ContentSettings): void {
+  contentSettings = settings;
+  applyInterfaceLanguage(settings.interfaceLanguage);
+  setPanelAppearance(settings.appearance);
+  renderCurrentPanel();
+
+  if (!settings.wordLookupEnabled) {
+    hideCurrentPanel();
+  }
+}
+
+async function initializeContentSettings(): Promise<void> {
+  const response = await sendRuntimeMessage<ContentSettingsResponse>({
+    type: 'LINGUALENS_GET_CONTENT_SETTINGS'
+  });
+
+  if (!response.ok) {
+    throw new Error(response.error);
+  }
+
+  applyContentSettings(response.settings);
 }
 
 async function translateSelection(
@@ -152,6 +176,13 @@ async function saveCurrentSelection(): Promise<void> {
 }
 
 async function handleSelectionChange(): Promise<void> {
+  try {
+    await contentSettingsReady;
+  } catch {
+    hideCurrentPanel();
+    return;
+  }
+
   const selection = window.getSelection();
   const text = normalizeSelectedText(selection?.toString() ?? '');
 
@@ -162,10 +193,7 @@ async function handleSelectionChange(): Promise<void> {
 
   const sentenceContext =
     extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
-  const { appearance, explanationLanguage, interfaceLanguage, wordLookupEnabled } =
-    await getSettings();
-  applyInterfaceLanguage(interfaceLanguage);
-  setPanelAppearance(appearance);
+  const { explanationLanguage, wordLookupEnabled } = contentSettings;
 
   if (!wordLookupEnabled) {
     hideCurrentPanel();
@@ -177,24 +205,15 @@ async function handleSelectionChange(): Promise<void> {
   await translationPromise;
 }
 
-function handleStorageChange(changes: Record<string, chrome.storage.StorageChange>): void {
-  const nextSettings = changes[SETTINGS_KEY]?.newValue as
-    | {
-        appearance?: Appearance;
-        interfaceLanguage?: Settings['interfaceLanguage'];
-        wordLookupEnabled?: boolean;
-      }
-    | undefined;
-
-  if (changes[SETTINGS_KEY]) {
-    setPanelAppearance(getStoredAppearance(nextSettings?.appearance));
-    applyInterfaceLanguage(nextSettings?.interfaceLanguage ?? 'system');
-    renderCurrentPanel();
+function handleStorageChange(
+  changes: Record<string, chrome.storage.StorageChange>,
+  areaName: string
+): void {
+  if (areaName !== 'session' || !changes[CONTENT_SETTINGS_KEY]?.newValue) {
+    return;
   }
 
-  if (nextSettings?.wordLookupEnabled === false) {
-    hideCurrentPanel();
-  }
+  applyContentSettings(changes[CONTENT_SETTINGS_KEY].newValue as ContentSettings);
 }
 
 function scheduleSelectionChange(event?: Event): void {
@@ -210,6 +229,7 @@ function scheduleSelectionChange(event?: Event): void {
 
 function startContentScript(): void {
   const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+  contentSettingsReady = initializeContentSettings();
 
   document.addEventListener('mouseup', scheduleSelectionChange);
   document.addEventListener('keyup', scheduleSelectionChange);
@@ -217,10 +237,7 @@ function startContentScript(): void {
   window.addEventListener('scroll', hideCurrentPanel, { passive: true });
   chrome.storage.onChanged.addListener(handleStorageChange);
   colorScheme.addEventListener('change', refreshPanelAppearance);
-  void getSettings().then(({ appearance, interfaceLanguage }) => {
-    setPanelAppearance(appearance);
-    applyInterfaceLanguage(interfaceLanguage);
-  });
+  void contentSettingsReady.catch(() => undefined);
 }
 
 if (typeof globalThis.document !== 'undefined' && typeof globalThis.window !== 'undefined') {

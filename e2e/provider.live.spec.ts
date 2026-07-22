@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures/extension';
 import {
+  credentialsStorageKey,
   routeTestArticle,
   savedItemsStorageKey,
   selectArticleText,
@@ -33,22 +34,23 @@ for (const providerConfig of providerConfigs) {
     );
 
     await popupPage.evaluate(
-      async ([storageKey, settingsKey, endpointPreset, model, apiKey]) => {
+      async ([storageKey, settingsKey, credentialsKey, endpointPreset, model, apiKey]) => {
         await chrome.storage.local.clear();
         await chrome.storage.local.set({
           [settingsKey]: {
             explanationLanguage: 'zh-CN',
             llmProvider: 'openai-compatible',
             llmEndpointPreset: endpointPreset,
-            llmModel: model,
-            apiKey
+            llmModel: model
           },
+          [credentialsKey]: { apiKey },
           [storageKey]: []
         });
       },
       [
         savedItemsStorageKey,
         settingsStorageKey,
+        credentialsStorageKey,
         providerConfig.endpointPreset,
         providerConfig.model,
         providerConfig.apiKey

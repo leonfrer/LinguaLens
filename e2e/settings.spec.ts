@@ -1,5 +1,11 @@
 import { expect, test } from './fixtures/extension';
-import { routeTestArticle, selectArticleText, testArticleUrl } from './fixtures/helpers';
+import {
+  credentialsStorageKey,
+  routeTestArticle,
+  selectArticleText,
+  settingsStorageKey,
+  testArticleUrl
+} from './fixtures/helpers';
 
 test('shows all settings and links back to saved items', async ({ context, extensionId }) => {
   const settingsPage = await context.newPage();
@@ -85,6 +91,14 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await expect(settingsPage.getByText('AI service configured')).toBeVisible();
   await expect(settingsPage.getByText('test-api-key')).toHaveCount(0);
 
+  const storedData = await settingsPage.evaluate(
+    async ([settingsKey, credentialsKey]) =>
+      chrome.storage.local.get([settingsKey, credentialsKey]),
+    [settingsStorageKey, credentialsStorageKey]
+  );
+  expect(storedData[settingsStorageKey]).not.toHaveProperty('apiKey');
+  expect(storedData[credentialsStorageKey]).toEqual({ apiKey: 'test-api-key' });
+
   await settingsPage.reload();
   await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
@@ -102,6 +116,17 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   await expect(settingsPage.getByLabel('Pronunciation notation: 4')).toHaveValue('Jyutping');
   await expect(settingsPage.getByLabel('Explanation language')).toHaveValue('en');
   await expect(settingsPage.getByLabel('API key')).toHaveValue('test-api-key');
+
+  await settingsPage.getByLabel('API key').fill('');
+  await settingsPage.getByRole('button', { name: 'Save changes' }).click();
+  await expect(settingsPage.getByText('Set up AI service')).toBeVisible();
+  await settingsPage.reload();
+  await expect(settingsPage.getByLabel('API key')).toHaveValue('');
+  const clearedCredentials = await settingsPage.evaluate(
+    async (credentialsKey) => chrome.storage.local.get(credentialsKey),
+    credentialsStorageKey
+  );
+  expect(clearedCredentials[credentialsStorageKey]).toEqual({ apiKey: '' });
   await settingsPage.close();
 });
 

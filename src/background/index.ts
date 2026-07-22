@@ -1,19 +1,23 @@
 import { t } from '../shared/i18n';
-import { applyInterfaceLanguage, initializeInterfaceLanguage } from '../shared/localization';
-import { getSettings, saveItem, SETTINGS_KEY } from '../shared/storage';
+import { applyInterfaceLanguage } from '../shared/localization';
+import {
+  getContentSettings,
+  getSettings,
+  initializeStorage,
+  publishContentSettings,
+  saveItem,
+  SETTINGS_KEY
+} from '../shared/storage';
 import { translateWithConfiguredProvider } from '../shared/translation';
 import type {
+  ContentSettingsResponse,
   LinguaLensMessage,
   SaveItemResponse,
-  Settings,
   TranslateResponse
 } from '../shared/types';
 import { updateActionIcon } from './action-icon';
 
-async function syncActionIcon(): Promise<void> {
-  const { wordLookupEnabled } = await getSettings();
-  await updateActionIcon(wordLookupEnabled);
-}
+const storageReady = initializeStorage();
 
 function handleSettingsChange(
   changes: Record<string, chrome.storage.StorageChange>,
@@ -23,23 +27,25 @@ function handleSettingsChange(
     return;
   }
 
-  const nextSettings = changes[SETTINGS_KEY]?.newValue as Partial<Settings> | undefined;
-
-  if (nextSettings?.interfaceLanguage) {
-    applyInterfaceLanguage(nextSettings.interfaceLanguage);
-  }
-
-  if (typeof nextSettings?.wordLookupEnabled === 'boolean') {
-    void updateActionIcon(nextSettings.wordLookupEnabled).catch(() => undefined);
-    return;
-  }
-
-  void syncActionIcon().catch(() => undefined);
+  void storageReady
+    .then(getSettings)
+    .then(async (settings) => {
+      applyInterfaceLanguage(settings.interfaceLanguage);
+      await Promise.all([
+        updateActionIcon(settings.wordLookupEnabled),
+        publishContentSettings(settings)
+      ]);
+    })
+    .catch(() => undefined);
 }
 
 chrome.storage.onChanged.addListener(handleSettingsChange);
-void initializeInterfaceLanguage().catch(() => undefined);
-void syncActionIcon().catch(() => undefined);
+void storageReady
+  .then(async (settings) => {
+    applyInterfaceLanguage(settings.interfaceLanguage);
+    await updateActionIcon(settings.wordLookupEnabled);
+  })
+  .catch(() => undefined);
 
 function isLinguaLensMessage(message: unknown): message is LinguaLensMessage {
   if (!message || typeof message !== 'object') {
@@ -48,7 +54,9 @@ function isLinguaLensMessage(message: unknown): message is LinguaLensMessage {
 
   return (
     'type' in message &&
-    (message.type === 'LINGUALENS_TRANSLATE' || message.type === 'LINGUALENS_SAVE_ITEM')
+    (message.type === 'LINGUALENS_TRANSLATE' ||
+      message.type === 'LINGUALENS_SAVE_ITEM' ||
+      message.type === 'LINGUALENS_GET_CONTENT_SETTINGS')
   );
 }
 
@@ -57,8 +65,29 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
+  if (message.type === 'LINGUALENS_GET_CONTENT_SETTINGS') {
+    void storageReady
+      .then(getSettings)
+      .then((settings) => {
+        const response: ContentSettingsResponse = {
+          ok: true,
+          settings: getContentSettings(settings)
+        };
+        sendResponse(response);
+      })
+      .catch((error: unknown) => {
+        const response: ContentSettingsResponse = {
+          ok: false,
+          error: error instanceof Error ? error.message : t('runtimeMessageFailed')
+        };
+        sendResponse(response);
+      });
+    return true;
+  }
+
   if (message.type === 'LINGUALENS_TRANSLATE') {
-    void getSettings()
+    void storageReady
+      .then(getSettings)
       .then((settings) => {
         applyInterfaceLanguage(settings.interfaceLanguage);
         return translateWithConfiguredProvider({
@@ -83,19 +112,22 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
-  void saveItem({
-    text: message.text,
-    translation: message.translation,
-    pronunciation: message.pronunciation,
-    pronunciationNotation: message.pronunciationNotation,
-    explanationLanguage: message.explanationLanguage,
-    sentenceContext: message.sentenceContext,
-    explanation: message.explanation,
-    provider: message.provider,
-    model: message.model,
-    sourceUrl: message.sourceUrl,
-    sourceTitle: message.sourceTitle
-  })
+  void storageReady
+    .then(() =>
+      saveItem({
+        text: message.text,
+        translation: message.translation,
+        pronunciation: message.pronunciation,
+        pronunciationNotation: message.pronunciationNotation,
+        explanationLanguage: message.explanationLanguage,
+        sentenceContext: message.sentenceContext,
+        explanation: message.explanation,
+        provider: message.provider,
+        model: message.model,
+        sourceUrl: message.sourceUrl,
+        sourceTitle: message.sourceTitle
+      })
+    )
     .then((item) => {
       const response: SaveItemResponse = { ok: true, item };
       sendResponse(response);

@@ -1,4 +1,8 @@
 declare namespace chrome {
+  namespace action {
+    function setIcon(details: { path: string | Record<number, string> }): Promise<void>;
+  }
+
   namespace runtime {
     const lastError: { message?: string } | undefined;
 

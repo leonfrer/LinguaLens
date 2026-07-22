@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 export const savedItemsStorageKey = 'lingualens.savedItems';
 export const settingsStorageKey = 'lingualens.settings';
+export const credentialsStorageKey = 'lingualens.credentials';
 export const testArticleUrl = 'https://lingualens.test/article';
 
 export async function routeTestArticle(
@@ -92,7 +93,7 @@ export async function seedExtensionSettings(
   }
 ): Promise<void> {
   await popupPage.evaluate(
-    async ([settingsKey, nextSettings]) => {
+    async ([settingsKey, credentialsKey, nextSettings]) => {
       await chrome.storage.local.set({
         [settingsKey]: {
           appearance: nextSettings.appearance ?? 'system',
@@ -128,11 +129,11 @@ export async function seedExtensionSettings(
           ],
           llmProvider: 'openai-compatible',
           llmEndpointPreset: nextSettings.endpointPreset ?? 'nvidia',
-          llmModel: nextSettings.model ?? 'meta/llama-3.1-8b-instruct',
-          apiKey: nextSettings.apiKey ?? ''
-        }
+          llmModel: nextSettings.model ?? 'meta/llama-3.1-8b-instruct'
+        },
+        [credentialsKey]: { apiKey: nextSettings.apiKey ?? '' }
       });
     },
-    [settingsStorageKey, settings]
+    [settingsStorageKey, credentialsStorageKey, settings]
   );
 }

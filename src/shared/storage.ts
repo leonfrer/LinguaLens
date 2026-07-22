@@ -14,6 +14,8 @@ import type {
   LlmEndpointPreset,
   LlmProvider,
   Appearance,
+  ContentSettings,
+  Credentials,
   InterfaceLanguage,
   SavedItem,
   SaveItemMessage,
@@ -37,6 +39,10 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
 export const SETTINGS_KEY = 'lingualens.settings';
+export const CREDENTIALS_KEY = 'lingualens.credentials';
+export const CONTENT_SETTINGS_KEY = 'lingualens.contentSettings';
+
+type StoredSettings = Omit<Settings, 'apiKey'>;
 
 export function isAppearance(value: unknown): value is Appearance {
   return value === 'light' || value === 'dark' || value === 'system';
@@ -68,18 +74,21 @@ export function createSavedItem(
 }
 
 export async function getSettings(): Promise<Settings> {
-  const result = await chrome.storage.local.get(SETTINGS_KEY);
+  const result = await chrome.storage.local.get([SETTINGS_KEY, CREDENTIALS_KEY]);
   const storedSettings = result[SETTINGS_KEY] as
-    | (Partial<Omit<Settings, 'llmProvider' | 'baseUrl'>> & {
+    | (Partial<Omit<StoredSettings, 'llmProvider' | 'baseUrl'>> & {
         llmProvider?: string;
         llmEndpointPreset?: string;
         baseUrl?: string;
+        apiKey?: unknown;
         ipaLookupEnabled?: boolean;
         skipSentencePronunciation?: boolean;
         targetLanguage?: Settings['explanationLanguage'];
       })
     | undefined;
+  const storedCredentials = result[CREDENTIALS_KEY] as Partial<Credentials> | undefined;
   const {
+    apiKey: _ignoredLegacyApiKey,
     ipaLookupEnabled,
     skipSentencePronunciation,
     targetLanguage,
@@ -132,7 +141,11 @@ export async function getSettings(): Promise<Settings> {
       currentSettings.pronunciationPreferences
     ),
     explanationLanguage:
-      currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage
+      currentSettings.explanationLanguage ?? targetLanguage ?? DEFAULT_SETTINGS.explanationLanguage,
+    apiKey:
+      typeof storedCredentials?.apiKey === 'string'
+        ? storedCredentials.apiKey
+        : DEFAULT_SETTINGS.apiKey
   };
 
   if (endpointConfig.legacyModels?.includes(nextSettings.llmModel)) {
@@ -161,8 +174,44 @@ export async function updateSettings(settings: Partial<Settings>): Promise<Setti
         : endpointConfig.baseUrl
   };
 
-  await chrome.storage.local.set({ [SETTINGS_KEY]: nextSettings });
+  const { apiKey, ...storedSettings } = nextSettings;
+  const updates: Record<string, StoredSettings | Credentials> = {
+    [SETTINGS_KEY]: storedSettings
+  };
+
+  if (typeof settings.apiKey === 'string') {
+    updates[CREDENTIALS_KEY] = { apiKey };
+  }
+
+  await chrome.storage.local.set(updates);
   return nextSettings;
+}
+
+export function getContentSettings(settings: Settings): ContentSettings {
+  return {
+    appearance: settings.appearance,
+    interfaceLanguage: settings.interfaceLanguage,
+    wordLookupEnabled: settings.wordLookupEnabled,
+    explanationLanguage: settings.explanationLanguage
+  };
+}
+
+export const DEFAULT_CONTENT_SETTINGS = getContentSettings(DEFAULT_SETTINGS);
+
+export async function publishContentSettings(settings: Settings): Promise<ContentSettings> {
+  const contentSettings = getContentSettings(settings);
+  await chrome.storage.session.set({ [CONTENT_SETTINGS_KEY]: contentSettings });
+  return contentSettings;
+}
+
+export async function initializeStorage(): Promise<Settings> {
+  await Promise.all([
+    chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }),
+    chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' })
+  ]);
+  const settings = await getSettings();
+  await publishContentSettings(settings);
+  return settings;
 }
 
 export async function getSavedItems(): Promise<SavedItem[]> {

@@ -1,11 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  CREDENTIALS_KEY,
+  CONTENT_SETTINGS_KEY,
   createSavedItem,
   DEFAULT_SETTINGS,
+  getContentSettings,
   getSavedItems,
   getSettings,
+  initializeStorage,
   SAVED_ITEMS_KEY,
-  SETTINGS_KEY
+  SETTINGS_KEY,
+  updateSettings
 } from './storage';
 
 vi.stubGlobal('crypto', {
@@ -74,7 +79,7 @@ describe('getSettings', () => {
     await expect(getSettings()).resolves.toMatchObject({ interfaceLanguage: 'system' });
   });
 
-  it('defaults word lookup on and pronunciation lookup off for existing users', async () => {
+  it('ignores an API key stored in the legacy settings object', async () => {
     vi.stubGlobal('chrome', {
       storage: {
         local: {
@@ -88,11 +93,28 @@ describe('getSettings', () => {
     });
 
     await expect(getSettings()).resolves.toEqual({
-      ...DEFAULT_SETTINGS,
-      apiKey: 'test-key'
+      ...DEFAULT_SETTINGS
     });
     expect(DEFAULT_SETTINGS.pronunciationLookupEnabled).toBe(false);
     expect(DEFAULT_SETTINGS.skipLongTextPronunciation).toBe(true);
+  });
+
+  it('reads the API key from credentials storage', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {},
+            [CREDENTIALS_KEY]: { apiKey: 'credential-key' }
+          })
+        }
+      }
+    });
+
+    await expect(getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      apiKey: 'credential-key'
+    });
   });
 
   it('migrates the previous IPA lookup setting to pronunciation lookup', async () => {
@@ -168,7 +190,8 @@ describe('getSettings', () => {
             [SETTINGS_KEY]: {
               targetLanguage: 'en',
               apiKey: 'test-key'
-            }
+            },
+            [CREDENTIALS_KEY]: { apiKey: 'test-key' }
           })
         }
       }
@@ -191,7 +214,8 @@ describe('getSettings', () => {
               llmEndpointPreset: 'openai',
               llmModel: 'gpt-4o-mini',
               apiKey: 'test-key'
-            }
+            },
+            [CREDENTIALS_KEY]: { apiKey: 'test-key' }
           })
         }
       }
@@ -216,7 +240,8 @@ describe('getSettings', () => {
               llmProvider: 'openrouter',
               llmModel: 'openai/gpt-4o-mini',
               apiKey: 'test-key'
-            }
+            },
+            [CREDENTIALS_KEY]: { apiKey: 'test-key' }
           })
         }
       }
@@ -241,7 +266,8 @@ describe('getSettings', () => {
               llmProvider: 'removed-provider',
               llmModel: 'removed-model',
               apiKey: 'test-key'
-            }
+            },
+            [CREDENTIALS_KEY]: { apiKey: 'test-key' }
           })
         }
       }
@@ -264,7 +290,8 @@ describe('getSettings', () => {
               baseUrl: ' https://api.example.com/v1/ ',
               llmModel: 'example-model',
               apiKey: 'test-key'
-            }
+            },
+            [CREDENTIALS_KEY]: { apiKey: 'test-key' }
           })
         }
       }
@@ -277,6 +304,97 @@ describe('getSettings', () => {
       baseUrl: 'https://api.example.com/v1',
       llmModel: 'example-model',
       apiKey: 'test-key'
+    });
+  });
+});
+
+describe('updateSettings', () => {
+  it('updates regular settings without rewriting credentials', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {},
+            [CREDENTIALS_KEY]: { apiKey: 'credential-key' }
+          }),
+          set
+        }
+      }
+    });
+
+    await expect(updateSettings({ appearance: 'dark' })).resolves.toMatchObject({
+      appearance: 'dark',
+      apiKey: 'credential-key'
+    });
+    expect(set).toHaveBeenCalledTimes(1);
+    const update = set.mock.calls[0][0];
+    expect(update).not.toHaveProperty(CREDENTIALS_KEY);
+    expect(update[SETTINGS_KEY]).not.toHaveProperty('apiKey');
+  });
+
+  it('stores an API key separately from regular settings', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({ [SETTINGS_KEY]: {} }),
+          set
+        }
+      }
+    });
+
+    await expect(updateSettings({ apiKey: 'new-key' })).resolves.toMatchObject({
+      apiKey: 'new-key'
+    });
+    const update = set.mock.calls[0][0];
+    expect(update[CREDENTIALS_KEY]).toEqual({ apiKey: 'new-key' });
+    expect(update[SETTINGS_KEY]).not.toHaveProperty('apiKey');
+  });
+});
+
+describe('content settings', () => {
+  it('projects only the settings needed by content scripts', () => {
+    expect(getContentSettings({ ...DEFAULT_SETTINGS, apiKey: 'secret-key' })).toEqual({
+      appearance: 'system',
+      interfaceLanguage: 'system',
+      wordLookupEnabled: true,
+      explanationLanguage: 'zh-CN'
+    });
+  });
+
+  it('restricts local storage and publishes the safe projection to session storage', async () => {
+    const localSetAccessLevel = vi.fn().mockResolvedValue(undefined);
+    const sessionSetAccessLevel = vi.fn().mockResolvedValue(undefined);
+    const sessionSet = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SETTINGS_KEY]: {},
+            [CREDENTIALS_KEY]: { apiKey: 'secret-key' }
+          }),
+          setAccessLevel: localSetAccessLevel
+        },
+        session: {
+          set: sessionSet,
+          setAccessLevel: sessionSetAccessLevel
+        }
+      }
+    });
+
+    await expect(initializeStorage()).resolves.toMatchObject({ apiKey: 'secret-key' });
+    expect(localSetAccessLevel).toHaveBeenCalledWith({ accessLevel: 'TRUSTED_CONTEXTS' });
+    expect(sessionSetAccessLevel).toHaveBeenCalledWith({
+      accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS'
+    });
+    expect(sessionSet).toHaveBeenCalledWith({
+      [CONTENT_SETTINGS_KEY]: {
+        appearance: 'system',
+        interfaceLanguage: 'system',
+        wordLookupEnabled: true,
+        explanationLanguage: 'zh-CN'
+      }
     });
   });
 });

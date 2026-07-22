@@ -15,7 +15,7 @@ LinguaLens is a Chrome extension for reading foreign-language web pages. Select 
 
 Supported endpoint presets include NVIDIA NIM, OpenAI, OpenRouter, Groq, DeepInfra, Together AI, LM Studio, and Ollama. A custom OpenAI-compatible endpoint can also be used.
 
-Settings and saved items are stored in `chrome.storage.local`. API keys are never included in saved items. Selected text and available sentence context are sent to the configured service and may consume the user's API quota.
+Settings, credentials, and saved items are stored locally with `chrome.storage.local`. API keys are persisted without application-level encryption, restricted to trusted extension contexts, and never exposed to content scripts, synced, or included in saved items. Selected text and available sentence context are sent to the configured service and may consume the user's API quota.
 
 ## Tech Stack
 

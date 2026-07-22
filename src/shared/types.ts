@@ -54,6 +54,15 @@ export type Settings = {
   apiKey: string;
 };
 
+export type Credentials = {
+  apiKey: string;
+};
+
+export type ContentSettings = Pick<
+  Settings,
+  'appearance' | 'interfaceLanguage' | 'wordLookupEnabled' | 'explanationLanguage'
+>;
+
 export type SavedItem = {
   id: string;
   text: string;
@@ -92,7 +101,24 @@ export type SaveItemMessage = {
   sourceTitle: string;
 };
 
-export type LinguaLensMessage = TranslateRequestMessage | SaveItemMessage;
+export type GetContentSettingsMessage = {
+  type: 'LINGUALENS_GET_CONTENT_SETTINGS';
+};
+
+export type LinguaLensMessage =
+  | TranslateRequestMessage
+  | SaveItemMessage
+  | GetContentSettingsMessage;
+
+export type ContentSettingsResponse =
+  | {
+      ok: true;
+      settings: ContentSettings;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
 
 export type TranslateResponse =
   | {

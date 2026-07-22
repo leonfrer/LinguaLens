@@ -28,15 +28,21 @@ declare namespace chrome {
   }
 
   namespace storage {
+    type AccessLevel = 'TRUSTED_CONTEXTS' | 'TRUSTED_AND_UNTRUSTED_CONTEXTS';
+
     type StorageChange = {
       oldValue?: unknown;
       newValue?: unknown;
     };
 
-    const local: {
+    type StorageArea = {
       get(keys?: string | string[] | Record<string, unknown> | null): Promise<Record<string, unknown>>;
       set(items: Record<string, unknown>): Promise<void>;
+      setAccessLevel(options: { accessLevel: AccessLevel }): Promise<void>;
     };
+
+    const local: StorageArea;
+    const session: StorageArea;
 
     namespace onChanged {
       function addListener(

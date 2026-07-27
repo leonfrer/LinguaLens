@@ -14,12 +14,12 @@
     "test:e2e:ui": "npm run build && playwright test --ui"
   },
   "dependencies": {
-    "@ai-sdk/openai": "4.0.16",
+    "@ai-sdk/openai": "4.0.20",
     "@crxjs/vite-plugin": "2.7.1",
-    "@vitejs/plugin-react": "6.0.3",
-    "ai": "7.0.31",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.0.4",
+    "ai": "7.0.37",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "typescript": "7.0.2",
     "vite": "8.1.5"
   },

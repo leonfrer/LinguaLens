@@ -29,6 +29,8 @@ let selectionTimer: number | undefined;
 let lastRequestedText = '';
 let contentSettings = DEFAULT_CONTENT_SETTINGS;
 let contentSettingsReady: Promise<void> = Promise.resolve();
+/** True while the primary pointer button is held — suppress lookups mid-drag. */
+let isSelectingWithPointer = false;
 
 function sendRuntimeMessage<TResponse>(message: unknown): Promise<TResponse> {
   return new Promise((resolve, reject) => {
@@ -216,8 +218,13 @@ function handleStorageChange(
   applyContentSettings(changes[CONTENT_SETTINGS_KEY].newValue as ContentSettings);
 }
 
+function cancelScheduledSelectionChange(): void {
+  window.clearTimeout(selectionTimer);
+  selectionTimer = undefined;
+}
+
 function scheduleSelectionChange(event?: Event): void {
-  if (isPanelEventTarget(event?.target ?? null)) {
+  if (isSelectingWithPointer || isPanelEventTarget(event?.target ?? null)) {
     return;
   }
 
@@ -227,13 +234,43 @@ function scheduleSelectionChange(event?: Event): void {
   }, LINGUALENS_CONFIG.selectionDebounceMs);
 }
 
+function handlePointerSelectionStart(event: MouseEvent): void {
+  if (event.button !== 0 || isPanelEventTarget(event.target)) {
+    return;
+  }
+
+  // Selection is still in progress; never translate until the button is released.
+  isSelectingWithPointer = true;
+  cancelScheduledSelectionChange();
+}
+
+function handlePointerSelectionEnd(event: MouseEvent): void {
+  if (event.button !== 0) {
+    return;
+  }
+
+  isSelectingWithPointer = false;
+  scheduleSelectionChange(event);
+}
+
+function handleWindowBlur(): void {
+  // mouseup may never arrive if the button is released outside the window.
+  isSelectingWithPointer = false;
+}
+
 function startContentScript(): void {
   const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
   contentSettingsReady = initializeContentSettings();
 
-  document.addEventListener('mouseup', scheduleSelectionChange);
+  // Capture phase so we see the drag start even if a page stops propagation.
+  window.addEventListener('mousedown', handlePointerSelectionStart, true);
+  window.addEventListener('mouseup', handlePointerSelectionEnd, true);
+  window.addEventListener('blur', handleWindowBlur);
   document.addEventListener('keyup', scheduleSelectionChange);
-  document.addEventListener('selectionchange', scheduleSelectionChange);
+  // Fires continuously while dragging; ignored until the pointer is released.
+  document.addEventListener('selectionchange', () => {
+    scheduleSelectionChange();
+  });
   window.addEventListener('scroll', hideCurrentPanel, { passive: true });
   chrome.storage.onChanged.addListener(handleStorageChange);
   colorScheme.addEventListener('change', refreshPanelAppearance);

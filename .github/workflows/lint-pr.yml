@@ -33,8 +33,12 @@ jobs:
           scopes: |
             popup
             settings
+            saved
             content
             background
+            shared
+            i18n
+            e2e
             manifest
             build
             release

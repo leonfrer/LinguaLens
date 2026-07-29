@@ -7,6 +7,7 @@ import {
 import { DEFAULT_SETTINGS } from './storage';
 import {
   buildTranslationPrompts,
+  formatTranslationError,
   parseLlmTranslation,
   translateWithConfiguredProvider
 } from './translation';
@@ -158,6 +159,33 @@ describe('translateWithConfiguredProvider', () => {
       ok: false,
       error: t('translationBaseUrlRequired')
     });
+  });
+});
+
+describe('formatTranslationError', () => {
+  it('explains authentication failures without exposing credentials', () => {
+    const settings = { ...DEFAULT_SETTINGS, apiKey: 'secret-api-key' };
+    const error = Object.assign(new Error('401 secret-api-key'), { statusCode: 401 });
+
+    expect(formatTranslationError(error, settings)).toContain('API key');
+    expect(formatTranslationError(error, settings)).not.toContain('secret-api-key');
+  });
+
+  it('explains model and endpoint failures using the provider response', () => {
+    const settings = { ...DEFAULT_SETTINGS };
+    const error = Object.assign(new Error('bad request'), {
+      statusCode: 400,
+      responseBody: JSON.stringify({ error: { message: 'model does not exist' } })
+    });
+
+    expect(formatTranslationError(error, settings)).toContain('model does not exist');
+    expect(formatTranslationError(error, settings)).toContain('HTTP 400');
+  });
+
+  it('gives network-specific guidance', () => {
+    expect(
+      formatTranslationError(new Error('fetch failed: ECONNREFUSED'), DEFAULT_SETTINGS)
+    ).toContain('could not reach');
   });
 });
 

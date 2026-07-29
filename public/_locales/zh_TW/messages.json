@@ -334,5 +334,14 @@
         "content": "$1"
       }
     }
-  }
+  },
+  "translationProviderUnauthorized": { "message": "服務商拒絕了 API 金鑰（HTTP $1）。請檢查金鑰是否正確，以及是否有權限存取此模型。" },
+  "translationProviderForbidden": { "message": "服務商拒絕了此請求（HTTP $1）。請檢查金鑰權限、帳戶狀態和模型存取權限。" },
+  "translationProviderNotFound": { "message": "找不到端點或模型（HTTP $1）。請檢查設定中的基礎 URL 和模型 ID。" },
+  "translationProviderRateLimited": { "message": "請求過於頻繁或已超出額度（HTTP $1）。請稍後再試，並檢查額度和計費限制。" },
+  "translationProviderServerError": { "message": "服務商暫時無法使用（HTTP $1）。請稍後再試，或檢查服務商狀態。" },
+  "translationProviderBadRequest": { "message": "服務商拒絕了請求（HTTP $1）。請檢查基礎 URL 和模型 ID 是否受支援。" },
+  "translationProviderNetworkError": { "message": "LinguaLens 無法連線到服務商。請檢查網路連線和基礎 URL，然後重試。" },
+  "translationProviderRequestFailed": { "message": "服務商返回了錯誤（HTTP $1）：$2" },
+  "translationProviderUnknownError": { "message": "翻譯請求失敗：$1" }
 }

@@ -334,5 +334,14 @@
         "content": "$1"
       }
     }
-  }
+  },
+  "translationProviderUnauthorized": { "message": "The provider rejected the API key (HTTP $1). Check that the key is correct and has access to this model." },
+  "translationProviderForbidden": { "message": "The provider denied this request (HTTP $1). Check the key permissions, account status, and model access." },
+  "translationProviderNotFound": { "message": "The endpoint or model was not found (HTTP $1). Check the base URL and model ID in settings." },
+  "translationProviderRateLimited": { "message": "The provider rate-limited this request (HTTP $1). Wait a moment, or check your quota and billing limits." },
+  "translationProviderServerError": { "message": "The provider is temporarily unavailable (HTTP $1). Try again later or check the provider status." },
+  "translationProviderBadRequest": { "message": "The provider rejected the request (HTTP $1). Check that the base URL and model ID are supported." },
+  "translationProviderNetworkError": { "message": "LinguaLens could not reach the provider. Check your internet connection and base URL, then try again." },
+  "translationProviderRequestFailed": { "message": "The provider returned an error (HTTP $1): $2" },
+  "translationProviderUnknownError": { "message": "The translation request failed: $1" }
 }

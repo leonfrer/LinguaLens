@@ -2,11 +2,7 @@ import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
 import { applyInterfaceLanguage } from '../shared/localization';
 import { CONTENT_SETTINGS_KEY, DEFAULT_CONTENT_SETTINGS } from '../shared/storage';
-import {
-  extractSentenceContainingText,
-  isValidSelectionText,
-  normalizeSelectedText
-} from '../shared/text';
+import { isValidSelectionText, normalizeSelectedText } from '../shared/text';
 import type {
   ContentSettings,
   ContentSettingsResponse,
@@ -23,6 +19,7 @@ import {
   setPanelAppearance,
   type PanelState
 } from './panel';
+import { getSentenceContextFromSelection } from './selection-context';
 
 let currentState: PanelState | null = null;
 let selectionTimer: number | undefined;
@@ -193,8 +190,7 @@ async function handleSelectionChange(): Promise<void> {
     return;
   }
 
-  const sentenceContext =
-    extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
+  const sentenceContext = getSentenceContextFromSelection(selection, text);
   const { explanationLanguage, wordLookupEnabled } = contentSettings;
 
   if (!wordLookupEnabled) {

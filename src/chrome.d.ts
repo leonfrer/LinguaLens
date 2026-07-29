@@ -6,6 +6,10 @@ declare namespace chrome {
   namespace runtime {
     const lastError: { message?: string } | undefined;
 
+    namespace onStartup {
+      function addListener(callback: () => void): void;
+    }
+
     function sendMessage<TResponse = unknown>(
       message: unknown,
       responseCallback?: (response: TResponse) => void

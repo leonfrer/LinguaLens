@@ -2,11 +2,7 @@ import { LINGUALENS_CONFIG } from '../config';
 import { t } from '../shared/i18n';
 import { applyInterfaceLanguage } from '../shared/localization';
 import { CONTENT_SETTINGS_KEY, DEFAULT_CONTENT_SETTINGS } from '../shared/storage';
-import {
-  extractSentenceContainingText,
-  isValidSelectionText,
-  normalizeSelectedText
-} from '../shared/text';
+import { isValidSelectionText, normalizeSelectedText } from '../shared/text';
 import type {
   ContentSettings,
   ContentSettingsResponse,
@@ -23,6 +19,7 @@ import {
   setPanelAppearance,
   type PanelState
 } from './panel';
+import { getSentenceContextFromSelection } from './selection-context';
 
 let currentState: PanelState | null = null;
 let selectionTimer: number | undefined;
@@ -77,7 +74,8 @@ async function initializeContentSettings(): Promise<void> {
 async function translateSelection(
   text: string,
   explanationLanguage: ExplanationLanguage,
-  sentenceContext?: string
+  sentenceContext?: string,
+  selectionStartInContext?: number
 ): Promise<void> {
   const requestedText = text;
   lastRequestedText = requestedText;
@@ -87,6 +85,7 @@ async function translateSelection(
     translation: '',
     explanationLanguage,
     sentenceContext,
+    selectionStartInContext,
     status: 'loading'
   };
   renderCurrentPanel();
@@ -111,6 +110,7 @@ async function translateSelection(
           pronunciationNotation: response.pronunciationNotation,
           explanationLanguage,
           sentenceContext,
+          selectionStartInContext,
           explanation: response.explanation,
           provider: response.provider,
           model: response.model,
@@ -121,6 +121,7 @@ async function translateSelection(
           translation: '',
           explanationLanguage,
           sentenceContext,
+          selectionStartInContext,
           status: 'error',
           error: response.error
         };
@@ -130,6 +131,7 @@ async function translateSelection(
       translation: '',
       explanationLanguage,
       sentenceContext,
+      selectionStartInContext,
       status: 'error',
       error: error instanceof Error ? error.message : t('panelTranslationFailed')
     };
@@ -164,6 +166,7 @@ async function saveCurrentSelection(): Promise<void> {
     pronunciationNotation: currentState.pronunciationNotation,
     explanationLanguage: currentState.explanationLanguage,
     sentenceContext: currentState.sentenceContext,
+    selectionStartInContext: currentState.selectionStartInContext,
     explanation: currentState.explanation,
     provider: currentState.provider,
     model: currentState.model,
@@ -193,8 +196,7 @@ async function handleSelectionChange(): Promise<void> {
     return;
   }
 
-  const sentenceContext =
-    extractSentenceContainingText(selection.anchorNode?.textContent ?? '', text) || undefined;
+  const extractedContext = getSentenceContextFromSelection(selection, text);
   const { explanationLanguage, wordLookupEnabled } = contentSettings;
 
   if (!wordLookupEnabled) {
@@ -202,7 +204,12 @@ async function handleSelectionChange(): Promise<void> {
     return;
   }
 
-  const translationPromise = translateSelection(text, explanationLanguage, sentenceContext);
+  const translationPromise = translateSelection(
+    text,
+    explanationLanguage,
+    extractedContext?.context,
+    extractedContext?.selectionStart
+  );
   positionPanel(selection);
   await translationPromise;
 }

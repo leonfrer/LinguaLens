@@ -98,3 +98,111 @@ test('shows sentence context and source links on the saved items page', async ({
 
   await savedPage.close();
 });
+
+test('highlights a whole-word match instead of a longer-word prefix', async ({
+  context,
+  extensionId,
+  popupPage
+}) => {
+  await popupPage.evaluate(async ([storageKey]) => {
+    await chrome.storage.local.set({
+      [storageKey]: [
+        {
+          id: 'saved-page-item-na',
+          text: 'Na',
+          translation: '钠',
+          explanationLanguage: 'zh-CN',
+          sentenceContext: 'Nato and Na.',
+          provider: 'openai-compatible',
+          model: 'mock-model',
+          sourceUrl: 'https://lingualens.test/article',
+          sourceTitle: 'LinguaLens Test Article',
+          createdAt: Date.UTC(2026, 6, 16)
+        }
+      ]
+    });
+  }, [savedItemsStorageKey]);
+
+  await popupPage.reload();
+  const pagePromise = context.waitForEvent('page');
+  await popupPage.getByRole('link', { name: 'View all' }).click();
+  const savedPage = await pagePromise;
+  await savedPage.waitForLoadState();
+
+  await expect(savedPage).toHaveURL(`chrome-extension://${extensionId}/saved.html`);
+  await expect(savedPage.locator('.contextText')).toHaveText('Nato and Na.');
+  await expect(savedPage.locator('.contextText mark')).toHaveText('Na');
+
+  const highlighted = await savedPage.locator('.contextText').evaluate((node) => {
+    const mark = node.querySelector('mark');
+    if (!mark || !mark.parentNode) {
+      return null;
+    }
+
+    const before = mark.previousSibling?.textContent ?? '';
+    const after = mark.nextSibling?.textContent ?? '';
+    return { before, marked: mark.textContent, after };
+  });
+
+  expect(highlighted).toEqual({
+    before: 'Nato and ',
+    marked: 'Na',
+    after: '.'
+  });
+
+  await savedPage.close();
+});
+
+test('highlights the stored occurrence when the same word appears twice', async ({
+  context,
+  extensionId,
+  popupPage
+}) => {
+  await popupPage.evaluate(async ([storageKey]) => {
+    await chrome.storage.local.set({
+      [storageKey]: [
+        {
+          id: 'saved-page-item-bank',
+          text: 'bank',
+          translation: '银行',
+          explanationLanguage: 'zh-CN',
+          sentenceContext: 'The bank by the river and the bank downtown.',
+          selectionStartInContext: 32,
+          provider: 'openai-compatible',
+          model: 'mock-model',
+          sourceUrl: 'https://lingualens.test/article',
+          sourceTitle: 'LinguaLens Test Article',
+          createdAt: Date.UTC(2026, 6, 16)
+        }
+      ]
+    });
+  }, [savedItemsStorageKey]);
+
+  await popupPage.reload();
+  const pagePromise = context.waitForEvent('page');
+  await popupPage.getByRole('link', { name: 'View all' }).click();
+  const savedPage = await pagePromise;
+  await savedPage.waitForLoadState();
+
+  const highlighted = await savedPage.locator('.contextText').evaluate((node) => {
+    const mark = node.querySelector('mark');
+    if (!mark) {
+      return null;
+    }
+
+    return {
+      before: mark.previousSibling?.textContent ?? '',
+      marked: mark.textContent,
+      after: mark.nextSibling?.textContent ?? ''
+    };
+  });
+
+  expect(highlighted).toEqual({
+    before: 'The bank by the river and the ',
+    marked: 'bank',
+    after: ' downtown.'
+  });
+
+  await expect(savedPage).toHaveURL(`chrome-extension://${extensionId}/saved.html`);
+  await savedPage.close();
+});

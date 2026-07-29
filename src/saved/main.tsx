@@ -66,7 +66,7 @@ function formatSavedDate(createdAt: number): string {
 
 function HighlightedContext({ item }: { item: SavedItem }) {
   const context = item.sentenceContext?.trim() || item.text;
-  const range = findTextRange(context, item.text);
+  const range = findTextRange(context, item.text, item.selectionStartInContext);
 
   if (!range) {
     return <>{context}</>;

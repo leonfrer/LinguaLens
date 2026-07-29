@@ -129,6 +129,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         pronunciationNotation: message.pronunciationNotation,
         explanationLanguage: message.explanationLanguage,
         sentenceContext: message.sentenceContext,
+        selectionStartInContext: message.selectionStartInContext,
         explanation: message.explanation,
         provider: message.provider,
         model: message.model,

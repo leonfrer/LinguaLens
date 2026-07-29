@@ -71,6 +71,11 @@ export type SavedItem = {
   pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
+  /**
+   * Start index of `text` within `sentenceContext` at save time.
+   * Used so Saved highlights the selected occurrence when the text appears more than once.
+   */
+  selectionStartInContext?: number;
   explanation?: string;
   provider?: LlmProvider;
   model?: string;
@@ -94,6 +99,7 @@ export type SaveItemMessage = {
   pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
+  selectionStartInContext?: number;
   explanation?: string;
   provider?: LlmProvider;
   model?: string;

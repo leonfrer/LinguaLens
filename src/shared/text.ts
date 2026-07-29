@@ -92,12 +92,18 @@ function findBestMatchStart(
   return bestStart;
 }
 
+export type ExtractedSentenceContext = {
+  context: string;
+  /** Start index of the selected text within `context`. */
+  selectionStart: number;
+};
+
 function extractSentenceFromNormalized(
   normalizedSource: string,
   selectionStart: number,
   selectionEnd: number,
   normalizedSelection: string
-): string {
+): ExtractedSentenceContext | undefined {
   const sentenceStartBoundary = Math.max(
     ...SENTENCE_TERMINATORS.map((punctuation) =>
       normalizedSource.lastIndexOf(punctuation, selectionStart - 1)
@@ -110,33 +116,60 @@ function extractSentenceFromNormalized(
     ? Math.min(...sentenceEndCandidates) + 1
     : normalizedSource.length;
 
-  const sentenceContext = normalizedSource
-    .slice(sentenceStartBoundary === -1 ? 0 : sentenceStartBoundary + 1, sentenceEndBoundary)
-    .trim()
-    .slice(0, 1000);
+  const rawStart = sentenceStartBoundary === -1 ? 0 : sentenceStartBoundary + 1;
+  const rawSlice = normalizedSource.slice(rawStart, sentenceEndBoundary);
+  const leadingWhitespace = rawSlice.match(/^\s*/)?.[0].length ?? 0;
+  const trailingWhitespace = rawSlice.match(/\s*$/)?.[0].length ?? 0;
+  const trimmedEnd =
+    trailingWhitespace > 0 ? rawSlice.length - trailingWhitespace : rawSlice.length;
+  const sentenceContext = rawSlice.slice(leadingWhitespace, trimmedEnd).slice(0, 1000);
 
-  return sentenceContext.toLocaleLowerCase() === normalizedSelection.toLocaleLowerCase()
-    ? ''
-    : sentenceContext;
+  if (!sentenceContext) {
+    return undefined;
+  }
+
+  if (sentenceContext.toLocaleLowerCase() === normalizedSelection.toLocaleLowerCase()) {
+    // Full sentence selected — context adds no extra signal.
+    return undefined;
+  }
+
+  const selectionStartInContext = selectionStart - rawStart - leadingWhitespace;
+  if (
+    selectionStartInContext < 0 ||
+    selectionStartInContext + normalizedSelection.length > sentenceContext.length
+  ) {
+    return {
+      context: sentenceContext,
+      selectionStart: Math.max(0, sentenceContext.toLocaleLowerCase().indexOf(
+        normalizedSelection.toLocaleLowerCase()
+      ))
+    };
+  }
+
+  return {
+    context: sentenceContext,
+    selectionStart: selectionStartInContext
+  };
 }
 
 /**
- * Extract the sentence that contains `selectedText` within `sourceText`.
+ * Extract the sentence that contains `selectedText` within `sourceText`, plus the
+ * selection's start offset inside that sentence.
  *
  * When `preferredStart` is provided, it is treated as a character offset into the
  * original (pre-normalization) `sourceText`, and the nearest matching occurrence is used.
  * This avoids picking the wrong instance when a word appears multiple times.
  */
-export function extractSentenceContainingText(
+export function extractSentenceContext(
   sourceText: string,
   selectedText: string,
   preferredStart?: number
-): string {
+): ExtractedSentenceContext | undefined {
   const { normalized: normalizedSource, origToNorm } = normalizeWithIndexMap(sourceText);
   const normalizedSelection = normalizeSelectedText(selectedText);
 
   if (!normalizedSource || !normalizedSelection) {
-    return '';
+    return undefined;
   }
 
   let preferredNormalizedStart: number | undefined;
@@ -154,7 +187,7 @@ export function extractSentenceContainingText(
   );
 
   if (selectionStart === -1) {
-    return '';
+    return undefined;
   }
 
   const selectionEnd = selectionStart + normalizedSelection.length;
@@ -164,4 +197,17 @@ export function extractSentenceContainingText(
     selectionEnd,
     normalizedSelection
   );
+}
+
+/**
+ * Extract the sentence that contains `selectedText` within `sourceText`.
+ *
+ * @see extractSentenceContext for the richer result that includes the match offset.
+ */
+export function extractSentenceContainingText(
+  sourceText: string,
+  selectedText: string,
+  preferredStart?: number
+): string {
+  return extractSentenceContext(sourceText, selectedText, preferredStart)?.context ?? '';
 }

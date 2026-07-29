@@ -1,4 +1,4 @@
-import { extractSentenceContainingText } from '../shared/text';
+import { extractSentenceContext, type ExtractedSentenceContext } from '../shared/text';
 
 /**
  * Block-level (or sectioning) elements that usually contain a full sentence.
@@ -62,7 +62,7 @@ function findContextContainer(node: Node): Node {
 export function getSentenceContextFromSelection(
   selection: Selection,
   selectedText: string
-): string | undefined {
+): ExtractedSentenceContext | undefined {
   if (!selection.rangeCount) {
     return undefined;
   }
@@ -78,9 +78,7 @@ export function getSentenceContextFromSelection(
   try {
     containerRange.selectNodeContents(container);
   } catch {
-    return (
-      extractSentenceContainingText(container.textContent ?? '', selectedText) || undefined
-    );
+    return extractSentenceContext(container.textContent ?? '', selectedText);
   }
 
   const sourceText = containerRange.toString();
@@ -97,7 +95,5 @@ export function getSentenceContextFromSelection(
     preferredStart = undefined;
   }
 
-  return (
-    extractSentenceContainingText(sourceText, selectedText, preferredStart) || undefined
-  );
+  return extractSentenceContext(sourceText, selectedText, preferredStart);
 }

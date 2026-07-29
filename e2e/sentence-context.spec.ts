@@ -4,6 +4,7 @@ import {
   getTranslationPromptPayload,
   mockTranslationEndpoint,
   routeTestArticle,
+  savedItemsStorageKey,
   seedExtensionSettings,
   selectArticleText,
   testArticleUrl
@@ -81,6 +82,48 @@ test('uses the sentence for the selected occurrence of a repeated word', async (
     selectedText: 'bank',
     sentenceContext: 'Later he went to the bank to open an account.'
   });
+
+  await page.close();
+});
+
+test('saves the selection offset so repeated substrings highlight correctly', async ({
+  context,
+  popupPage
+}) => {
+  await seedMockTranslator(popupPage);
+  await mockTranslationEndpoint(context, {
+    url: `${mockBaseUrl}/chat/completions`,
+    translation: '钠',
+    model: mockModel
+  });
+
+  await routeTestArticle(context, {
+    body: 'Nato and Na. Keep learning chemistry.'
+  });
+
+  const page = await context.newPage();
+  await page.goto(testArticleUrl);
+  await page.locator('#article').waitFor();
+  await selectArticleText(page, 'Na', { occurrence: 1 });
+
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel.getByText('钠')).toBeVisible();
+  await panel.getByRole('button', { name: 'Save' }).click();
+  await expect(panel.getByText('Saved')).toBeVisible();
+
+  const savedItems = await popupPage.evaluate(async ([storageKey]) => {
+    const result = await chrome.storage.local.get(storageKey);
+    return result[storageKey];
+  }, [savedItemsStorageKey]);
+
+  expect(savedItems).toEqual([
+    expect.objectContaining({
+      text: 'Na',
+      sentenceContext: 'Nato and Na.',
+      selectionStartInContext: 9,
+      translation: '钠'
+    })
+  ]);
 
   await page.close();
 });

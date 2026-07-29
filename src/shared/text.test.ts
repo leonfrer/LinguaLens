@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   extractSentenceContainingText,
+  extractSentenceContext,
   isValidSelectionText,
   normalizeSelectedText,
   normalizeWithIndexMap
@@ -105,5 +106,27 @@ describe('extractSentenceContainingText', () => {
     expect(extractSentenceContainingText(source, 'Submit')).toBe(
       'Click the Submit button to continue.'
     );
+  });
+});
+
+describe('extractSentenceContext', () => {
+  it('returns the selection start inside the extracted sentence', () => {
+    const source = 'First sentence. Nato and Na. Last sentence.';
+    const secondNa = source.lastIndexOf('Na');
+
+    expect(extractSentenceContext(source, 'Na', secondNa)).toEqual({
+      context: 'Nato and Na.',
+      selectionStart: 9
+    });
+  });
+
+  it('keeps the offset for a selection that is also a prefix of an earlier word', () => {
+    const source = 'Nato and Na.';
+    const secondNa = source.lastIndexOf('Na');
+
+    expect(extractSentenceContext(source, 'Na', secondNa)).toEqual({
+      context: 'Nato and Na.',
+      selectionStart: 9
+    });
   });
 });

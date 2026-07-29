@@ -11,6 +11,7 @@ export type PanelState = {
   pronunciationNotation?: string;
   explanationLanguage: ExplanationLanguage;
   sentenceContext?: string;
+  selectionStartInContext?: number;
   explanation?: string;
   provider?: LlmProvider;
   model?: string;

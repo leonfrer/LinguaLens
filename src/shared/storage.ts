@@ -64,6 +64,7 @@ export function createSavedItem(
     pronunciationNotation: payload.pronunciationNotation,
     explanationLanguage: payload.explanationLanguage,
     sentenceContext: payload.sentenceContext,
+    selectionStartInContext: payload.selectionStartInContext,
     explanation: payload.explanation,
     provider: payload.provider,
     model: payload.model,

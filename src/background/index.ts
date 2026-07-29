@@ -19,6 +19,11 @@ import { updateActionIcon } from './action-icon';
 
 const storageReady = initializeStorage();
 
+async function syncActionIcon(): Promise<void> {
+  const { wordLookupEnabled } = await storageReady.then(getSettings);
+  await updateActionIcon(wordLookupEnabled);
+}
+
 function handleSettingsChange(
   changes: Record<string, chrome.storage.StorageChange>,
   areaName: string
@@ -40,6 +45,9 @@ function handleSettingsChange(
 }
 
 chrome.storage.onChanged.addListener(handleSettingsChange);
+chrome.runtime.onStartup.addListener(() => {
+  void syncActionIcon().catch(() => undefined);
+});
 void storageReady
   .then(async (settings) => {
     applyInterfaceLanguage(settings.interfaceLanguage);

@@ -43,6 +43,105 @@ type TranslationPrompts = {
   prompt: string;
 };
 
+function getErrorStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const candidate = error as { statusCode?: unknown; responseStatus?: unknown; status?: unknown };
+  const status = candidate.statusCode ?? candidate.responseStatus ?? candidate.status;
+  return typeof status === 'number'
+    ? status
+    : typeof status === 'string' && /^\d{3}$/.test(status)
+      ? Number(status)
+      : undefined;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (!error || typeof error !== 'object') {
+    return '';
+  }
+
+  const candidate = error as { message?: unknown; responseBody?: unknown };
+  if (typeof candidate.responseBody === 'string') {
+    try {
+      const body = JSON.parse(candidate.responseBody) as {
+        error?: { message?: unknown } | string;
+        message?: unknown;
+      };
+      const message =
+        typeof body.error === 'object' && body.error
+          ? body.error.message
+          : body.error ?? body.message;
+      if (typeof message === 'string' && message.trim()) {
+        return message.trim();
+      }
+    } catch {
+      // Fall back to the SDK error message when the response is not JSON.
+    }
+  }
+
+  return typeof candidate.message === 'string' ? candidate.message.trim() : '';
+}
+
+function sanitizeErrorMessage(message: string, settings: Settings): string {
+  const secrets = [settings.apiKey.trim(), settings.baseUrl.trim()].filter(
+    (value) => value.length >= 4
+  );
+  const escapedSecrets = secrets.map((secret) =>
+    secret.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  );
+  const sanitized = escapedSecrets.length
+    ? message.replace(new RegExp(escapedSecrets.join('|'), 'gi'), '[redacted]')
+    : message;
+
+  return sanitized.replace(/\s+/g, ' ').trim().slice(0, 240);
+}
+
+export function formatTranslationError(error: unknown, settings: Settings): string {
+  const status = getErrorStatus(error);
+  const statusText = status ? String(status) : 'unknown';
+  const message = sanitizeErrorMessage(getErrorMessage(error), settings);
+  const lowerMessage = message.toLowerCase();
+
+  if (
+    lowerMessage.includes('fetch failed') ||
+    lowerMessage.includes('network') ||
+    lowerMessage.includes('enotfound') ||
+    lowerMessage.includes('econnrefused') ||
+    lowerMessage.includes('timeout')
+  ) {
+    return t('translationProviderNetworkError');
+  }
+
+  if (status === 401) {
+    return t('translationProviderUnauthorized', statusText);
+  }
+  if (status === 403) {
+    return t('translationProviderForbidden', statusText);
+  }
+  if (status === 404) {
+    return t('translationProviderNotFound', statusText);
+  }
+  if (status === 429) {
+    return t('translationProviderRateLimited', statusText);
+  }
+  if (status !== undefined && status >= 500) {
+    return t('translationProviderServerError', statusText);
+  }
+  if (status !== undefined && status >= 400) {
+    return t(
+      message ? 'translationProviderRequestFailed' : 'translationProviderBadRequest',
+      message ? [statusText, message] : statusText
+    );
+  }
+
+  return t(
+    message ? 'translationProviderUnknownError' : 'translationUnableWithProvider',
+    message || getEndpointLabel(settings.llmEndpointPreset, settings.baseUrl)
+  );
+}
+
 export function buildTranslationPrompts(
   text: string,
   sentenceContext: string | undefined,
@@ -182,13 +281,10 @@ export async function translateWithConfiguredProvider({
       provider: settings.llmProvider,
       model: settings.llmModel
     };
-  } catch {
+  } catch (error) {
     return {
       ok: false,
-      error: t(
-        'translationUnableWithProvider',
-        getEndpointLabel(settings.llmEndpointPreset, settings.baseUrl)
-      )
+      error: formatTranslationError(error, settings)
     };
   }
 }

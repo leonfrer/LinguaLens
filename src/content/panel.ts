@@ -292,7 +292,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         <div class="explanation"${state.explanation ? '' : ' hidden'}></div>
       </div>
       <div class="actions">
-        <span class="status"></span>
+        <span class="status"${state.status === 'error' ? ' role="alert"' : ''}></span>
         <div class="actionButtons">
           <button class="secondary iconButton" type="button" data-action="close" aria-label="${t('panelClose')}">
             <svg aria-hidden="true" viewBox="0 0 20 20">

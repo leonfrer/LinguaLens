@@ -1,40 +1,22 @@
 # AGENTS.md
 
-## Code Map
+## Code Map and Architecture
 
-LinguaLens is a Chrome Manifest V3 extension that translates selected text using AI. Built with Vite, React, TypeScript, and `@crxjs/vite-plugin`.
+LinguaLens is a Chrome Manifest V3 extension that translates selected text using AI (Vite, React, TypeScript, `@crxjs/vite-plugin`).
 
-### UI pages (each has `main.tsx` and `styles.css`)
+**Full code map, runtime diagram, messaging/storage sketch, and e2e inventory:** see [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
-- Popup: `src/popup/`
-- Settings: `src/settings/`
-- Saved items: `src/saved/` (includes `highlight.ts` for search keyword highlighting)
+Open that file when changing directory layout, content/background boundaries, storage keys, message types, provider wiring, or Playwright harness/specs.
 
-### Extension infrastructure
+### Critical paths (summary)
 
-- Content script entry: `src/content/selection.ts` → `index.ts` (selection handling), `panel.ts` (shadow-DOM floating panel)
-- Background service worker entry: `src/background/service-worker.ts` → `index.ts` (message routing), `action-icon.ts` (toolbar icon enabled/disabled state)
-- Manifest: `manifest.config.ts`
-- App-wide constants: `src/config.ts`
-- Locales: `public/_locales/{en,zh_CN,zh_TW}/messages.json`
-
-### Shared modules (`src/shared/`)
-
-- `types.ts` — core TypeScript types (settings, messages, saved items)
-- `storage.ts` — Chrome storage for settings, credentials, contentSettings, and saved items
-- `translation.ts` — AI translation via Vercel AI SDK
-- `providers.ts` — OpenAI-compatible endpoint presets, base URLs, and default models
-- `models.ts` — fetch and normalize model lists from the configured provider
-- `text.ts` — text selection normalization and sentence context extraction
-- `i18n.ts`, `localization.ts`, `languages.ts` — internationalization and locale switching
-- `pronunciation.ts` — pronunciation preference defaults and normalization
-- `theme.ts`, `theme.css` — light/dark/system theme management
-- Shared components: `ManagementHeader.tsx`, `ThemeSwitcher.tsx`, `management.css`
-
-### Tests
-
-- Unit tests: co-located `*.test.ts` files in `src/shared/`, `src/background/`, and `src/saved/` (Vitest)
-- E2E tests: `e2e/*.spec.ts` with custom Playwright fixtures in `e2e/fixtures/`
+- UI: `src/popup/`, `src/settings/`, `src/saved/`
+- Content: `src/content/` (selection + shadow-DOM panel)
+- Background: `src/background/` (translation, save, content settings, action icon)
+- Shared: `src/shared/` (`types`, `storage`, `translation`, `providers`, …)
+- Manifest / constants / locales: `manifest.config.ts`, `src/config.ts`, `public/_locales/`
+- Unit tests: co-located `*.test.ts` (Vitest)
+- E2E: `e2e/*.spec.ts`, fixtures in `e2e/fixtures/` (Playwright; loads `dist/`)
 
 ## Architecture (do not break)
 

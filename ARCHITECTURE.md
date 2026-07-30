@@ -24,7 +24,7 @@ High-level flow:
 | --- | --- | --- |
 | Popup | `src/popup/` | Quick settings, recent items, links to full pages |
 | Settings | `src/settings/` | Full configuration (provider, model, i18n, pronunciation) |
-| Saved items | `src/saved/` | Browse/search saved items; `highlight.ts` for keyword highlighting |
+| Saved items | `src/saved/` | Browse saved items; `highlight.ts` marks the saved selection inside sentence context |
 
 HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
@@ -32,7 +32,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
 | Piece | Path | Role |
 | --- | --- | --- |
-| Content script entry | `src/content/selection.ts` | Manifest entry → `index.ts` (selection), `panel.ts` (floating panel) |
+| Content script entry | `src/content/selection.ts` | Manifest entry → `index.ts` (selection lifecycle), `selection-context.ts` (DOM sentence context), `panel.ts` (floating panel) |
 | Background entry | `src/background/service-worker.ts` | Manifest entry → `index.ts` (routing), `action-icon.ts` (toolbar icon) |
 | Manifest | `manifest.config.ts` | MV3 permissions, entries, locales |
 | App constants | `src/config.ts` | Shared non-secret constants |
@@ -43,7 +43,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | Module | Responsibility |
 | --- | --- |
 | `types.ts` | Settings, credentials, content settings, saved items, message payloads |
-| `storage.ts` | `chrome.storage.local` for settings, credentials, contentSettings, savedItems |
+| `storage.ts` | `chrome.storage.local` buckets + read/write helpers (see Storage below) |
 | `translation.ts` | AI translation via Vercel AI SDK |
 | `providers.ts` | Endpoint presets, base URLs, default models |
 | `models.ts` | Fetch and normalize model lists from the configured provider |
@@ -65,7 +65,7 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` 
   - `LINGUALENS_TRANSLATE` — selected text (+ optional sentence context) → translation result
   - `LINGUALENS_SAVE_ITEM` — persist a saved item from the panel / UI
   - `LINGUALENS_GET_CONTENT_SETTINGS` — content-safe settings subset for the panel
-- **Storage** (`src/shared/storage.ts`): separate buckets for settings, credentials, contentSettings, and savedItems. Keep credentials out of content scripts, saved items, exports, logs, and errors.
+- **Storage** (`src/shared/storage.ts`): four `chrome.storage.local` buckets (see below). Keep credentials out of content scripts, saved items, logs, errors, and any future export/share paths.
 - **LLM**: OpenAI-compatible providers via Vercel AI SDK; presets live in `src/shared/providers.ts`.
 
 ## Messaging and storage sketch
@@ -84,6 +84,17 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` 
     → chrome.storage / background as needed
     → credentials only in settings / background paths
 ```
+
+### Storage buckets
+
+| Key | Contents |
+| --- | --- |
+| `lingualens.settings` | Non-secret settings only (`StoredSettings` = `Settings` without `apiKey`) |
+| `lingualens.credentials` | `{ apiKey }` only |
+| `lingualens.contentSettings` | Derived content-safe subset published for the content script |
+| `lingualens.savedItems` | Saved translations and metadata (never credentials) |
+
+In-memory `Settings` still includes `apiKey` for settings UI convenience; `getSettings` / `updateSettings` merge and split credentials at the storage boundary. Legacy `apiKey` values left on the settings object are ignored on read.
 
 `ContentSettings` is a safe subset of `Settings` (`appearance`, `interfaceLanguage`, `wordLookupEnabled`, `explanationLanguage`) for content-script use.
 
@@ -126,7 +137,7 @@ Typical patterns:
 
 ### Mock vs live providers
 
-- **Mock** (`provider.spec.ts`): Playwright route stubs; safe for CI and default local runs; asserts errors never include the configured API key.
+- **Mock** (`provider.spec.ts`): Playwright route stubs; safe for default local runs and any future CI job that runs e2e (the tag/PR build workflow currently builds only); asserts errors never include the configured API key.
 - **Live** (`provider.live.spec.ts`): currently NVIDIA NIM via:
   - `LINGUALENS_E2E_NVIDIA_API_KEY` (required to run; otherwise `test.skip`)
   - `LINGUALENS_E2E_NVIDIA_MODEL` (optional; default `meta/llama-3.1-8b-instruct`)  

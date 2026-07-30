@@ -204,6 +204,19 @@ async function handleSelectionChange(): Promise<void> {
     return;
   }
 
+  // Some pages keep the selection when the user clicks elsewhere. mouseup /
+  // selectionchange still fire, so skip a duplicate request for the same text
+  // while a non-error result (or in-flight request) is already shown.
+  if (
+    text === lastRequestedText &&
+    currentState &&
+    currentState.explanationLanguage === explanationLanguage &&
+    currentState.status !== 'error'
+  ) {
+    positionPanel(selection);
+    return;
+  }
+
   const translationPromise = translateSelection(
     text,
     explanationLanguage,

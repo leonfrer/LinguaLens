@@ -11,7 +11,7 @@ Open that file when changing directory layout, content/background boundaries, st
 ### Critical paths (summary)
 
 - UI: `src/popup/`, `src/settings/`, `src/saved/`
-- Content: `src/content/` (selection + shadow-DOM panel)
+- Content: `src/content/` (selection, sentence context, shadow-DOM panel)
 - Background: `src/background/` (translation, save, content settings, action icon)
 - Shared: `src/shared/` (`types`, `storage`, `translation`, `providers`, …)
 - Manifest / constants / locales: `manifest.config.ts`, `src/config.ts`, `public/_locales/`
@@ -23,7 +23,7 @@ Open that file when changing directory layout, content/background boundaries, st
 - Content script: selection and panel UI only; never receives or stores API keys.
 - Background: owns translation, save, content-settings fan-out, and action icon updates.
 - Messaging: `LINGUALENS_TRANSLATE` | `LINGUALENS_SAVE_ITEM` | `LINGUALENS_GET_CONTENT_SETTINGS` (see `src/shared/types.ts`).
-- Storage: settings vs credentials vs contentSettings vs savedItems (`src/shared/storage.ts`). Keep credentials out of content scripts, saved items, exports, logs, and errors.
+- Storage: settings vs credentials vs contentSettings vs savedItems (`src/shared/storage.ts`). In-memory `Settings` may include `apiKey`; only the credentials bucket persists it. Keep credentials out of content scripts, saved items, logs, errors, and any future export/share paths.
 - LLM: OpenAI-compatible providers via Vercel AI SDK; endpoint presets live in `src/shared/providers.ts`.
 
 ## Commands
@@ -46,7 +46,7 @@ Open that file when changing directory layout, content/background boundaries, st
 
 - Keep direct dependencies pinned to exact versions and use `npm ci` in CI and release workflows.
 - Keep DOM-heavy behavior testable by moving parsing and transformations into pure modules.
-- Treat user API keys as sensitive: never hard-code, commit, log, expose outside settings, include in errors, or store with saved items or exports.
+- Treat user API keys as sensitive: never hard-code, commit, log, expose outside settings, include in errors, or store with saved items (or any future export/share payload).
 - Prefer the full local environment for dependency installation, Playwright, and Chrome extension loading; do not claim e2e passed if it was not run.
 - Prefer the `gh` CLI for GitHub remote operations. Create regular PRs unless a draft is requested.
 
@@ -54,7 +54,7 @@ Open that file when changing directory layout, content/background boundaries, st
 
 - Name branches `<type>/<short-kebab-case-description>` using lowercase kebab-case; use `feat/` for feature work and never use a `codex/` prefix.
 - Commit messages and PR titles use Conventional Commits, such as `feat(content): detect selected text`.
-- Keep subjects imperative, lowercase, concise, and under 72 characters. Common scopes include `popup`, `settings`, `saved`, `content`, `background`, `shared`, `i18n`, `e2e`, `manifest`, `build`, `release`, and `deps`.
-- Use `chore(deps): ...` for dependency updates. PR title format is enforced by `.github/workflows/lint-pr.yml`.
+- Keep subjects imperative, lowercase, concise, and under 72 characters. Allowed types/scopes match `.github/workflows/lint-pr.yml` (types include `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`; scopes include `popup`, `settings`, `saved`, `content`, `background`, `shared`, `i18n`, `e2e`, `manifest`, `build`, `release`, `deps`).
+- Use `chore(deps): ...` for dependency updates. PR title format is enforced by the lint-pr workflow.
 - Use `.codex/skills/lingualens-release/SKILL.md` when preparing, PRing, tagging, documenting, or verifying a release.
 - Package and manifest versions use plain semver; Git tags add `v`.

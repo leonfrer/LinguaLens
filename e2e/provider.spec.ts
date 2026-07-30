@@ -193,7 +193,11 @@ test('shows provider errors without leaking the configured API key', async ({ co
 
   const panel = page.locator('#lingualens-selection-panel');
   await expect(panel).toBeVisible();
-  await expect(panel.getByText('Unable to translate with NVIDIA NIM.')).toBeVisible();
+  await expect(
+    panel.getByText(
+      'The provider rejected the API key (HTTP 401). Check that the key is correct and has access to this model.'
+    )
+  ).toBeVisible();
   await expect(panel.getByText('invalid-provider-key')).toHaveCount(0);
   await expect(panel.getByRole('button', { name: 'Save' })).toBeDisabled();
   await page.close();

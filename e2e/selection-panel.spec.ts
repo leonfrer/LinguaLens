@@ -1,6 +1,8 @@
 import { expect, test } from './fixtures/extension';
 import {
+  mockTranslationEndpoint,
   routeTestArticle,
+  seedExtensionSettings,
   selectArticleText,
   settingsStorageKey,
   testArticleUrl
@@ -96,5 +98,49 @@ test('supports keyboard selection, close, invalid selection, and scroll dismissa
     window.scrollTo(0, 160);
   });
   await expect(panel).toHaveCount(0);
+  await page.close();
+});
+
+test('does not re-translate when a click keeps the same selection', async ({
+  context,
+  popupPage
+}) => {
+  const mockBaseUrl = 'https://translation.example.test/v1';
+  const mockModel = 'mock-stable-selection-model';
+  await seedExtensionSettings(popupPage, {
+    apiKey: 'mocked-selection-key',
+    endpointPreset: 'custom',
+    baseUrl: mockBaseUrl,
+    model: mockModel
+  });
+  const mock = await mockTranslationEndpoint(context, {
+    url: `${mockBaseUrl}/chat/completions`,
+    translation: '外语阅读',
+    model: mockModel
+  });
+
+  await routeTestArticle(context);
+  const page = await context.newPage();
+  await page.goto(testArticleUrl);
+  await page.locator('#article').waitFor();
+  await selectArticleText(page, 'foreign-language reading');
+
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel.getByText('外语阅读')).toBeVisible();
+  await expect.poll(() => mock.getRequestBodies().length).toBe(1);
+
+  // Simulate a page click that leaves the selection intact (common on some sites).
+  await page.evaluate(() => {
+    document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, button: 0 }));
+    document.dispatchEvent(new Event('selectionchange'));
+  });
+
+  // Debounce is 160ms; wait long enough that a duplicate would have been sent.
+  await page.waitForTimeout(400);
+  expect(mock.getRequestBodies()).toHaveLength(1);
+  await expect(panel.getByText('外语阅读')).toBeVisible();
+  await expect(panel.getByText('Generating translation')).toHaveCount(0);
+
   await page.close();
 });

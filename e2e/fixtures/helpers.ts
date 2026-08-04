@@ -33,7 +33,7 @@ export async function routeTestArticle(
           </head>
           <body>
             <main>
-              <p id="article">${body}</p>
+              <div id="article">${body}</div>
             </main>
           </body>
         </html>

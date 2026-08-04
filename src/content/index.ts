@@ -140,6 +140,19 @@ async function translateSelection(
   renderCurrentPanel();
 }
 
+function repositionOpenPanel(): void {
+  if (!currentState) {
+    return;
+  }
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) {
+    return;
+  }
+
+  positionPanel(selection);
+}
+
 function renderCurrentPanel(): void {
   if (!currentState) {
     return;
@@ -151,6 +164,15 @@ function renderCurrentPanel(): void {
       void saveCurrentSelection();
     }
   });
+
+  // Height changes across loading → ready/error/saved; remeasure after layout.
+  window.requestAnimationFrame(() => {
+    repositionOpenPanel();
+  });
+}
+
+function handleViewportResize(): void {
+  repositionOpenPanel();
 }
 
 async function saveCurrentSelection(): Promise<void> {
@@ -291,7 +313,8 @@ function startContentScript(): void {
   document.addEventListener('selectionchange', () => {
     scheduleSelectionChange();
   });
-  window.addEventListener('scroll', hideCurrentPanel, { passive: true });
+  // Keep the absolute-positioned panel on window scroll; only remeasure on resize.
+  window.addEventListener('resize', handleViewportResize);
   chrome.storage.onChanged.addListener(handleStorageChange);
   colorScheme.addEventListener('change', refreshPanelAppearance);
   void contentSettingsReady.catch(() => undefined);

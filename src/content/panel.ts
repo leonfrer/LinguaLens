@@ -1,6 +1,11 @@
 import { getInterfaceLocale, t } from '../shared/i18n';
 import { resolveAppearance } from '../shared/theme';
 import type { Appearance, ExplanationLanguage, LlmProvider } from '../shared/types';
+import {
+  PANEL_FALLBACK_HEIGHT_PX,
+  PANEL_FALLBACK_WIDTH_PX,
+  computePanelPosition
+} from './panel-position';
 
 const PANEL_ID = 'lingualens-selection-panel';
 
@@ -84,14 +89,28 @@ export function positionPanel(selection: Selection): void {
 
   const range = selection.getRangeAt(0);
   const rect = range.getBoundingClientRect();
-  const top = window.scrollY + rect.bottom + 8;
-  const left = Math.min(
-    window.scrollX + rect.left,
-    window.scrollX + document.documentElement.clientWidth - 332
-  );
+  const hostRect = panelHost.getBoundingClientRect();
+  const panelWidth = hostRect.width || PANEL_FALLBACK_WIDTH_PX;
+  const panelHeight = hostRect.height || PANEL_FALLBACK_HEIGHT_PX;
+  const { top, left } = computePanelPosition({
+    selection: {
+      top: rect.top,
+      left: rect.left,
+      bottom: rect.bottom,
+      right: rect.right,
+      width: rect.width,
+      height: rect.height
+    },
+    panelWidth,
+    panelHeight,
+    viewportWidth: document.documentElement.clientWidth,
+    viewportHeight: document.documentElement.clientHeight,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY
+  });
 
-  panelHost.style.top = `${Math.max(window.scrollY + 8, top)}px`;
-  panelHost.style.left = `${Math.max(window.scrollX + 12, left)}px`;
+  panelHost.style.top = `${top}px`;
+  panelHost.style.left = `${left}px`;
 }
 
 export function renderPanel(state: PanelState, actions: PanelActions): void {

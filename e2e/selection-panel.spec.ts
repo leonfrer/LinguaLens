@@ -72,7 +72,7 @@ test('toggles word lookup from the popup and suppresses selection handling', asy
   await page.close();
 });
 
-test('supports keyboard selection, close, invalid selection, and scroll dismissal', async ({
+test('supports keyboard selection, close, invalid selection, and stay-on-scroll', async ({
   context
 }) => {
   await routeTestArticle(context);
@@ -97,7 +97,58 @@ test('supports keyboard selection, close, invalid selection, and scroll dismissa
   await page.evaluate(() => {
     window.scrollTo(0, 160);
   });
-  await expect(panel).toHaveCount(0);
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('selected text')).toBeVisible();
+  await page.close();
+});
+
+test('opens the panel above a selection near the viewport bottom', async ({ context }) => {
+  await routeTestArticle(context, {
+    body: `
+      <span id="top-line">top anchor text for spacing</span>
+      <div style="height: 85vh"></div>
+      <span id="bottom-target">bottom-edge lookup phrase</span>
+    `
+  });
+
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 900, height: 700 });
+  await page.goto(testArticleUrl);
+  await page.locator('#bottom-target').waitFor();
+  await page.locator('#bottom-target').scrollIntoViewIfNeeded();
+  await selectArticleText(page, 'bottom-edge lookup phrase');
+
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('bottom-edge lookup phrase')).toBeVisible();
+
+  const geometry = await page.evaluate(() => {
+    const host = document.querySelector('#lingualens-selection-panel');
+    const target = document.querySelector('#bottom-target');
+    if (!(host instanceof HTMLElement) || !(target instanceof HTMLElement)) {
+      return null;
+    }
+
+    const panelRect = host.getBoundingClientRect();
+    const selectionRect = target.getBoundingClientRect();
+    return {
+      panelTop: panelRect.top,
+      panelBottom: panelRect.bottom,
+      panelLeft: panelRect.left,
+      panelRight: panelRect.right,
+      selectionTop: selectionRect.top,
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth
+    };
+  });
+
+  expect(geometry).not.toBeNull();
+  expect(geometry!.panelBottom).toBeLessThanOrEqual(geometry!.selectionTop + 1);
+  expect(geometry!.panelTop).toBeGreaterThanOrEqual(0);
+  expect(geometry!.panelBottom).toBeLessThanOrEqual(geometry!.viewportHeight);
+  expect(geometry!.panelLeft).toBeGreaterThanOrEqual(0);
+  expect(geometry!.panelRight).toBeLessThanOrEqual(geometry!.viewportWidth);
+  await expect(panel.getByRole('button', { name: 'Close' })).toBeVisible();
   await page.close();
 });
 

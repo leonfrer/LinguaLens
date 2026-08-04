@@ -52,6 +52,7 @@ Open that file when changing directory layout, content/background boundaries, st
 
 ## Git and Release
 
+- Write GitHub issue titles and bodies in English (same for PR descriptions unless a template says otherwise).
 - Name branches `<type>/<short-kebab-case-description>` using lowercase kebab-case; use `feat/` for feature work and never use a `codex/` prefix.
 - Commit messages and PR titles use Conventional Commits, such as `feat(content): detect selected text`.
 - Keep subjects imperative, lowercase, concise, and under 72 characters. Allowed types/scopes match `.github/workflows/lint-pr.yml` (types include `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`; scopes include `popup`, `settings`, `saved`, `content`, `background`, `shared`, `i18n`, `e2e`, `manifest`, `build`, `release`, `deps`).

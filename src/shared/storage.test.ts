@@ -363,6 +363,7 @@ describe('content settings', () => {
       appearance: 'system',
       interfaceLanguage: 'system',
       wordLookupEnabled: true,
+      instantTranslateOnSelect: true,
       explanationLanguage: 'zh-CN'
     });
   });
@@ -397,6 +398,7 @@ describe('content settings', () => {
         appearance: 'system',
         interfaceLanguage: 'system',
         wordLookupEnabled: true,
+        instantTranslateOnSelect: true,
         explanationLanguage: 'zh-CN'
       }
     });

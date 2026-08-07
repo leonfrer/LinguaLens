@@ -171,7 +171,13 @@
     "message": "Selection lookup"
   },
   "settingsWordLookupDescription": {
-    "message": "Show the translation panel after you select text."
+    "message": "Enable translating text you select on web pages."
+  },
+  "settingsInstantTranslateOnSelect": {
+    "message": "Translate immediately on select"
+  },
+  "settingsInstantTranslateOnSelectDescription": {
+    "message": "When off, show a floating icon after selection and translate only when you click it."
   },
   "settingsPronunciationLookup": {
     "message": "Pronunciation lookup"
@@ -317,6 +323,9 @@
   },
   "panelTranslationAriaLabel": {
     "message": "LinguaLens translation"
+  },
+  "triggerIconTranslate": {
+    "message": "Translate selection with LinguaLens"
   },
   "panelTranslatingStatus": {
     "message": "Translating..."

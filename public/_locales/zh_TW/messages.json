@@ -171,7 +171,13 @@
     "message": "劃詞查詢"
   },
   "settingsWordLookupDescription": {
-    "message": "選取文字後顯示翻譯面板。"
+    "message": "啟用在網頁中選取文字後的翻譯功能。"
+  },
+  "settingsInstantTranslateOnSelect": {
+    "message": "選詞後立即翻譯"
+  },
+  "settingsInstantTranslateOnSelectDescription": {
+    "message": "關閉後，選取文字時先顯示浮動圖示，點擊圖示後再發起翻譯。"
   },
   "settingsPronunciationLookup": {
     "message": "查詢發音"
@@ -317,6 +323,9 @@
   },
   "panelTranslationAriaLabel": {
     "message": "LinguaLens 翻譯"
+  },
+  "triggerIconTranslate": {
+    "message": "使用 LinguaLens 翻譯選取文字"
   },
   "panelTranslatingStatus": {
     "message": "翻譯中..."

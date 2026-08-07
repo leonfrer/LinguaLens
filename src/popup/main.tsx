@@ -83,6 +83,23 @@ function QuickSettingsPanel({
           </span>
         </label>
 
+        {settings.wordLookupEnabled ? (
+          <label className="quickToggleControl">
+            <span>{t('settingsInstantTranslateOnSelect')}</span>
+            <span className="toggleControl">
+              <input
+                aria-label={t('settingsInstantTranslateOnSelect')}
+                checked={settings.instantTranslateOnSelect}
+                type="checkbox"
+                onChange={(event) => {
+                  onSettingsChange({ instantTranslateOnSelect: event.target.checked });
+                }}
+              />
+              <span className="toggleSwitch" aria-hidden="true" />
+            </span>
+          </label>
+        ) : null}
+
         <label className="quickSelectControl">
           <span>{t('settingsExplanationLanguage')}</span>
           <select

@@ -18,6 +18,9 @@ test('shows all settings and links back to saved items', async ({ context, exten
   await expect(settingsPage.getByRole('heading', { name: 'AI service' })).toBeVisible();
   await expect(settingsPage.getByRole('checkbox', { name: 'Selection lookup' })).toBeChecked();
   await expect(
+    settingsPage.getByRole('checkbox', { name: 'Translate immediately on select' })
+  ).toBeChecked();
+  await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).not.toBeChecked();
   await expect(
@@ -47,6 +50,7 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   const settingsPage = await context.newPage();
   await settingsPage.goto(`chrome-extension://${extensionId}/settings.html`);
 
+  await settingsPage.getByRole('checkbox', { name: 'Translate immediately on select' }).uncheck();
   await settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
   const skipLongTextPronunciation = settingsPage.getByRole('checkbox', {
     name: 'Skip pronunciation for long text'
@@ -100,6 +104,9 @@ test('saves reading and AI service settings', async ({ context, extensionId }) =
   expect(storedData[credentialsStorageKey]).toEqual({ apiKey: 'test-api-key' });
 
   await settingsPage.reload();
+  await expect(
+    settingsPage.getByRole('checkbox', { name: 'Translate immediately on select' })
+  ).not.toBeChecked();
   await expect(
     settingsPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).toBeChecked();

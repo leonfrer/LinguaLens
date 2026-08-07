@@ -32,6 +32,51 @@ test('shows an API key setup error from the content script selection flow', asyn
   await page.close();
 });
 
+test('icon mode shows a floating trigger and does not call the API until click', async ({
+  context,
+  popupPage
+}) => {
+  const mockBaseUrl = 'https://translation.example.test/v1';
+  const mockModel = 'mock-icon-mode-model';
+  await seedExtensionSettings(popupPage, {
+    instantTranslateOnSelect: false,
+    apiKey: 'mocked-icon-mode-key',
+    endpointPreset: 'custom',
+    baseUrl: mockBaseUrl,
+    model: mockModel
+  });
+  const mock = await mockTranslationEndpoint(context, {
+    url: `${mockBaseUrl}/chat/completions`,
+    translation: '外语阅读',
+    explanation: 'icon-mode mock explanation',
+    model: mockModel
+  });
+  await routeTestArticle(context);
+
+  const page = await context.newPage();
+  await page.goto(testArticleUrl);
+  await page.locator('#article').waitFor();
+  await selectArticleText(page, 'foreign-language reading');
+
+  const trigger = page.locator('#lingualens-selection-trigger');
+  await expect(trigger).toBeVisible();
+  await expect(page.locator('#lingualens-selection-panel')).toHaveCount(0);
+
+  // Debounce is 160ms; wait long enough that an eager translate would have fired.
+  await page.waitForTimeout(400);
+  expect(mock.getRequestBodies()).toHaveLength(0);
+
+  await trigger.getByRole('button', { name: 'Translate selection with LinguaLens' }).click();
+
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('foreign-language reading')).toBeVisible();
+  await expect(panel.getByText('外语阅读')).toBeVisible();
+  await expect.poll(() => mock.getRequestBodies().length).toBe(1);
+  await expect(trigger).toHaveCount(0);
+  await page.close();
+});
+
 test('toggles word lookup from the popup and suppresses selection handling', async ({
   context,
   popupPage

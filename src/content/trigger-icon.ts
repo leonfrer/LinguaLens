@@ -2,8 +2,11 @@ import { getInterfaceLocale, t } from '../shared/i18n';
 import { resolveAppearance } from '../shared/theme';
 import type { Appearance } from '../shared/types';
 
-const TRIGGER_ICON_ID = 'lingualens-selection-trigger';
+const TRIGGER_ICON_ID = 'lingualens-selection-trigger';/** Hit box / max visual size (hover). Default idle size is scaled down from this. */
 const ICON_SIZE_PX = 32;
+/** Idle scale relative to ICON_SIZE_PX (hover returns to 1). */
+const ICON_IDLE_SCALE = 0.88;
+const ICON_HOVER_TRANSITION_MS = 160;
 const ICON_GAP_PX = 6;
 const VIEWPORT_EDGE_PX = 8;
 
@@ -141,13 +144,15 @@ export function showTriggerIcon(selection: Selection, onClick: () => void): void
       }
 
       button {
+        align-items: center;
         appearance: none;
         background: transparent;
         border: 0;
         border-radius: 0;
         cursor: pointer;
-        display: block;
+        display: inline-flex;
         height: ${ICON_SIZE_PX}px;
+        justify-content: center;
         margin: 0;
         padding: 0;
         width: ${ICON_SIZE_PX}px;
@@ -158,17 +163,30 @@ export function showTriggerIcon(selection: Selection, onClick: () => void): void
         outline-offset: 2px;
       }
 
-      button:hover img {
-        filter: drop-shadow(0 4px 10px var(--trigger-shadow)) brightness(1.04);
-      }
-
       img {
         /* Keep the asset's own silhouette (no circular crop). */
         border-radius: 0;
         display: block;
         filter: drop-shadow(0 3px 8px var(--trigger-shadow));
         height: ${ICON_SIZE_PX}px;
+        transform: scale(${ICON_IDLE_SCALE});
+        transform-origin: center center;
+        transition:
+          transform ${ICON_HOVER_TRANSITION_MS}ms ease,
+          filter ${ICON_HOVER_TRANSITION_MS}ms ease;
         width: ${ICON_SIZE_PX}px;
+      }
+
+      button:hover img,
+      button:focus-visible img {
+        filter: drop-shadow(0 4px 12px var(--trigger-shadow)) brightness(1.04);
+        transform: scale(1);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        img {
+          transition: none;
+        }
       }
     </style>
     <button type="button" aria-label="${t('triggerIconTranslate')}">

@@ -176,7 +176,9 @@ h1 {
 
 .savedCards {
   display: grid;
+  /* Prevent long sentence min-content from expanding past page padding. */
   gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .savedCard {

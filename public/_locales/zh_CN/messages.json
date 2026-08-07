@@ -271,6 +271,21 @@
       }
     }
   },
+  "savedBackupButton": {
+    "message": "备份"
+  },
+  "savedRestoreButton": {
+    "message": "恢复"
+  },
+  "savedRestoreSuccess": {
+    "message": "已恢复：新增 $1 条，更新 $2 条。"
+  },
+  "savedRestoreInvalidFile": {
+    "message": "该文件不是有效的 LinguaLens 保存项备份。"
+  },
+  "savedRestoreUnsupportedVersion": {
+    "message": "不支持此备份格式。请更新 LinguaLens 后重试。"
+  },
   "emptySavedHint": {
     "message": "配置 API 密钥后，在网页中选中文本即可翻译并保存。"
   },

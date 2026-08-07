@@ -10,6 +10,7 @@ import {
   DEFAULT_PRONUNCIATION_PREFERENCES,
   normalizePronunciationPreferences
 } from './pronunciation';
+import { mergeSavedItems, type MergeSavedItemsResult } from './saved-items-backup';
 import type {
   LlmEndpointPreset,
   LlmProvider,
@@ -231,16 +232,27 @@ export async function getSavedItems(): Promise<SavedItem[]> {
   });
 }
 
+export async function setSavedItems(items: SavedItem[]): Promise<void> {
+  await chrome.storage.local.set({ [SAVED_ITEMS_KEY]: items });
+}
+
 export async function saveItem(payload: Omit<SaveItemMessage, 'type'>): Promise<SavedItem> {
   const item = createSavedItem(payload);
   const items = await getSavedItems();
-  await chrome.storage.local.set({ [SAVED_ITEMS_KEY]: [item, ...items] });
+  await setSavedItems([item, ...items]);
   return item;
 }
 
 export async function deleteSavedItem(itemId: string): Promise<void> {
   const items = await getSavedItems();
-  await chrome.storage.local.set({
-    [SAVED_ITEMS_KEY]: items.filter((item) => item.id !== itemId)
-  });
+  await setSavedItems(items.filter((item) => item.id !== itemId));
+}
+
+export async function mergeSavedItemsFromBackup(
+  incoming: SavedItem[]
+): Promise<MergeSavedItemsResult> {
+  const local = await getSavedItems();
+  const result = mergeSavedItems(local, incoming);
+  await setSavedItems(result.items);
+  return result;
 }

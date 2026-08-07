@@ -24,7 +24,7 @@ High-level flow:
 | --- | --- | --- |
 | Popup | `src/popup/` | Quick settings, recent items, links to full pages |
 | Settings | `src/settings/` | Full configuration (provider, model, i18n, pronunciation) |
-| Saved items | `src/saved/` | Browse saved items; `highlight.ts` marks the saved selection inside sentence context |
+| Saved items | `src/saved/` | Browse saved items; backup/restore (merge by id); `highlight.ts` marks the saved selection inside sentence context |
 
 HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
@@ -44,6 +44,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | --- | --- |
 | `types.ts` | Settings, credentials, content settings, saved items, message payloads |
 | `storage.ts` | `chrome.storage.local` buckets + read/write helpers (see Storage below) |
+| `saved-items-backup.ts` | Versioned saved-items backup envelope (JSON), parse/validate, merge-by-id |
 | `translation.ts` | AI translation via Vercel AI SDK |
 | `providers.ts` | Endpoint presets, base URLs, default models |
 | `models.ts` | Fetch and normalize model lists from the configured provider |
@@ -95,6 +96,10 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` 
 | `lingualens.savedItems` | Saved translations and metadata (never credentials) |
 
 In-memory `Settings` still includes `apiKey` for settings UI convenience; `getSettings` / `updateSettings` merge and split credentials at the storage boundary. Legacy `apiKey` values left on the settings object are ignored on read.
+
+**Saved-items backup / restore** (Saved page only; `src/shared/saved-items-backup.ts`): private `.lingualens-backup` JSON (`format: lingualens-saved-items-backup`, `version: 1` via `BACKUP_VERSION`). Restore **merges by `id`** — local-only items kept; same id overwritten by backup; credentials never included.
+
+`version` is the backup **schema** version (not app/package semver). If the envelope or serialized `SavedItem` shape/meaning changes, bump `BACKUP_VERSION`, write the new number, and add a parse branch for it (prefer still reading older versions; unknown → `unsupported_version`). UI-only or non-backup changes do not need a bump.
 
 `ContentSettings` is a safe subset of `Settings` (`appearance`, `interfaceLanguage`, `wordLookupEnabled`, `explanationLanguage`) for content-script use.
 

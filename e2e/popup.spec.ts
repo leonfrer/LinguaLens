@@ -42,10 +42,7 @@ test('persists quick settings after reopening the popup', async ({
   ).not.toBeChecked();
   await expect(
     reopenedPopupPage.getByRole('checkbox', { name: 'Translate immediately on select' })
-  ).not.toBeChecked();
-  await expect(
-    reopenedPopupPage.getByRole('checkbox', { name: 'Translate immediately on select' })
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     reopenedPopupPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).toBeChecked();

@@ -141,16 +141,13 @@ export function showTriggerIcon(selection: Selection, onClick: () => void): void
       }
 
       button {
-        align-items: center;
         appearance: none;
-        background: var(--trigger-surface);
-        border: 1px solid var(--trigger-border);
-        border-radius: 999px;
-        box-shadow: 0 8px 20px var(--trigger-shadow);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
         cursor: pointer;
-        display: inline-flex;
+        display: block;
         height: ${ICON_SIZE_PX}px;
-        justify-content: center;
         margin: 0;
         padding: 0;
         width: ${ICON_SIZE_PX}px;
@@ -161,19 +158,21 @@ export function showTriggerIcon(selection: Selection, onClick: () => void): void
         outline-offset: 2px;
       }
 
-      button:hover {
-        filter: brightness(1.03);
+      button:hover img {
+        filter: drop-shadow(0 4px 10px var(--trigger-shadow)) brightness(1.04);
       }
 
       img {
-        border-radius: 4px;
+        /* Keep the asset's own silhouette (no circular crop). */
+        border-radius: 0;
         display: block;
-        height: 18px;
-        width: 18px;
+        filter: drop-shadow(0 3px 8px var(--trigger-shadow));
+        height: ${ICON_SIZE_PX}px;
+        width: ${ICON_SIZE_PX}px;
       }
     </style>
     <button type="button" aria-label="${t('triggerIconTranslate')}">
-      <img alt="" src="${iconUrl}" width="18" height="18" />
+      <img alt="" src="${iconUrl}" width="${ICON_SIZE_PX}" height="${ICON_SIZE_PX}" />
     </button>
   `;
 

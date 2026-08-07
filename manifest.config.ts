@@ -26,6 +26,13 @@ export default defineManifest({
   },
   permissions: ['storage'],
   host_permissions: ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'],
+  // Content-script trigger icon is rendered into host pages; expose the asset explicitly.
+  web_accessible_resources: [
+    {
+      resources: ['icons/icon32.png'],
+      matches: ['<all_urls>']
+    }
+  ],
   background: {
     service_worker: 'src/background/service-worker.ts',
     type: 'module'

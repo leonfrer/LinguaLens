@@ -46,6 +46,104 @@ a {
   justify-content: space-between;
 }
 
+.titleMeta {
+  align-items: flex-end;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.titleMetaRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.savedActions {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.savedActionsButton {
+  align-items: center;
+  appearance: none;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
+  border-radius: 8px;
+  color: var(--theme-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+}
+
+.savedActionsButton:hover,
+.savedActionsButton[aria-expanded='true'] {
+  background: var(--theme-surface-subtle);
+  color: var(--theme-text);
+}
+
+.savedActionsButton:focus-visible,
+.savedActionsMenuItem:focus-visible {
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 2px;
+}
+
+.savedActionsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.savedActionsButton svg {
+  height: 18px;
+  width: 18px;
+}
+
+.savedActionsMenu {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgb(var(--theme-shadow) / 0.2);
+  display: grid;
+  gap: 2px;
+  min-width: 148px;
+  padding: 5px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 100;
+}
+
+.savedActionsMenuItem {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--theme-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 34px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.savedActionsMenuItem:hover {
+  background: var(--theme-surface-hover);
+  color: var(--theme-text);
+}
+
+.backupFileInput {
+  display: none;
+}
+
 h1,
 h2,
 p {
@@ -280,6 +378,21 @@ h1 {
 
   .titleRow {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .titleMeta {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .titleMetaRow {
+    justify-content: flex-start;
+  }
+
+  .backupFeedback {
+    max-width: none;
+    text-align: left;
   }
 
   .savedCard {

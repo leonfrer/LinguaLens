@@ -271,6 +271,27 @@
       }
     }
   },
+  "savedMoreActionsLabel": {
+    "message": "更多操作"
+  },
+  "savedMoreActionsMenuLabel": {
+    "message": "儲存項目操作"
+  },
+  "savedBackupButton": {
+    "message": "備份"
+  },
+  "savedRestoreButton": {
+    "message": "還原"
+  },
+  "savedRestoreSuccess": {
+    "message": "已還原：新增 $1 條，更新 $2 條。"
+  },
+  "savedRestoreInvalidFile": {
+    "message": "此檔案不是有效的 LinguaLens 儲存項目備份。"
+  },
+  "savedRestoreUnsupportedVersion": {
+    "message": "不支援此備份格式。請更新 LinguaLens 後再試。"
+  },
   "emptySavedHint": {
     "message": "設定 API 金鑰後，在網頁中選取文字即可翻譯並儲存。"
   },

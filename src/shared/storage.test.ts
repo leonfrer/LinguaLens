@@ -8,7 +8,9 @@ import {
   getSavedItems,
   getSettings,
   initializeStorage,
+  mergeSavedItemsFromBackup,
   SAVED_ITEMS_KEY,
+  setSavedItems,
   SETTINGS_KEY,
   updateSettings
 } from './storage';
@@ -436,5 +438,95 @@ describe('getSavedItems', () => {
         createdAt: 123
       }
     ]);
+  });
+});
+
+describe('setSavedItems / mergeSavedItemsFromBackup', () => {
+  it('writes the full saved-items list', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          set
+        }
+      }
+    });
+
+    const items = [
+      {
+        id: 'item-1',
+        text: 'hello',
+        translation: '你好',
+        explanationLanguage: 'zh-CN' as const,
+        sourceUrl: 'https://example.com',
+        sourceTitle: 'Example',
+        createdAt: 1
+      }
+    ];
+
+    await setSavedItems(items);
+
+    expect(set).toHaveBeenCalledWith({ [SAVED_ITEMS_KEY]: items });
+  });
+
+  it('merges backup items by id and persists the result', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SAVED_ITEMS_KEY]: [
+              {
+                id: 'a',
+                text: 'local-a',
+                translation: 'A-local',
+                explanationLanguage: 'zh-CN',
+                sourceUrl: 'https://example.com',
+                sourceTitle: 'Example',
+                createdAt: 10
+              },
+              {
+                id: 'b',
+                text: 'local-b',
+                translation: 'B-local',
+                explanationLanguage: 'zh-CN',
+                sourceUrl: 'https://example.com',
+                sourceTitle: 'Example',
+                createdAt: 20
+              }
+            ]
+          }),
+          set
+        }
+      }
+    });
+
+    const result = await mergeSavedItemsFromBackup([
+      {
+        id: 'a',
+        text: 'backup-a',
+        translation: 'A-backup',
+        explanationLanguage: 'zh-CN',
+        sourceUrl: 'https://example.com',
+        sourceTitle: 'Example',
+        createdAt: 10
+      },
+      {
+        id: 'c',
+        text: 'backup-c',
+        translation: 'C-backup',
+        explanationLanguage: 'zh-CN',
+        sourceUrl: 'https://example.com',
+        sourceTitle: 'Example',
+        createdAt: 30
+      }
+    ]);
+
+    expect(result.added).toBe(1);
+    expect(result.updated).toBe(1);
+    expect(result.items.map((item) => item.id)).toEqual(['c', 'b', 'a']);
+    expect(set).toHaveBeenCalledWith({
+      [SAVED_ITEMS_KEY]: result.items
+    });
   });
 });

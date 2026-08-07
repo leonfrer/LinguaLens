@@ -271,6 +271,27 @@
       }
     }
   },
+  "savedMoreActionsLabel": {
+    "message": "More actions"
+  },
+  "savedMoreActionsMenuLabel": {
+    "message": "Saved items actions"
+  },
+  "savedBackupButton": {
+    "message": "Backup"
+  },
+  "savedRestoreButton": {
+    "message": "Restore"
+  },
+  "savedRestoreSuccess": {
+    "message": "Restored: $1 added, $2 updated."
+  },
+  "savedRestoreInvalidFile": {
+    "message": "That file is not a valid LinguaLens saved-items backup."
+  },
+  "savedRestoreUnsupportedVersion": {
+    "message": "This backup format is not supported. Update LinguaLens and try again."
+  },
   "emptySavedHint": {
     "message": "Add an API key, then select text on a web page to translate and save it."
   },

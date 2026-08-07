@@ -102,7 +102,7 @@ In-memory `Settings` still includes `apiKey` for settings UI convenience; `getSe
 
 `version` is the backup **schema** version (not app/package semver). If the envelope or serialized `SavedItem` shape/meaning changes, bump `BACKUP_VERSION`, write the new number, and add a parse branch for it (prefer still reading older versions; unknown → `unsupported_version`). UI-only or non-backup changes do not need a bump.
 
-`ContentSettings` is a safe subset of `Settings` (`appearance`, `interfaceLanguage`, `wordLookupEnabled`, `explanationLanguage`) for content-script use.
+`ContentSettings` is a safe subset of `Settings` (`appearance`, `interfaceLanguage`, `wordLookupEnabled`, `instantTranslateOnSelect`, `explanationLanguage`) for content-script use.
 
 ## E2E
 

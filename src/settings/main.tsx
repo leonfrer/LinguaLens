@@ -327,6 +327,16 @@ function App() {
                   updateDraft({ wordLookupEnabled });
                 }}
               />
+              {draftSettings.wordLookupEnabled ? (
+                <ToggleField
+                  checked={draftSettings.instantTranslateOnSelect}
+                  description={t('settingsInstantTranslateOnSelectDescription')}
+                  label={t('settingsInstantTranslateOnSelect')}
+                  onChange={(instantTranslateOnSelect) => {
+                    updateDraft({ instantTranslateOnSelect });
+                  }}
+                />
+              ) : null}
               <ToggleField
                 checked={draftSettings.pronunciationLookupEnabled}
                 description={t('settingsPronunciationLookupDescription')}

@@ -9,6 +9,9 @@ test('loads the extension popup with quick settings', async ({ extensionId, popu
   await expect(popupPage.getByText('Frequently used reading controls')).toBeVisible();
   await expect(popupPage.getByRole('checkbox', { name: 'Selection lookup' })).toBeChecked();
   await expect(
+    popupPage.getByRole('checkbox', { name: 'Translate immediately on select' })
+  ).toBeChecked();
+  await expect(
     popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).not.toBeChecked();
   await expect(popupPage.getByLabel('Explanation language')).toHaveValue('zh-CN');
@@ -25,6 +28,7 @@ test('persists quick settings after reopening the popup', async ({
   extensionId,
   popupPage
 }) => {
+  await popupPage.getByRole('checkbox', { name: 'Translate immediately on select' }).uncheck();
   await popupPage.getByRole('checkbox', { name: 'Selection lookup' }).uncheck();
   await popupPage.getByRole('checkbox', { name: 'Pronunciation lookup' }).check();
   await popupPage.getByLabel('Explanation language').selectOption('ja');
@@ -36,6 +40,12 @@ test('persists quick settings after reopening the popup', async ({
   await expect(
     reopenedPopupPage.getByRole('checkbox', { name: 'Selection lookup' })
   ).not.toBeChecked();
+  await expect(
+    reopenedPopupPage.getByRole('checkbox', { name: 'Translate immediately on select' })
+  ).not.toBeChecked();
+  await expect(
+    reopenedPopupPage.getByRole('checkbox', { name: 'Translate immediately on select' })
+  ).toBeDisabled();
   await expect(
     reopenedPopupPage.getByRole('checkbox', { name: 'Pronunciation lookup' })
   ).toBeChecked();

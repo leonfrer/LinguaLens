@@ -171,7 +171,13 @@
     "message": "划词查询"
   },
   "settingsWordLookupDescription": {
-    "message": "选中文本后显示翻译面板。"
+    "message": "启用在网页中选中文本后的翻译功能。"
+  },
+  "settingsInstantTranslateOnSelect": {
+    "message": "选词后立即翻译"
+  },
+  "settingsInstantTranslateOnSelectDescription": {
+    "message": "关闭后，选中文本时先显示悬浮图标，点击图标后再发起翻译。"
   },
   "settingsPronunciationLookup": {
     "message": "查询发音"
@@ -317,6 +323,9 @@
   },
   "panelTranslationAriaLabel": {
     "message": "LinguaLens 翻译"
+  },
+  "triggerIconTranslate": {
+    "message": "使用 LinguaLens 翻译选中文本"
   },
   "panelTranslatingStatus": {
     "message": "翻译中..."

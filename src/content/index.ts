@@ -20,8 +20,25 @@ import {
   type PanelState
 } from './panel';
 import { getSentenceContextFromSelection } from './selection-context';
+import {
+  hideTriggerIcon,
+  isTriggerIconEventTarget,
+  isTriggerIconVisible,
+  positionTriggerIcon,
+  refreshTriggerIconAppearance,
+  setTriggerIconAppearance,
+  showTriggerIcon
+} from './trigger-icon';
+
+type PendingLookup = {
+  text: string;
+  explanationLanguage: ExplanationLanguage;
+  sentenceContext?: string;
+  selectionStartInContext?: number;
+};
 
 let currentState: PanelState | null = null;
+let pendingLookup: PendingLookup | null = null;
 let selectionTimer: number | undefined;
 let lastRequestedText = '';
 let contentSettings = DEFAULT_CONTENT_SETTINGS;
@@ -42,21 +59,49 @@ function sendRuntimeMessage<TResponse>(message: unknown): Promise<TResponse> {
   });
 }
 
+function isLingualensUiEventTarget(target: EventTarget | null): boolean {
+  return isPanelEventTarget(target) || isTriggerIconEventTarget(target);
+}
+
+function hidePendingTrigger(): void {
+  hideTriggerIcon();
+  pendingLookup = null;
+}
+
 function hideCurrentPanel(): void {
   hidePanel();
   currentState = null;
   lastRequestedText = '';
+  hidePendingTrigger();
 }
 
 function applyContentSettings(settings: ContentSettings): void {
+  const previous = contentSettings;
   contentSettings = settings;
   applyInterfaceLanguage(settings.interfaceLanguage);
   setPanelAppearance(settings.appearance);
+  setTriggerIconAppearance(settings.appearance);
   renderCurrentPanel();
 
   if (!settings.wordLookupEnabled) {
     hideCurrentPanel();
+    return;
   }
+
+  // Instant mode no longer needs a waiting icon.
+  if (settings.instantTranslateOnSelect && !previous.instantTranslateOnSelect) {
+    hidePendingTrigger();
+  }
+
+  // Icon mode: dismiss an open panel so the next selection shows the icon path.
+  if (!settings.instantTranslateOnSelect && previous.instantTranslateOnSelect && currentState) {
+    hidePanel();
+    currentState = null;
+    lastRequestedText = '';
+  }
+
+  // Re-evaluate the current selection under the new mode.
+  scheduleSelectionChange();
 }
 
 async function initializeContentSettings(): Promise<void> {
@@ -79,6 +124,7 @@ async function translateSelection(
 ): Promise<void> {
   const requestedText = text;
   lastRequestedText = requestedText;
+  hidePendingTrigger();
 
   currentState = {
     text,
@@ -140,17 +186,50 @@ async function translateSelection(
   renderCurrentPanel();
 }
 
-function repositionOpenPanel(): void {
-  if (!currentState) {
-    return;
-  }
+function showSelectionTrigger(
+  selection: Selection,
+  lookup: PendingLookup
+): void {
+  pendingLookup = lookup;
+  // Drop any prior panel so only the icon is visible before the user confirms.
+  hidePanel();
+  currentState = null;
+  lastRequestedText = '';
 
+  showTriggerIcon(selection, () => {
+    const active = pendingLookup;
+    if (!active) {
+      return;
+    }
+
+    void translateSelection(
+      active.text,
+      active.explanationLanguage,
+      active.sentenceContext,
+      active.selectionStartInContext
+    );
+
+    const currentSelection = window.getSelection();
+    if (currentSelection && currentSelection.rangeCount > 0) {
+      // Panel is created in loading state; pin it to the still-active selection.
+      positionPanel(currentSelection);
+    }
+  });
+}
+
+function repositionOpenUi(): void {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) {
     return;
   }
 
-  positionPanel(selection);
+  if (currentState) {
+    positionPanel(selection);
+  }
+
+  if (isTriggerIconVisible()) {
+    positionTriggerIcon(selection);
+  }
 }
 
 function renderCurrentPanel(): void {
@@ -167,12 +246,12 @@ function renderCurrentPanel(): void {
 
   // Height changes across loading → ready/error/saved; remeasure after layout.
   window.requestAnimationFrame(() => {
-    repositionOpenPanel();
+    repositionOpenUi();
   });
 }
 
 function handleViewportResize(): void {
-  repositionOpenPanel();
+  repositionOpenUi();
 }
 
 async function saveCurrentSelection(): Promise<void> {
@@ -219,7 +298,7 @@ async function handleSelectionChange(): Promise<void> {
   }
 
   const extractedContext = getSentenceContextFromSelection(selection, text);
-  const { explanationLanguage, wordLookupEnabled } = contentSettings;
+  const { explanationLanguage, wordLookupEnabled, instantTranslateOnSelect } = contentSettings;
 
   if (!wordLookupEnabled) {
     hideCurrentPanel();
@@ -239,11 +318,34 @@ async function handleSelectionChange(): Promise<void> {
     return;
   }
 
-  const translationPromise = translateSelection(
+  if (
+    !instantTranslateOnSelect &&
+    pendingLookup &&
+    pendingLookup.text === text &&
+    pendingLookup.explanationLanguage === explanationLanguage &&
+    isTriggerIconVisible()
+  ) {
+    positionTriggerIcon(selection);
+    return;
+  }
+
+  const lookup: PendingLookup = {
     text,
     explanationLanguage,
-    extractedContext?.context,
-    extractedContext?.selectionStart
+    sentenceContext: extractedContext?.context,
+    selectionStartInContext: extractedContext?.selectionStart
+  };
+
+  if (!instantTranslateOnSelect) {
+    showSelectionTrigger(selection, lookup);
+    return;
+  }
+
+  const translationPromise = translateSelection(
+    lookup.text,
+    lookup.explanationLanguage,
+    lookup.sentenceContext,
+    lookup.selectionStartInContext
   );
   positionPanel(selection);
   await translationPromise;
@@ -266,7 +368,7 @@ function cancelScheduledSelectionChange(): void {
 }
 
 function scheduleSelectionChange(event?: Event): void {
-  if (isSelectingWithPointer || isPanelEventTarget(event?.target ?? null)) {
+  if (isSelectingWithPointer || isLingualensUiEventTarget(event?.target ?? null)) {
     return;
   }
 
@@ -277,7 +379,7 @@ function scheduleSelectionChange(event?: Event): void {
 }
 
 function handlePointerSelectionStart(event: MouseEvent): void {
-  if (event.button !== 0 || isPanelEventTarget(event.target)) {
+  if (event.button !== 0 || isLingualensUiEventTarget(event.target)) {
     return;
   }
 
@@ -316,7 +418,10 @@ function startContentScript(): void {
   // Keep the absolute-positioned panel on window scroll; only remeasure on resize.
   window.addEventListener('resize', handleViewportResize);
   chrome.storage.onChanged.addListener(handleStorageChange);
-  colorScheme.addEventListener('change', refreshPanelAppearance);
+  colorScheme.addEventListener('change', () => {
+    refreshPanelAppearance();
+    refreshTriggerIconAppearance();
+  });
   void contentSettingsReady.catch(() => undefined);
 }
 

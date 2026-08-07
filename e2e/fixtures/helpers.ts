@@ -137,6 +137,8 @@ export async function seedExtensionSettings(
     interfaceLanguage?: 'system' | 'en' | 'zh-CN' | 'zh-TW';
     apiKey?: string;
     explanationLanguage?: string;
+    wordLookupEnabled?: boolean;
+    instantTranslateOnSelect?: boolean;
     pronunciationLookupEnabled?: boolean;
     skipLongTextPronunciation?: boolean;
     pronunciationPreferences?: Array<{
@@ -158,6 +160,8 @@ export async function seedExtensionSettings(
           appearance: nextSettings.appearance ?? 'system',
           interfaceLanguage: nextSettings.interfaceLanguage ?? 'system',
           explanationLanguage: nextSettings.explanationLanguage ?? 'zh-CN',
+          wordLookupEnabled: nextSettings.wordLookupEnabled ?? true,
+          instantTranslateOnSelect: nextSettings.instantTranslateOnSelect ?? true,
           pronunciationLookupEnabled: nextSettings.pronunciationLookupEnabled ?? false,
           skipLongTextPronunciation: nextSettings.skipLongTextPronunciation ?? true,
           pronunciationPreferences: nextSettings.pronunciationPreferences ?? [

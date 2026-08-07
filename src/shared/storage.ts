@@ -27,6 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   appearance: 'system',
   interfaceLanguage: 'system',
   wordLookupEnabled: true,
+  instantTranslateOnSelect: true,
   pronunciationLookupEnabled: false,
   skipLongTextPronunciation: true,
   pronunciationPreferences: DEFAULT_PRONUNCIATION_PREFERENCES,
@@ -194,6 +195,7 @@ export function getContentSettings(settings: Settings): ContentSettings {
     appearance: settings.appearance,
     interfaceLanguage: settings.interfaceLanguage,
     wordLookupEnabled: settings.wordLookupEnabled,
+    instantTranslateOnSelect: settings.instantTranslateOnSelect,
     explanationLanguage: settings.explanationLanguage
   };
 }

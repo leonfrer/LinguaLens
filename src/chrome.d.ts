@@ -10,6 +10,8 @@ declare namespace chrome {
       function addListener(callback: () => void): void;
     }
 
+    function getURL(path: string): string;
+
     function sendMessage<TResponse = unknown>(
       message: unknown,
       responseCallback?: (response: TResponse) => void

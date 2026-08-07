@@ -43,6 +43,11 @@ export type Settings = {
   appearance: Appearance;
   interfaceLanguage: InterfaceLanguage;
   wordLookupEnabled: boolean;
+  /**
+   * When true, selection settle triggers translate immediately.
+   * When false, a floating icon is shown first; translate runs on icon click.
+   */
+  instantTranslateOnSelect: boolean;
   pronunciationLookupEnabled: boolean;
   skipLongTextPronunciation: boolean;
   pronunciationPreferences: PronunciationPreferences;
@@ -60,7 +65,11 @@ export type Credentials = {
 
 export type ContentSettings = Pick<
   Settings,
-  'appearance' | 'interfaceLanguage' | 'wordLookupEnabled' | 'explanationLanguage'
+  | 'appearance'
+  | 'interfaceLanguage'
+  | 'wordLookupEnabled'
+  | 'instantTranslateOnSelect'
+  | 'explanationLanguage'
 >;
 
 export type SavedItem = {

@@ -32,6 +32,36 @@ test('shows an API key setup error from the content script selection flow', asyn
   await page.close();
 });
 
+test('icon mode shows a floating trigger and translates only after click', async ({
+  context,
+  popupPage
+}) => {
+  await seedExtensionSettings(popupPage, {
+    instantTranslateOnSelect: false
+  });
+  await routeTestArticle(context);
+
+  const page = await context.newPage();
+  await page.goto(testArticleUrl);
+  await page.locator('#article').waitFor();
+  await selectArticleText(page, 'foreign-language reading');
+
+  const trigger = page.locator('#lingualens-selection-trigger');
+  await expect(trigger).toBeVisible();
+  await expect(page.locator('#lingualens-selection-panel')).toHaveCount(0);
+
+  await trigger.getByRole('button', { name: 'Translate selection with LinguaLens' }).click();
+
+  const panel = page.locator('#lingualens-selection-panel');
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('foreign-language reading')).toBeVisible();
+  await expect(
+    panel.getByText('Please add your LLM API key in LinguaLens settings before translating.')
+  ).toBeVisible();
+  await expect(trigger).toHaveCount(0);
+  await page.close();
+});
+
 test('toggles word lookup from the popup and suppresses selection handling', async ({
   context,
   popupPage

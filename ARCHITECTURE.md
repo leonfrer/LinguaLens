@@ -137,7 +137,7 @@ Typical patterns:
 | `i18n.spec.ts` | Chrome i18n runtime for popup and content panel (e.g. zh-CN) |
 | `selection-panel.spec.ts` | Selection flow errors, word-lookup toggle, keyboard selection / dismiss |
 | `sentence-context.spec.ts` | Sentence context with inline markup, repeated words, selection offset for highlight |
-| `saved-items.spec.ts` | Popup saved list, saved page context/links, highlight behavior |
+| `saved-items.spec.ts` | Popup saved list, saved page context/links, highlight behavior, backup restore (merge + toast / invalid file) |
 | `provider.spec.ts` | Mock OpenAI-compatible endpoint: model list, translate+save, errors without key leakage |
 | `provider.live.spec.ts` | Optional real provider calls (skipped unless env key is set) |
 

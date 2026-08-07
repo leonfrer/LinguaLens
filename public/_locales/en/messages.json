@@ -271,6 +271,12 @@
       }
     }
   },
+  "savedMoreActionsLabel": {
+    "message": "More actions"
+  },
+  "savedMoreActionsMenuLabel": {
+    "message": "Saved items actions"
+  },
   "savedBackupButton": {
     "message": "Backup"
   },

@@ -45,6 +45,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | `types.ts` | Settings, credentials, content settings, saved items, message payloads |
 | `storage.ts` | `chrome.storage.local` buckets + read/write helpers (see Storage below) |
 | `saved-items-backup.ts` | Versioned saved-items backup envelope (JSON), parse/validate, merge-by-id |
+| `Toast.tsx` | Fixed viewport toast + `useToast` (auto-dismiss); for management-page feedback |
 | `translation.ts` | AI translation via Vercel AI SDK |
 | `providers.ts` | Endpoint presets, base URLs, default models |
 | `models.ts` | Fetch and normalize model lists from the configured provider |

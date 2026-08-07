@@ -271,6 +271,12 @@
       }
     }
   },
+  "savedMoreActionsLabel": {
+    "message": "更多操作"
+  },
+  "savedMoreActionsMenuLabel": {
+    "message": "保存项操作"
+  },
   "savedBackupButton": {
     "message": "备份"
   },

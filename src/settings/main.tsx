@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
 import { applyInterfaceLanguage, initializeInterfaceLanguage } from '../shared/localization';
@@ -16,6 +16,10 @@ import {
   getPronunciationNotationSuggestions,
   MAX_PRONUNCIATION_LABEL_LENGTH
 } from '../shared/pronunciation';
+import {
+  getWordLookupShortcut,
+  openExtensionShortcutsPage
+} from '../shared/commands';
 import { DEFAULT_SETTINGS, getSettings, updateSettings } from '../shared/storage';
 import type {
   ExplanationLanguage,
@@ -68,6 +72,7 @@ function App() {
   const [modelOptions, setModelOptions] = useState<ModelOption[]>([]);
   const [modelLoadError, setModelLoadError] = useState('');
   const [savedStatus, setSavedStatus] = useState('');
+  const [wordLookupShortcut, setWordLookupShortcut] = useState<string | null>(null);
   const hasChanges = useMemo(
     () => JSON.stringify(settings) !== JSON.stringify(draftSettings),
     [draftSettings, settings]
@@ -87,16 +92,26 @@ function App() {
   const hasBlockingPronunciationPreferenceError =
     draftSettings.pronunciationLookupEnabled && hasInvalidPronunciationPreferences;
 
+  const refreshWordLookupShortcut = useCallback(() => {
+    void getWordLookupShortcut()
+      .then(setWordLookupShortcut)
+      .catch(() => setWordLookupShortcut(null));
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
-    void getSettings().then((storedSettings) => {
+    void Promise.all([
+      getSettings(),
+      getWordLookupShortcut().catch(() => null)
+    ]).then(([storedSettings, shortcut]) => {
       if (!isMounted) {
         return;
       }
 
       setSettings(storedSettings);
       setDraftSettings(storedSettings);
+      setWordLookupShortcut(shortcut);
       setIsLoading(false);
     });
 
@@ -104,6 +119,21 @@ function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') {
+        refreshWordLookupShortcut();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', refreshWordLookupShortcut);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', refreshWordLookupShortcut);
+    };
+  }, [refreshWordLookupShortcut]);
 
   useEffect(() => {
     document.title = t('settingsDocumentTitle');
@@ -319,14 +349,37 @@ function App() {
             </div>
 
             <div className="toggleGroup">
-              <ToggleField
-                checked={draftSettings.wordLookupEnabled}
-                description={t('settingsWordLookupDescription')}
-                label={t('settingsWordLookup')}
-                onChange={(wordLookupEnabled) => {
-                  updateDraft({ wordLookupEnabled });
-                }}
-              />
+              <div className="toggleBlock">
+                <ToggleField
+                  checked={draftSettings.wordLookupEnabled}
+                  description={t('settingsWordLookupDescription')}
+                  label={t('settingsWordLookup')}
+                  onChange={(wordLookupEnabled) => {
+                    updateDraft({ wordLookupEnabled });
+                  }}
+                />
+                <div className="shortcutHintRow">
+                  <span className="shortcutHintText">
+                    {wordLookupShortcut ? (
+                      <>
+                        {t('settingsWordLookupShortcutPrefix')}{' '}
+                        <kbd className="shortcutKbd">{wordLookupShortcut}</kbd>
+                      </>
+                    ) : (
+                      t('settingsWordLookupShortcutUnset')
+                    )}
+                  </span>
+                  <button
+                    className="textButton"
+                    type="button"
+                    onClick={() => {
+                      void openExtensionShortcutsPage().catch(() => undefined);
+                    }}
+                  >
+                    {t('settingsWordLookupShortcutChange')}
+                  </button>
+                </div>
+              </div>
               {draftSettings.wordLookupEnabled ? (
                 <ToggleField
                   checked={draftSettings.instantTranslateOnSelect}

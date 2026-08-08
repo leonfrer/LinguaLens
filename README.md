@@ -9,6 +9,7 @@ LinguaLens is a Chrome extension for reading foreign-language web pages. Select 
 - Save translations, context, pronunciation, source details, and model metadata locally.
 - Review recent items in the popup or browse all saved items on a dedicated page.
 - Switch word lookup and pronunciation lookup from the popup.
+- Toggle word lookup with a keyboard shortcut (default `Alt+L` / macOS `⌥L`; shown in the popup and settings; change under `chrome://extensions/shortcuts`).
 - Choose light, dark, or system appearance.
 - Use the interface in English, Simplified Chinese, Traditional Chinese, or the system language.
 - Configure an OpenAI-compatible service, model, and user-managed API key on a dedicated settings page.
@@ -16,6 +17,14 @@ LinguaLens is a Chrome extension for reading foreign-language web pages. Select 
 Supported endpoint presets include NVIDIA NIM, OpenAI, OpenRouter, Groq, DeepInfra, Together AI, LM Studio, and Ollama. A custom OpenAI-compatible endpoint can also be used.
 
 Settings, credentials, a content-script settings subset, and saved items are stored locally with `chrome.storage.local`. API keys are persisted without application-level encryption, restricted to trusted extension contexts, and never exposed to content scripts, synced, or included in saved items. Selected text and available sentence context are sent to the configured service and may consume the user's API quota.
+
+### Keyboard shortcuts
+
+| Command | Default | Purpose |
+| --- | --- | --- |
+| Toggle selection lookup | `Alt+L` (macOS: `⌥L`) | Flip word lookup on/off (toolbar icon updates; open selection panel closes when turning off) |
+
+The popup and settings pages show the **currently assigned** combo (as reported by Chrome) and link to `chrome://extensions/shortcuts` to change it. If the default conflicts with another extension or was cleared, assign one there. Chrome may keep a previous empty binding when reloading an unpacked extension; re-assign or remove/re-add the extension if the default does not appear.
 
 ## Tech Stack
 

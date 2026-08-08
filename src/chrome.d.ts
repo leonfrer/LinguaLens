@@ -3,6 +3,24 @@ declare namespace chrome {
     function setIcon(details: { path: string | Record<number, string> }): Promise<void>;
   }
 
+  namespace commands {
+    type Command = {
+      name?: string;
+      description?: string;
+      shortcut?: string;
+    };
+
+    function getAll(): Promise<Command[]>;
+
+    namespace onCommand {
+      function addListener(callback: (command: string) => void): void;
+    }
+  }
+
+  namespace tabs {
+    function create(createProperties: { url: string }): Promise<unknown>;
+  }
+
   namespace runtime {
     const lastError: { message?: string } | undefined;
 

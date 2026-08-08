@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { t } from '../shared/i18n';
 import {
@@ -8,6 +8,10 @@ import {
 import { ThemeSwitcher } from '../shared/ThemeSwitcher';
 import { initializeTheme } from '../shared/theme';
 import { EXPLANATION_LANGUAGE_OPTIONS } from '../shared/languages';
+import {
+  getWordLookupShortcut,
+  openExtensionShortcutsPage
+} from '../shared/commands';
 import {
   DEFAULT_SETTINGS,
   deleteSavedItem,
@@ -50,11 +54,15 @@ function getSavedItemSourceLabel(item: SavedItem): string {
 type QuickSettingsPanelProps = {
   settings: Settings;
   onSettingsChange: (nextSettings: Partial<Settings>) => void;
+  wordLookupShortcut: string | null;
+  onChangeShortcut: () => void;
 };
 
 function QuickSettingsPanel({
   settings,
-  onSettingsChange
+  onSettingsChange,
+  wordLookupShortcut,
+  onChangeShortcut
 }: QuickSettingsPanelProps) {
   const isApiKeyConfigured = settings.apiKey.trim().length > 0;
 
@@ -68,20 +76,41 @@ function QuickSettingsPanel({
       </div>
 
       <div className="quickSettingsList">
-        <label className="quickToggleControl">
-          <span>{t('settingsWordLookup')}</span>
-          <span className="toggleControl">
-            <input
-              aria-label={t('settingsWordLookup')}
-              checked={settings.wordLookupEnabled}
-              type="checkbox"
-              onChange={(event) => {
-                onSettingsChange({ wordLookupEnabled: event.target.checked });
-              }}
-            />
-            <span className="toggleSwitch" aria-hidden="true" />
-          </span>
-        </label>
+        <div className="quickToggleBlock">
+          <label className="quickToggleControl">
+            <span>{t('settingsWordLookup')}</span>
+            <span className="toggleControl">
+              <input
+                aria-label={t('settingsWordLookup')}
+                checked={settings.wordLookupEnabled}
+                type="checkbox"
+                onChange={(event) => {
+                  onSettingsChange({ wordLookupEnabled: event.target.checked });
+                }}
+              />
+              <span className="toggleSwitch" aria-hidden="true" />
+            </span>
+          </label>
+          <div className="quickShortcutRow">
+            <span className="quickShortcutLabel">
+              {wordLookupShortcut ? (
+                <>
+                  {t('settingsWordLookupShortcutPrefix')}{' '}
+                  <kbd className="shortcutKbd">{wordLookupShortcut}</kbd>
+                </>
+              ) : (
+                t('settingsWordLookupShortcutUnset')
+              )}
+            </span>
+            <button
+              className="quickShortcutLink"
+              type="button"
+              onClick={onChangeShortcut}
+            >
+              {t('settingsWordLookupShortcutChange')}
+            </button>
+          </div>
+        </div>
 
         {settings.wordLookupEnabled ? (
           <label className="quickToggleControl">
@@ -199,13 +228,24 @@ function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [, setLocaleVersion] = useState(0);
+  const [wordLookupShortcut, setWordLookupShortcut] = useState<string | null>(null);
   const recentItems = useMemo(() => items.slice(0, 20), [items]);
+
+  const refreshWordLookupShortcut = useCallback(() => {
+    void getWordLookupShortcut()
+      .then(setWordLookupShortcut)
+      .catch(() => setWordLookupShortcut(null));
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPopupData() {
-      const [savedItems, settings] = await Promise.all([getSavedItems(), getSettings()]);
+      const [savedItems, settings, shortcut] = await Promise.all([
+        getSavedItems(),
+        getSettings(),
+        getWordLookupShortcut().catch(() => null)
+      ]);
 
       if (!isMounted) {
         return;
@@ -213,6 +253,7 @@ function App() {
 
       setItems(savedItems);
       setSettings(settings);
+      setWordLookupShortcut(shortcut);
       setIsLoading(false);
     }
 
@@ -222,6 +263,21 @@ function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') {
+        refreshWordLookupShortcut();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', refreshWordLookupShortcut);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', refreshWordLookupShortcut);
+    };
+  }, [refreshWordLookupShortcut]);
 
   useEffect(
     () => subscribeToInterfaceLanguage(() => setLocaleVersion((version) => version + 1)),
@@ -266,8 +322,12 @@ function App() {
 
       <QuickSettingsPanel
         settings={settings}
+        wordLookupShortcut={wordLookupShortcut}
         onSettingsChange={(nextSettings) => {
           void handleQuickSettingsChange(nextSettings);
+        }}
+        onChangeShortcut={() => {
+          void openExtensionShortcutsPage().catch(() => undefined);
         }}
       />
 

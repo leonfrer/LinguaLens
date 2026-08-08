@@ -144,9 +144,75 @@ p {
   padding: 8px 10px;
 }
 
+.quickToggleBlock {
+  display: grid;
+}
+
+.quickToggleBlock .quickToggleControl {
+  border-top: none;
+}
+
+.quickShortcutRow {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 0 10px 8px;
+}
+
+.quickShortcutLabel {
+  color: var(--theme-text-subtle);
+  font-size: 11px;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.shortcutKbd {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
+  border-radius: 4px;
+  color: var(--theme-text-secondary);
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-left: 4px;
+  padding: 2px 5px;
+  vertical-align: baseline;
+}
+
+.quickShortcutLink {
+  background: none;
+  border: none;
+  color: var(--theme-primary);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.quickShortcutLink:hover {
+  opacity: 0.85;
+}
+
+.quickShortcutLink:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 2px;
+}
+
 .quickToggleControl + .quickToggleControl,
 .quickToggleControl + .quickSelectControl,
-.quickSelectControl + .quickToggleControl {
+.quickSelectControl + .quickToggleControl,
+.quickToggleBlock + .quickToggleControl,
+.quickToggleBlock + .quickSelectControl,
+.quickToggleControl + .quickToggleBlock,
+.quickSelectControl + .quickToggleBlock {
   border-top: 1px solid var(--theme-border-soft);
 }
 

@@ -16,6 +16,10 @@ import type {
   TranslateResponse
 } from '../shared/types';
 import { updateActionIcon } from './action-icon';
+import {
+  TOGGLE_WORD_LOOKUP_COMMAND,
+  toggleWordLookupEnabled
+} from './toggle-word-lookup';
 
 const storageReady = initializeStorage();
 
@@ -47,6 +51,13 @@ function handleSettingsChange(
 chrome.storage.onChanged.addListener(handleSettingsChange);
 chrome.runtime.onStartup.addListener(() => {
   void syncActionIcon().catch(() => undefined);
+});
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== TOGGLE_WORD_LOOKUP_COMMAND) {
+    return;
+  }
+
+  void storageReady.then(() => toggleWordLookupEnabled()).catch(() => undefined);
 });
 void storageReady
   .then(async (settings) => {

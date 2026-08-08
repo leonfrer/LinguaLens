@@ -155,8 +155,18 @@ h1 {
   padding: 16px;
 }
 
-.toggleField + .toggleField {
+.toggleField + .toggleField,
+.toggleBlock + .toggleField,
+.toggleField + .toggleBlock {
   border-top: 1px solid var(--theme-border-soft);
+}
+
+.toggleBlock {
+  display: grid;
+}
+
+.toggleBlock .toggleField {
+  padding-bottom: 8px;
 }
 
 .toggleCopy {
@@ -175,6 +185,61 @@ h1 {
   color: var(--theme-text-subtle);
   font-size: 12px;
   line-height: 1.45;
+}
+
+/* Same pattern as popup: shortcut sits under the toggle with no divider. */
+.shortcutHintRow {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 0 16px 14px;
+}
+
+.shortcutHintText {
+  color: var(--theme-text-subtle);
+  font-size: 12px;
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.shortcutKbd {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border-control);
+  border-radius: 4px;
+  color: var(--theme-text-secondary);
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-left: 2px;
+  padding: 2px 6px;
+  vertical-align: baseline;
+}
+
+.textButton {
+  background: none;
+  border: none;
+  color: var(--theme-primary);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.textButton:hover {
+  opacity: 0.85;
+}
+
+.textButton:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 2px;
 }
 
 .toggleControl {

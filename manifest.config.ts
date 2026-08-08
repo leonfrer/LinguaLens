@@ -37,6 +37,16 @@ export default defineManifest({
     service_worker: 'src/background/service-worker.ts',
     type: 'module'
   },
+  commands: {
+    'toggle-word-lookup': {
+      description: '__MSG_commandToggleWordLookup__',
+      // Alt+L on Windows/Linux; on macOS Alt maps to Option (⌥+L).
+      suggested_key: {
+        default: 'Alt+L',
+        mac: 'Alt+L'
+      }
+    }
+  },
   content_scripts: [
     {
       matches: ['<all_urls>'],

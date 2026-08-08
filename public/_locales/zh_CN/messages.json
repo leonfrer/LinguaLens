@@ -167,11 +167,23 @@
   "settingsManualModelId": {
     "message": "手动模型 ID"
   },
+  "commandToggleWordLookup": {
+    "message": "切换划词查询"
+  },
   "settingsWordLookup": {
     "message": "划词查询"
   },
   "settingsWordLookupDescription": {
     "message": "启用在网页中选中文本后的翻译功能。"
+  },
+  "settingsWordLookupShortcutPrefix": {
+    "message": "快捷键："
+  },
+  "settingsWordLookupShortcutUnset": {
+    "message": "尚未设置键盘快捷键"
+  },
+  "settingsWordLookupShortcutChange": {
+    "message": "更改快捷键"
   },
   "settingsInstantTranslateOnSelect": {
     "message": "选词后立即翻译"

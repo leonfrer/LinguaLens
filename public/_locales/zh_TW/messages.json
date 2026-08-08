@@ -167,11 +167,23 @@
   "settingsManualModelId": {
     "message": "手動模型 ID"
   },
+  "commandToggleWordLookup": {
+    "message": "切換劃詞查詢"
+  },
   "settingsWordLookup": {
     "message": "劃詞查詢"
   },
   "settingsWordLookupDescription": {
     "message": "啟用在網頁中選取文字後的翻譯功能。"
+  },
+  "settingsWordLookupShortcutPrefix": {
+    "message": "快速鍵："
+  },
+  "settingsWordLookupShortcutUnset": {
+    "message": "尚未設定鍵盤快速鍵"
+  },
+  "settingsWordLookupShortcutChange": {
+    "message": "變更快速鍵"
   },
   "settingsInstantTranslateOnSelect": {
     "message": "選詞後立即翻譯"

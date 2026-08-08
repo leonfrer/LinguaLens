@@ -167,11 +167,23 @@
   "settingsManualModelId": {
     "message": "Manual model ID"
   },
+  "commandToggleWordLookup": {
+    "message": "Toggle selection lookup"
+  },
   "settingsWordLookup": {
     "message": "Selection lookup"
   },
   "settingsWordLookupDescription": {
     "message": "Enable translating text you select on web pages."
+  },
+  "settingsWordLookupShortcutPrefix": {
+    "message": "Shortcut:"
+  },
+  "settingsWordLookupShortcutUnset": {
+    "message": "No keyboard shortcut assigned"
+  },
+  "settingsWordLookupShortcutChange": {
+    "message": "Change shortcut"
   },
   "settingsInstantTranslateOnSelect": {
     "message": "Translate immediately on select"

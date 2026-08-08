@@ -33,8 +33,8 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | Piece | Path | Role |
 | --- | --- | --- |
 | Content script entry | `src/content/selection.ts` | Manifest entry → `index.ts` (selection lifecycle), `selection-context.ts` (DOM sentence context), `panel.ts` (floating panel) |
-| Background entry | `src/background/service-worker.ts` | Manifest entry → `index.ts` (routing), `action-icon.ts` (toolbar icon) |
-| Manifest | `manifest.config.ts` | MV3 permissions, entries, locales |
+| Background entry | `src/background/service-worker.ts` | Manifest entry → `index.ts` (routing), `action-icon.ts` (toolbar icon), `toggle-word-lookup.ts` (commands) |
+| Manifest | `manifest.config.ts` | MV3 permissions, entries, locales, `commands` |
 | App constants | `src/config.ts` | Shared non-secret constants |
 | Locales | `public/_locales/{en,zh_CN,zh_TW}/messages.json` | Chrome i18n message catalogs |
 
@@ -62,7 +62,9 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` 
 ## Runtime boundaries (do not break)
 
 - **Content script**: selection and panel UI only; never receives or stores API keys.
-- **Background**: owns translation, save, content-settings fan-out, and action icon updates.
+- **Background**: owns translation, save, content-settings fan-out, action icon updates, and extension commands.
+- **Commands** (manifest `commands`, handled in background):
+  - `toggle-word-lookup` — flip `wordLookupEnabled` via `updateSettings` (default `Alt+L`, macOS Option+L; rebind in `chrome://extensions/shortcuts`). Icon and content-settings fan-out follow the normal `storage.onChanged` path. Popup/settings read the active combo via `chrome.commands.getAll` (`src/shared/commands.ts`).
 - **Messaging** (see `src/shared/types.ts`):
   - `LINGUALENS_TRANSLATE` — selected text (+ optional sentence context) → translation result
   - `LINGUALENS_SAVE_ITEM` — persist a saved item from the panel / UI

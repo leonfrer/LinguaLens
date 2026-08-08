@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test';
 import { expect, test } from './fixtures/extension';
-import { savedItemsStorageKey } from './fixtures/helpers';
+import { savedItemsStorageKey, savedItemsViewStorageKey } from './fixtures/helpers';
 
 const BACKUP_FORMAT = 'lingualens-saved-items-backup';
 
@@ -354,6 +354,143 @@ test('shows an error toast when restore file is invalid', async ({ context, exte
     'That file is not a valid LinguaLens saved-items backup.'
   );
   await expect(savedPage.getByRole('heading', { name: 'Nothing saved yet' })).toBeVisible();
+  await expect(savedPage.locator('.savedCard')).toHaveCount(0);
+
+  await savedPage.close();
+});
+
+test('groups saved items by source page and remembers the view mode', async ({
+  context,
+  extensionId
+}) => {
+  const savedPage = await openSavedPage(context, extensionId);
+
+  await savedPage.evaluate(
+    async ([itemsKey, viewKey]) => {
+      await chrome.storage.local.set({
+        [itemsKey]: [
+          {
+            id: 'page-a-1',
+            text: 'bonjour',
+            translation: '你好',
+            explanationLanguage: 'zh-CN',
+            sentenceContext: 'She said bonjour.',
+            sourceUrl: 'https://lingualens.test/article?utm=1',
+            sourceTitle: 'Article Alpha',
+            provider: 'openai-compatible',
+            model: 'mock-model',
+            createdAt: 30
+          },
+          {
+            id: 'page-a-2',
+            text: 'merci',
+            translation: '谢谢',
+            explanationLanguage: 'zh-CN',
+            sentenceContext: 'Say merci.',
+            sourceUrl: 'https://lingualens.test/article?utm=2',
+            sourceTitle: 'Article Alpha',
+            provider: 'openai-compatible',
+            model: 'mock-model',
+            createdAt: 20
+          },
+          {
+            id: 'page-b-1',
+            text: 'hola',
+            translation: '你好',
+            explanationLanguage: 'zh-CN',
+            sentenceContext: 'Hola amigo.',
+            sourceUrl: 'https://lingualens.test/other',
+            sourceTitle: 'Article Beta',
+            provider: 'openai-compatible',
+            model: 'mock-model',
+            createdAt: 10
+          },
+          {
+            id: 'unknown-1',
+            text: 'orphan',
+            translation: '孤儿',
+            explanationLanguage: 'zh-CN',
+            sentenceContext: 'An orphan term.',
+            sourceUrl: '',
+            sourceTitle: '',
+            provider: 'openai-compatible',
+            model: 'mock-model',
+            createdAt: 5
+          }
+        ],
+        [viewKey]: 'list'
+      });
+    },
+    [savedItemsStorageKey, savedItemsViewStorageKey]
+  );
+
+  await savedPage.reload();
+  await savedPage.waitForLoadState();
+
+  await expect(savedPage.getByRole('heading', { name: 'Saved items' })).toBeVisible();
+  await expect(savedPage.locator('.savedCard')).toHaveCount(4);
+  await expect(savedPage.locator('.savedStack')).toHaveCount(0);
+
+  const viewMode = savedPage.getByRole('radiogroup', { name: 'View mode' });
+  await expect(viewMode.getByRole('radio', { name: 'List' })).toHaveAttribute(
+    'aria-checked',
+    'true'
+  );
+
+  await viewMode.getByRole('radio', { name: 'By page' }).click();
+
+  await expect(savedPage.locator('.savedStack')).toHaveCount(3);
+  await expect(savedPage.getByRole('heading', { name: 'Article Alpha', level: 2 })).toBeVisible();
+  await expect(savedPage.getByRole('heading', { name: 'Article Beta', level: 2 })).toBeVisible();
+  await expect(savedPage.getByRole('heading', { name: 'Unknown source', level: 2 })).toBeVisible();
+  // Stacks start collapsed: no full cards until expand.
+  await expect(savedPage.locator('.savedCard')).toHaveCount(0);
+
+  const alphaStack = savedPage.locator('.savedStack').filter({
+    has: savedPage.getByRole('heading', { name: 'Article Alpha', level: 2 })
+  });
+  await expect(alphaStack.locator('.savedStackCount')).toHaveText('2 items');
+  await expect(alphaStack.locator('.savedStackPreviewTranslation')).toHaveText('你好');
+  await expect(alphaStack.getByRole('button', { name: 'Expand Article Alpha' })).toHaveAttribute(
+    'aria-expanded',
+    'false'
+  );
+
+  const betaStack = savedPage.locator('.savedStack').filter({
+    has: savedPage.getByRole('heading', { name: 'Article Beta', level: 2 })
+  });
+  await expect(betaStack.locator('.savedStackCount')).toHaveText('1 items');
+
+  await alphaStack.getByRole('button', { name: 'Expand Article Alpha' }).click();
+  await expect(alphaStack.getByRole('button', { name: 'Collapse Article Alpha' })).toHaveAttribute(
+    'aria-expanded',
+    'true'
+  );
+  await expect(alphaStack.locator('.savedCard')).toHaveCount(2);
+  await expect(alphaStack.locator('.translationText')).toHaveText(['你好', '谢谢']);
+  await expect(alphaStack.locator('.savedStackPreview')).toHaveCount(0);
+
+  await alphaStack.getByRole('button', { name: 'Delete bonjour' }).click();
+  await expect(alphaStack.locator('.savedCard')).toHaveCount(1);
+  await expect(alphaStack.locator('.savedStackCount')).toHaveText('1 items');
+
+  await alphaStack.getByRole('button', { name: 'Delete merci' }).click();
+  await expect(savedPage.getByRole('heading', { name: 'Article Alpha', level: 2 })).toHaveCount(0);
+  await expect(savedPage.locator('.savedStack')).toHaveCount(2);
+
+  const storedView = await savedPage.evaluate(async ([viewKey]) => {
+    const result = await chrome.storage.local.get(viewKey);
+    return result[viewKey] as string;
+  }, [savedItemsViewStorageKey]);
+  expect(storedView).toBe('byPage');
+
+  await savedPage.reload();
+  await savedPage.waitForLoadState();
+  await expect(
+    savedPage.getByRole('radiogroup', { name: 'View mode' }).getByRole('radio', { name: 'By page' })
+  ).toHaveAttribute('aria-checked', 'true');
+  await expect(savedPage.locator('.savedStack')).toHaveCount(2);
+  // Expand state is not persisted across reloads.
   await expect(savedPage.locator('.savedCard')).toHaveCount(0);
 
   await savedPage.close();

@@ -3,14 +3,19 @@ import {
   CREDENTIALS_KEY,
   CONTENT_SETTINGS_KEY,
   createSavedItem,
+  DEFAULT_SAVED_ITEMS_VIEW_MODE,
   DEFAULT_SETTINGS,
   getContentSettings,
   getSavedItems,
+  getSavedItemsViewMode,
   getSettings,
   initializeStorage,
+  isSavedItemsViewMode,
   mergeSavedItemsFromBackup,
   SAVED_ITEMS_KEY,
+  SAVED_ITEMS_VIEW_KEY,
   setSavedItems,
+  setSavedItemsViewMode,
   SETTINGS_KEY,
   updateSettings
 } from './storage';
@@ -530,5 +535,52 @@ describe('setSavedItems / mergeSavedItemsFromBackup', () => {
     expect(set).toHaveBeenCalledWith({
       [SAVED_ITEMS_KEY]: result.items
     });
+  });
+});
+
+describe('isSavedItemsViewMode', () => {
+  it('accepts list and byPage only', () => {
+    expect(isSavedItemsViewMode('list')).toBe(true);
+    expect(isSavedItemsViewMode('byPage')).toBe(true);
+    expect(isSavedItemsViewMode('grid')).toBe(false);
+    expect(isSavedItemsViewMode(undefined)).toBe(false);
+  });
+});
+
+describe('getSavedItemsViewMode / setSavedItemsViewMode', () => {
+  it('defaults to list when missing or invalid', async () => {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({})
+        }
+      }
+    });
+    await expect(getSavedItemsViewMode()).resolves.toBe(DEFAULT_SAVED_ITEMS_VIEW_MODE);
+
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({ [SAVED_ITEMS_VIEW_KEY]: 'grid' })
+        }
+      }
+    });
+    await expect(getSavedItemsViewMode()).resolves.toBe('list');
+  });
+
+  it('reads and writes the saved view preference', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({ [SAVED_ITEMS_VIEW_KEY]: 'byPage' }),
+          set
+        }
+      }
+    });
+
+    await expect(getSavedItemsViewMode()).resolves.toBe('byPage');
+    await setSavedItemsViewMode('list');
+    expect(set).toHaveBeenCalledWith({ [SAVED_ITEMS_VIEW_KEY]: 'list' });
   });
 });

@@ -263,6 +263,27 @@
   "savedPageListAriaLabel": {
     "message": "All saved items"
   },
+  "savedPageGroupsAriaLabel": {
+    "message": "Saved items by page"
+  },
+  "savedViewModeLabel": {
+    "message": "View mode"
+  },
+  "savedViewList": {
+    "message": "List"
+  },
+  "savedViewByPage": {
+    "message": "By page"
+  },
+  "savedGroupItemCount": {
+    "message": "$1 items"
+  },
+  "savedStackExpandLabel": {
+    "message": "Expand $1"
+  },
+  "savedStackCollapseLabel": {
+    "message": "Collapse $1"
+  },
   "savedOpenSource": {
     "message": "Open source"
   },

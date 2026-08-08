@@ -24,7 +24,7 @@ High-level flow:
 | --- | --- | --- |
 | Popup | `src/popup/` | Quick settings, recent items, links to full pages |
 | Settings | `src/settings/` | Full configuration (provider, model, i18n, pronunciation) |
-| Saved items | `src/saved/` | Browse saved items; backup/restore (merge by id); `highlight.ts` marks the saved selection inside sentence context |
+| Saved items | `src/saved/` | Browse saved items (List or By page collapsible stacks); backup/restore (merge by id); `highlight.ts` / `group-by-source.ts` |
 
 HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
@@ -95,6 +95,7 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` 
 | `lingualens.credentials` | `{ apiKey }` only |
 | `lingualens.contentSettings` | Derived content-safe subset published for the content script |
 | `lingualens.savedItems` | Saved translations and metadata (never credentials) |
+| `lingualens.savedItemsView` | Saved page view mode: `'list'` \| `'byPage'` (presentation only; By page uses collapsible stacks per source) |
 
 In-memory `Settings` still includes `apiKey` for settings UI convenience; `getSettings` / `updateSettings` merge and split credentials at the storage boundary. Legacy `apiKey` values left on the settings object are ignored on read.
 

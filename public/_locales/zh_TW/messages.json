@@ -263,6 +263,27 @@
   "savedPageListAriaLabel": {
     "message": "所有儲存的內容"
   },
+  "savedPageGroupsAriaLabel": {
+    "message": "按頁面分組的儲存內容"
+  },
+  "savedViewModeLabel": {
+    "message": "檢視模式"
+  },
+  "savedViewList": {
+    "message": "列表"
+  },
+  "savedViewByPage": {
+    "message": "按頁面"
+  },
+  "savedGroupItemCount": {
+    "message": "$1 筆"
+  },
+  "savedStackExpandLabel": {
+    "message": "展開 $1"
+  },
+  "savedStackCollapseLabel": {
+    "message": "收起 $1"
+  },
   "savedOpenSource": {
     "message": "開啟來源"
   },

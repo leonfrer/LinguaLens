@@ -263,6 +263,27 @@
   "savedPageListAriaLabel": {
     "message": "所有保存的内容"
   },
+  "savedPageGroupsAriaLabel": {
+    "message": "按页面分组的保存内容"
+  },
+  "savedViewModeLabel": {
+    "message": "视图模式"
+  },
+  "savedViewList": {
+    "message": "列表"
+  },
+  "savedViewByPage": {
+    "message": "按页面"
+  },
+  "savedGroupItemCount": {
+    "message": "$1 条"
+  },
+  "savedStackExpandLabel": {
+    "message": "展开 $1"
+  },
+  "savedStackCollapseLabel": {
+    "message": "收起 $1"
+  },
   "savedOpenSource": {
     "message": "打开来源"
   },

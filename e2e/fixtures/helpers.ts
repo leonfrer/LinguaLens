@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test';
 
 export const savedItemsStorageKey = 'lingualens.savedItems';
+export const savedItemsViewStorageKey = 'lingualens.savedItemsView';
 export const settingsStorageKey = 'lingualens.settings';
 export const credentialsStorageKey = 'lingualens.credentials';
 export const testArticleUrl = 'https://lingualens.test/article';

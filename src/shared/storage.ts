@@ -23,6 +23,9 @@ import type {
   Settings
 } from './types';
 
+/** Saved page presentation mode (flat list vs group by source page). */
+export type SavedItemsViewMode = 'list' | 'byPage';
+
 export const DEFAULT_SETTINGS: Settings = {
   appearance: 'system',
   interfaceLanguage: 'system',
@@ -40,9 +43,16 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export const SAVED_ITEMS_KEY = 'lingualens.savedItems';
+export const SAVED_ITEMS_VIEW_KEY = 'lingualens.savedItemsView';
 export const SETTINGS_KEY = 'lingualens.settings';
 export const CREDENTIALS_KEY = 'lingualens.credentials';
 export const CONTENT_SETTINGS_KEY = 'lingualens.contentSettings';
+
+export const DEFAULT_SAVED_ITEMS_VIEW_MODE: SavedItemsViewMode = 'list';
+
+export function isSavedItemsViewMode(value: unknown): value is SavedItemsViewMode {
+  return value === 'list' || value === 'byPage';
+}
 
 type StoredSettings = Omit<Settings, 'apiKey'>;
 
@@ -257,4 +267,14 @@ export async function mergeSavedItemsFromBackup(
   const result = mergeSavedItems(local, incoming);
   await setSavedItems(result.items);
   return result;
+}
+
+export async function getSavedItemsViewMode(): Promise<SavedItemsViewMode> {
+  const result = await chrome.storage.local.get(SAVED_ITEMS_VIEW_KEY);
+  const value = result[SAVED_ITEMS_VIEW_KEY];
+  return isSavedItemsViewMode(value) ? value : DEFAULT_SAVED_ITEMS_VIEW_MODE;
+}
+
+export async function setSavedItemsViewMode(mode: SavedItemsViewMode): Promise<void> {
+  await chrome.storage.local.set({ [SAVED_ITEMS_VIEW_KEY]: mode });
 }

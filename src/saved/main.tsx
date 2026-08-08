@@ -14,12 +14,17 @@ import {
 } from '../shared/saved-items-backup';
 import { initializeTheme } from '../shared/theme';
 import {
+  DEFAULT_SAVED_ITEMS_VIEW_MODE,
   deleteSavedItem,
   getSavedItems,
-  mergeSavedItemsFromBackup
+  getSavedItemsViewMode,
+  mergeSavedItemsFromBackup,
+  setSavedItemsViewMode,
+  type SavedItemsViewMode
 } from '../shared/storage';
 import { Toast, useToast } from '../shared/Toast';
 import type { SavedItem } from '../shared/types';
+import { groupSavedItemsBySource, type SavedItemGroup } from './group-by-source';
 import { findTextRange } from './highlight';
 import './styles.css';
 
@@ -65,6 +70,21 @@ function MoreIcon(props: IconProps) {
   );
 }
 
+function ChevronIcon(props: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" {...props}>
+      <path
+        d="M4 6.25 8 10.25 12 6.25"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
 function getSourceLabel(item: SavedItem): string {
   if (item.sourceTitle?.trim()) {
     return item.sourceTitle;
@@ -102,7 +122,15 @@ function HighlightedContext({ item }: { item: SavedItem }) {
   );
 }
 
-function SavedCard({ item, onDelete }: { item: SavedItem; onDelete: (itemId: string) => void }) {
+function SavedCard({
+  item,
+  onDelete,
+  hideSource = false
+}: {
+  item: SavedItem;
+  onDelete: (itemId: string) => void;
+  hideSource?: boolean;
+}) {
   const sourceLabel = getSourceLabel(item);
   const savedDate = formatSavedDate(item.createdAt);
 
@@ -139,7 +167,7 @@ function SavedCard({ item, onDelete }: { item: SavedItem; onDelete: (itemId: str
 
       <footer className="cardFooter">
         <time dateTime={new Date(item.createdAt).toISOString()}>{savedDate}</time>
-        {item.sourceUrl ? (
+        {!hideSource && item.sourceUrl ? (
           <a
             aria-label={`${t('savedOpenSource')}: ${sourceLabel}`}
             className="sourceLink"
@@ -151,11 +179,102 @@ function SavedCard({ item, onDelete }: { item: SavedItem; onDelete: (itemId: str
             <span>{sourceLabel}</span>
             <ExternalLinkIcon />
           </a>
-        ) : (
+        ) : null}
+        {!hideSource && !item.sourceUrl ? (
           <span className="sourceLabel">{sourceLabel}</span>
-        )}
+        ) : null}
       </footer>
     </article>
+  );
+}
+
+function groupDomId(groupKey: string, suffix: string): string {
+  return `saved-group-${encodeURIComponent(groupKey).replace(/%/g, '_')}-${suffix}`;
+}
+
+function SourceStack({
+  group,
+  expanded,
+  onToggle,
+  onDelete
+}: {
+  group: SavedItemGroup;
+  expanded: boolean;
+  onToggle: () => void;
+  onDelete: (itemId: string) => void;
+}) {
+  const label = group.label || t('commonUnknownSource');
+  const countLabel = t('savedGroupItemCount', String(group.items.length));
+  const headingId = groupDomId(group.key, 'title');
+  const panelId = groupDomId(group.key, 'panel');
+  const previewItem = group.items[0];
+  const toggleLabel = expanded
+    ? t('savedStackCollapseLabel', label)
+    : t('savedStackExpandLabel', label);
+
+  return (
+    <section
+      className={`savedStack${expanded ? ' is-expanded' : ' is-collapsed'}`}
+      aria-labelledby={headingId}
+    >
+      <div className="savedStackCard">
+        <header className="savedStackHeader">
+          <button
+            aria-controls={panelId}
+            aria-expanded={expanded}
+            aria-label={toggleLabel}
+            className="savedStackToggle"
+            type="button"
+            onClick={onToggle}
+          >
+            <span className="savedStackTitleRow">
+              <h2 className="savedStackTitle" id={headingId} title={label}>
+                {label}
+              </h2>
+              <span className="savedStackCount">{countLabel}</span>
+              <ChevronIcon className="savedStackChevron" />
+            </span>
+          </button>
+          {group.sourceUrl ? (
+            <a
+              aria-label={`${t('savedOpenSource')}: ${label}`}
+              className="savedStackSourceLink"
+              href={group.sourceUrl}
+              rel="noreferrer"
+              target="_blank"
+              title={group.sourceUrl}
+            >
+              <span>{group.sourceUrl}</span>
+              <ExternalLinkIcon />
+            </a>
+          ) : null}
+        </header>
+
+        {!expanded && previewItem ? (
+          <div className="savedStackPreview">
+            <p className="savedStackPreviewContext">
+              <HighlightedContext item={previewItem} />
+            </p>
+            <p className="savedStackPreviewTranslation">{previewItem.translation}</p>
+          </div>
+        ) : null}
+
+        {expanded ? (
+          <div
+            className="savedCards savedStackPanel"
+            id={panelId}
+            role="region"
+            aria-labelledby={headingId}
+          >
+            {group.items.map((item) => (
+              <SavedCard hideSource item={item} key={item.id} onDelete={onDelete} />
+            ))}
+          </div>
+        ) : (
+          <div hidden id={panelId} />
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -174,6 +293,8 @@ function downloadTextFile(filename: string, contents: string) {
 
 function App() {
   const [items, setItems] = useState<SavedItem[]>([]);
+  const [viewMode, setViewMode] = useState<SavedItemsViewMode>(DEFAULT_SAVED_ITEMS_VIEW_MODE);
+  const [expandedStackKeys, setExpandedStackKeys] = useState<Set<string>>(() => new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -185,16 +306,24 @@ function App() {
     () => [...items].sort((first, second) => second.createdAt - first.createdAt),
     [items]
   );
+  const sourceGroups = useMemo(() => groupSavedItemsBySource(items), [items]);
+  const activeStackKeys = useMemo(
+    () => new Set(sourceGroups.map((group) => group.key)),
+    [sourceGroups]
+  );
 
   useEffect(() => {
     let isMounted = true;
 
-    void getSavedItems().then((savedItems) => {
-      if (isMounted) {
-        setItems(savedItems);
-        setIsLoading(false);
+    void Promise.all([getSavedItems(), getSavedItemsViewMode()]).then(
+      ([savedItems, savedViewMode]) => {
+        if (isMounted) {
+          setItems(savedItems);
+          setViewMode(savedViewMode);
+          setIsLoading(false);
+        }
       }
-    });
+    );
 
     return () => {
       isMounted = false;
@@ -269,6 +398,30 @@ function App() {
   async function handleDelete(itemId: string) {
     await deleteSavedItem(itemId);
     setItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+  }
+
+  function handleViewModeChange(nextMode: SavedItemsViewMode) {
+    if (nextMode === viewMode) {
+      return;
+    }
+    setViewMode(nextMode);
+    void setSavedItemsViewMode(nextMode);
+  }
+
+  function handleStackToggle(groupKey: string) {
+    setExpandedStackKeys((current) => {
+      const next = new Set(current);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  }
+
+  function isStackExpanded(groupKey: string): boolean {
+    return expandedStackKeys.has(groupKey) && activeStackKeys.has(groupKey);
   }
 
   async function handleBackup() {
@@ -348,6 +501,36 @@ function App() {
                   {sortedItems.length} {t('savedCountLabel')}
                 </span>
               ) : null}
+              {!isLoading && sortedItems.length > 0 ? (
+                <div
+                  aria-label={t('savedViewModeLabel')}
+                  className="savedViewToggle"
+                  role="radiogroup"
+                >
+                  <button
+                    aria-checked={viewMode === 'list'}
+                    className="savedViewToggleButton"
+                    role="radio"
+                    type="button"
+                    onClick={() => {
+                      handleViewModeChange('list');
+                    }}
+                  >
+                    {t('savedViewList')}
+                  </button>
+                  <button
+                    aria-checked={viewMode === 'byPage'}
+                    className="savedViewToggleButton"
+                    role="radio"
+                    type="button"
+                    onClick={() => {
+                      handleViewModeChange('byPage');
+                    }}
+                  >
+                    {t('savedViewByPage')}
+                  </button>
+                </div>
+              ) : null}
               <div className="savedActions" ref={actionsMenuRef}>
                 <button
                   aria-expanded={isActionsMenuOpen}
@@ -418,7 +601,7 @@ function App() {
         </section>
       ) : null}
 
-      {sortedItems.length > 0 ? (
+      {sortedItems.length > 0 && viewMode === 'list' ? (
         <section className="savedCards" aria-label={t('savedPageListAriaLabel')}>
           {sortedItems.map((item) => (
             <SavedCard
@@ -430,6 +613,24 @@ function App() {
             />
           ))}
         </section>
+      ) : null}
+
+      {sortedItems.length > 0 && viewMode === 'byPage' ? (
+        <div className="savedStacks" aria-label={t('savedPageGroupsAriaLabel')}>
+          {sourceGroups.map((group) => (
+            <SourceStack
+              expanded={isStackExpanded(group.key)}
+              group={group}
+              key={group.key}
+              onDelete={(itemId) => {
+                void handleDelete(itemId);
+              }}
+              onToggle={() => {
+                handleStackToggle(group.key);
+              }}
+            />
+          ))}
+        </div>
       ) : null}
 
       <Toast toast={toast} onDismiss={clearToast} />

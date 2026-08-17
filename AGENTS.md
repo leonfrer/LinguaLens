@@ -32,7 +32,7 @@ Open that file when changing directory layout, content/background boundaries, st
 - `npm run build`: type-check and build into `dist/`.
 - `npm test`: run Vitest unit tests.
 - `npm run test:e2e`: build and run Playwright extension tests.
-- See README for other scripts (`test:watch`, headed/UI e2e, `preview`).
+- See README for other scripts (`test:watch`, headed/UI e2e, `preview`, `icons`).
 - CI runs `npm test` then `npm run build` on pull requests and `main`. Playwright stays local.
 
 ## Verification

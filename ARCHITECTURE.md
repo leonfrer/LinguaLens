@@ -39,7 +39,8 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | Locales | `public/_locales/{en,zh_CN,zh_TW}/messages.json` | Chrome i18n message catalogs |
 | Agent skills | `.agents/skills/` | Shared Agent Skills (`SKILL.md` packages). Codex, Pi, and other compatible harnesses load this directory. |
 | Codex project config | `.codex/config.toml` | Codex-only sandbox / runtime settings. Not the skill store. |
-| Icon source | `design/lingualens-icon/` | SVG/layer archive plus `spec.json`. Runtime artwork is `lingualens-icon.preview.svg` (rounded). Popup, settings, saved, and the content trigger use `public/icons/icon.svg`; toolbar/store PNGs are rasterized from that preview. `tmp/` and design PNGs are local scratch. |
+| Icon source | `design/lingualens-icon/` | SVG/layer archive plus `spec.json`. Runtime artwork is `lingualens-icon.preview.svg` (rounded). Popup, settings, saved, and the content trigger use `public/icons/icon.svg`; toolbar/store PNGs are rasterized from that preview via `npm run icons`. `tmp/` and design PNGs are local scratch. |
+| Icon rasterizer | `scripts/rasterize-icons.mjs` | `npm run icons`. Copies the rounded preview SVG to `public/icons/icon.svg` and writes `icon{16,32,48,128}.png` plus grayscale `-disabled` variants. Requires Playwright Chromium and Python 3 + Pillow. |
 
 ### Shared modules (`src/shared/`)
 

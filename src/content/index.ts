@@ -6,6 +6,7 @@ import { isValidSelectionText, normalizeSelectedText } from '../shared/text';
 import type {
   ContentSettings,
   ContentSettingsResponse,
+  DeleteItemResponse,
   ExplanationLanguage,
   SaveItemResponse,
   TranslateResponse
@@ -46,6 +47,7 @@ let currentState: PanelState | null = null;
 let pendingLookup: PendingLookup | null = null;
 let selectionTimer: number | undefined;
 let lastRequestedText = '';
+let persistInFlight = false;
 let contentSettings = DEFAULT_CONTENT_SETTINGS;
 let contentSettingsReady: Promise<void> = Promise.resolve();
 /** True while the primary pointer button is held — suppress lookups mid-drag. */
@@ -249,6 +251,9 @@ function renderCurrentPanel(): void {
     onClose: hideCurrentPanel,
     onSave: () => {
       void saveCurrentSelection();
+    },
+    onUndo: () => {
+      void undoCurrentSave();
     }
   });
 
@@ -263,29 +268,92 @@ function handleViewportResize(): void {
 }
 
 async function saveCurrentSelection(): Promise<void> {
-  if (!currentState || currentState.status !== 'ready') {
+  const panelState = currentState;
+  if (!panelState || panelState.status !== 'ready' || persistInFlight) {
     return;
   }
 
-  const response = await sendRuntimeMessage<SaveItemResponse>({
-    type: 'LINGUALENS_SAVE_ITEM',
-    text: currentState.text,
-    translation: currentState.translation,
-    pronunciation: currentState.pronunciation,
-    pronunciationNotation: currentState.pronunciationNotation,
-    explanationLanguage: currentState.explanationLanguage,
-    sentenceContext: currentState.sentenceContext,
-    selectionStartInContext: currentState.selectionStartInContext,
-    explanation: currentState.explanation,
-    provider: currentState.provider,
-    model: currentState.model,
-    sourceUrl: window.location.href,
-    sourceTitle: document.title
-  });
+  persistInFlight = true;
+  try {
+    const response = await sendRuntimeMessage<SaveItemResponse>({
+      type: 'LINGUALENS_SAVE_ITEM',
+      text: panelState.text,
+      translation: panelState.translation,
+      pronunciation: panelState.pronunciation,
+      pronunciationNotation: panelState.pronunciationNotation,
+      explanationLanguage: panelState.explanationLanguage,
+      sentenceContext: panelState.sentenceContext,
+      selectionStartInContext: panelState.selectionStartInContext,
+      explanation: panelState.explanation,
+      provider: panelState.provider,
+      model: panelState.model,
+      sourceUrl: window.location.href,
+      sourceTitle: document.title
+    });
 
-  currentState = response.ok
-    ? { ...currentState, status: 'saved' }
-    : { ...currentState, status: 'error', error: response.error };
+    if (currentState !== panelState) {
+      return;
+    }
+
+    currentState = response.ok
+      ? { ...panelState, status: 'saved', savedItemId: response.item.id, error: undefined }
+      : { ...panelState, status: 'error', error: response.error };
+  } catch (error) {
+    if (currentState !== panelState) {
+      return;
+    }
+
+    currentState = {
+      ...panelState,
+      status: 'error',
+      error: error instanceof Error ? error.message : t('runtimeMessageFailed')
+    };
+  } finally {
+    persistInFlight = false;
+  }
+
+  renderCurrentPanel();
+}
+
+async function undoCurrentSave(): Promise<void> {
+  const panelState = currentState;
+  if (
+    !panelState ||
+    panelState.status !== 'saved' ||
+    !panelState.savedItemId ||
+    persistInFlight
+  ) {
+    return;
+  }
+
+  persistInFlight = true;
+  try {
+    const response = await sendRuntimeMessage<DeleteItemResponse>({
+      type: 'LINGUALENS_DELETE_ITEM',
+      itemId: panelState.savedItemId
+    });
+
+    if (currentState !== panelState) {
+      return;
+    }
+
+    currentState = response.ok
+      ? { ...panelState, status: 'ready', savedItemId: undefined, error: undefined }
+      : { ...panelState, status: 'saved', error: response.error };
+  } catch (error) {
+    if (currentState !== panelState) {
+      return;
+    }
+
+    currentState = {
+      ...panelState,
+      status: 'saved',
+      error: error instanceof Error ? error.message : t('runtimeMessageFailed')
+    };
+  } finally {
+    persistInFlight = false;
+  }
+
   renderCurrentPanel();
 }
 

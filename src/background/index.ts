@@ -1,6 +1,7 @@
 import { t } from '../shared/i18n';
 import { applyInterfaceLanguage } from '../shared/localization';
 import {
+  deleteSavedItem,
   getContentSettings,
   getSettings,
   initializeStorage,
@@ -11,6 +12,7 @@ import {
 import { translateWithConfiguredProvider } from '../shared/translation';
 import type {
   ContentSettingsResponse,
+  DeleteItemResponse,
   LinguaLensMessage,
   SaveItemResponse,
   TranslateResponse
@@ -75,6 +77,7 @@ function isLinguaLensMessage(message: unknown): message is LinguaLensMessage {
     'type' in message &&
     (message.type === 'LINGUALENS_TRANSLATE' ||
       message.type === 'LINGUALENS_SAVE_ITEM' ||
+      message.type === 'LINGUALENS_DELETE_ITEM' ||
       message.type === 'LINGUALENS_GET_CONTENT_SETTINGS')
   );
 }
@@ -125,6 +128,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         const response: TranslateResponse = {
           ok: false,
           error: t('panelTranslationFailed')
+        };
+        sendResponse(response);
+      });
+    return true;
+  }
+
+  if (message.type === 'LINGUALENS_DELETE_ITEM') {
+    void storageReady
+      .then(() => deleteSavedItem(message.itemId))
+      .then(() => {
+        const response: DeleteItemResponse = { ok: true };
+        sendResponse(response);
+      })
+      .catch((error: unknown) => {
+        const response: DeleteItemResponse = {
+          ok: false,
+          error: error instanceof Error ? error.message : t('runtimeMessageFailed')
         };
         sendResponse(response);
       });

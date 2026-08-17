@@ -64,12 +64,13 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, `src/content/`, a
 ## Runtime boundaries (do not break)
 
 - **Content script**: selection and panel UI only; never receives or stores API keys.
-- **Background**: owns translation, save, content-settings fan-out, action icon updates, and extension commands.
+- **Background**: owns translation, save, delete, content-settings fan-out, action icon updates, and extension commands.
 - **Commands** (manifest `commands`, handled in background):
   - `toggle-word-lookup` — flip `wordLookupEnabled` via `updateSettings` (default `Alt+L`, macOS Option+L; rebind in `chrome://extensions/shortcuts`). Icon and content-settings fan-out follow the normal `storage.onChanged` path. Popup/settings read the active combo via `chrome.commands.getAll` (`src/shared/commands.ts`).
 - **Messaging** (see `src/shared/types.ts`):
   - `LINGUALENS_TRANSLATE` — selected text (+ optional sentence context) → translation result
   - `LINGUALENS_SAVE_ITEM` — persist a saved item from the panel / UI
+  - `LINGUALENS_DELETE_ITEM` — remove a saved item by id (panel undo)
   - `LINGUALENS_GET_CONTENT_SETTINGS` — content-safe settings subset for the panel
 - **Storage** (`src/shared/storage.ts`): four `chrome.storage.local` buckets (see below). Keep credentials out of content scripts, saved items, logs, errors, and any future export/share paths.
 - **LLM**: OpenAI-compatible providers via Vercel AI SDK; presets live in `src/shared/providers.ts`.
@@ -80,7 +81,7 @@ Co-located `*.test.ts` under `src/shared/`, `src/background/`, `src/content/`, a
 [Host page]
     selection / UI events
         → content script (panel only; no API keys)
-            → LINGUALENS_TRANSLATE | LINGUALENS_SAVE_ITEM | LINGUALENS_GET_CONTENT_SETTINGS
+            → LINGUALENS_TRANSLATE | LINGUALENS_SAVE_ITEM | LINGUALENS_DELETE_ITEM | LINGUALENS_GET_CONTENT_SETTINGS
                 → background service worker
                     → storage (settings / credentials / contentSettings / savedItems)
                     → OpenAI-compatible provider (credentials only here)

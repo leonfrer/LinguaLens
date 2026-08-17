@@ -21,8 +21,8 @@ Open that file when changing directory layout, content/background boundaries, st
 ## Architecture (do not break)
 
 - Content script: selection and panel UI only; never receives or stores API keys.
-- Background: owns translation, save, content-settings fan-out, and action icon updates.
-- Messaging: `LINGUALENS_TRANSLATE` | `LINGUALENS_SAVE_ITEM` | `LINGUALENS_GET_CONTENT_SETTINGS` (see `src/shared/types.ts`).
+- Background: owns translation, save, delete, content-settings fan-out, and action icon updates.
+- Messaging: `LINGUALENS_TRANSLATE` | `LINGUALENS_SAVE_ITEM` | `LINGUALENS_DELETE_ITEM` | `LINGUALENS_GET_CONTENT_SETTINGS` (see `src/shared/types.ts`).
 - Storage: settings vs credentials vs contentSettings vs savedItems (`src/shared/storage.ts`). In-memory `Settings` may include `apiKey`; only the credentials bucket persists it. Keep credentials out of content scripts, saved items, logs, errors, and any future export/share paths.
 - LLM: OpenAI-compatible providers via Vercel AI SDK; endpoint presets live in `src/shared/providers.ts`.
 

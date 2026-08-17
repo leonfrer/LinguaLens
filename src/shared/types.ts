@@ -116,6 +116,11 @@ export type SaveItemMessage = {
   sourceTitle: string;
 };
 
+export type DeleteItemMessage = {
+  type: 'LINGUALENS_DELETE_ITEM';
+  itemId: string;
+};
+
 export type GetContentSettingsMessage = {
   type: 'LINGUALENS_GET_CONTENT_SETTINGS';
 };
@@ -123,6 +128,7 @@ export type GetContentSettingsMessage = {
 export type LinguaLensMessage =
   | TranslateRequestMessage
   | SaveItemMessage
+  | DeleteItemMessage
   | GetContentSettingsMessage;
 
 export type ContentSettingsResponse =
@@ -154,6 +160,15 @@ export type SaveItemResponse =
   | {
       ok: true;
       item: SavedItem;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type DeleteItemResponse =
+  | {
+      ok: true;
     }
   | {
       ok: false;

@@ -5,6 +5,7 @@ import {
   createSavedItem,
   DEFAULT_SAVED_ITEMS_VIEW_MODE,
   DEFAULT_SETTINGS,
+  deleteSavedItem,
   getContentSettings,
   getSavedItems,
   getSavedItemsViewMode,
@@ -445,6 +446,84 @@ describe('getSavedItems', () => {
         createdAt: 123
       }
     ]);
+  });
+});
+
+describe('deleteSavedItem', () => {
+  it('removes only the requested item', async () => {
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            [SAVED_ITEMS_KEY]: [
+              {
+                id: 'keep',
+                text: 'hello',
+                translation: '你好',
+                explanationLanguage: 'zh-CN',
+                sourceUrl: 'https://example.com',
+                sourceTitle: 'Example',
+                createdAt: 1
+              },
+              {
+                id: 'remove',
+                text: 'bye',
+                translation: '再见',
+                explanationLanguage: 'zh-CN',
+                sourceUrl: 'https://example.com',
+                sourceTitle: 'Example',
+                createdAt: 2
+              }
+            ]
+          }),
+          set
+        }
+      }
+    });
+
+    await deleteSavedItem('remove');
+
+    expect(set).toHaveBeenCalledWith({
+      [SAVED_ITEMS_KEY]: [
+        {
+          id: 'keep',
+          text: 'hello',
+          translation: '你好',
+          explanationLanguage: 'zh-CN',
+          sourceUrl: 'https://example.com',
+          sourceTitle: 'Example',
+          createdAt: 1
+        }
+      ]
+    });
+  });
+
+  it('is a no-op when the id is already gone', async () => {
+    const items = [
+      {
+        id: 'keep',
+        text: 'hello',
+        translation: '你好',
+        explanationLanguage: 'zh-CN' as const,
+        sourceUrl: 'https://example.com',
+        sourceTitle: 'Example',
+        createdAt: 1
+      }
+    ];
+    const set = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({ [SAVED_ITEMS_KEY]: items }),
+          set
+        }
+      }
+    });
+
+    await deleteSavedItem('missing');
+
+    expect(set).toHaveBeenCalledWith({ [SAVED_ITEMS_KEY]: items });
   });
 });
 

@@ -6,6 +6,10 @@ test-results
 .env.*
 !.env.example
 
+# app-icon-gen scratch and raster exports; keep SVG/spec as the archive
+design/**/tmp/
+design/**/*.png
+
 # macOS
 .DS_Store
 .AppleDouble

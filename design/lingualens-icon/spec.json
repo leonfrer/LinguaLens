@@ -1,0 +1,119 @@
+{
+  "name": "LinguaLens",
+  "target_platforms": ["chrome"],
+  "source_reference": "direct-authored side-caret selection mark from semantic-icon-design.json",
+  "brief": "LinguaLens selection mark: vivid indigo stage, empty 3.5:1 word highlight, two white iOS-style handles. Vertical carets sit on the left and right edges of the rectangle. Start knob sits fully above the top-left; end knob sits fully below the bottom-right.",
+  "semantic_review": {
+    "status": "exact-enough",
+    "identity_risk": "low",
+    "basis": "original geometric mark with no external brand or font source; geometry authored from the side-caret selection contract",
+    "route": "semantic-svg",
+    "notes": "Empty rounded selection bar plus two disconnected handle groups. Carets are full-height side stems. Handles are filled circle-plus-rect, not strokes. No letters."
+  },
+  "source_analysis": {
+    "fidelity_target": "preserve an empty 3.5:1 word-height selection bar with diagonally paired iOS handles whose vertical carets sit on the left and right edges",
+    "identity_risk": "low",
+    "route": "semantic-svg",
+    "must_preserve": [
+      "word-bar proportion 3.5:1",
+      "empty selection interior with no letters",
+      "left caret centered on the bar's left edge",
+      "right caret centered on the bar's right edge",
+      "start handle fully above the top-left",
+      "end handle fully below the bottom-right"
+    ],
+    "must_not_add": [
+      "letters, CJK, or Latin glyphs",
+      "carets attached to the top or bottom edges",
+      "circles overlapping the bar",
+      "camera brackets, magnifier, translator arrows, or sparkles",
+      "bevel, glow, shadow, highlight, or glass shine",
+      "boolean hole, mask, clipPath, stroke, or opacity",
+      "rounded app mask in imported foreground assets"
+    ],
+    "components": [
+      {
+        "id": "selection-bar",
+        "layer": "selection bar",
+        "format": "svg",
+        "source_provenance": "generated-in-task",
+        "alignment_basis": "authored from locked 1024 canvas coordinates in semantic-icon-design.json",
+        "spec_constraints": [
+          "rounded rectangle 560x160 at 232,432 with rx 16",
+          "opaque #A8B8FF fill",
+          "no stroke or material helper geometry"
+        ]
+      },
+      {
+        "id": "start-handle",
+        "layer": "start handle",
+        "format": "svg",
+        "source_provenance": "generated-in-task",
+        "alignment_basis": "circle 232,362 r=70; stem 216,362 32x230; caret on left edge",
+        "spec_constraints": [
+          "filled circle plus filled stem rect",
+          "stem x-center at the bar left edge x=232",
+          "stem runs from circle center to bar bottom y=592",
+          "no stroke or material helper geometry"
+        ]
+      },
+      {
+        "id": "end-handle",
+        "layer": "end handle",
+        "format": "svg",
+        "source_provenance": "generated-in-task",
+        "alignment_basis": "circle 792,662 r=70; stem 776,432 32x230; caret on right edge",
+        "spec_constraints": [
+          "filled circle plus filled stem rect",
+          "stem x-center at the bar right edge x=792",
+          "stem runs from bar top y=432 to circle center",
+          "same radius and stem width as start handle",
+          "no stroke or material helper geometry"
+        ]
+      }
+    ],
+    "acceptance_checks": [
+      "preview remains two white discs on a diagonal plus a short mid bar at full size and 64px",
+      "vertical carets sit on the left and right sides of the rectangle",
+      "bar proportion reads as a selected word, not a card",
+      "package verification has no svg_material_warnings",
+      "no PNG fallback"
+    ]
+  },
+  "fill": {
+    "solid": "extended-srgb:0.23922 0.35294 0.83922 1"
+  },
+  "layers": [
+    {
+      "name": "background",
+      "svg": "<rect width=\"1024\" height=\"1024\" fill=\"#3D5AD6\"/>",
+      "composer": {
+        "include": false
+      }
+    },
+    {
+      "name": "selection bar",
+      "svg": "<rect x=\"232\" y=\"432\" width=\"560\" height=\"160\" rx=\"16\" fill=\"#A8B8FF\"/>",
+      "composer": {
+        "format": "svg",
+        "reason": "simple rounded selection bar should remain editable geometry"
+      }
+    },
+    {
+      "name": "start handle",
+      "svg": "<g fill=\"#FFFFFF\"><circle cx=\"232\" cy=\"362\" r=\"70\"/><rect x=\"216\" y=\"362\" width=\"32\" height=\"230\"/></g>",
+      "composer": {
+        "format": "svg",
+        "reason": "start handle is two filled primitives and should remain editable geometry"
+      }
+    },
+    {
+      "name": "end handle",
+      "svg": "<g fill=\"#FFFFFF\"><circle cx=\"792\" cy=\"662\" r=\"70\"/><rect x=\"776\" y=\"432\" width=\"32\" height=\"230\"/></g>",
+      "composer": {
+        "format": "svg",
+        "reason": "end handle is two filled primitives and should remain editable geometry"
+      }
+    }
+  ]
+}

@@ -59,6 +59,7 @@ Current types (`src/shared/types.ts`):
 
 - `LINGUALENS_TRANSLATE` — selected text plus optional sentence context → translation
 - `LINGUALENS_SAVE_ITEM` — persist a saved item from the panel / UI
+- `LINGUALENS_DELETE_ITEM` — remove a saved item by id (panel undo)
 - `LINGUALENS_GET_CONTENT_SETTINGS` — content-safe settings subset
 
 1. Add the request type and the response union (`ok: true` | `ok: false`).

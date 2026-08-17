@@ -155,6 +155,7 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
 
   await panel.getByRole('button', { name: 'Save' }).click();
   await expect(panel.getByText('Saved')).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Undo' })).toBeEnabled();
 
   const savedItems = await popupPage.evaluate(async ([storageKey]) => {
     const result = await chrome.storage.local.get(storageKey);
@@ -172,6 +173,16 @@ test('translates and saves with a mocked custom OpenAI-compatible endpoint', asy
     })
   ]);
   expect(savedItems[0]).not.toHaveProperty('apiKey');
+
+  await panel.getByRole('button', { name: 'Undo' }).click();
+  await expect(panel.getByRole('button', { name: 'Save' })).toBeEnabled();
+  await expect(panel.getByText('Saved')).toHaveCount(0);
+
+  const afterUndo = await popupPage.evaluate(async ([storageKey]) => {
+    const result = await chrome.storage.local.get(storageKey);
+    return result[storageKey];
+  }, [savedItemsStorageKey]);
+  expect(afterUndo).toEqual([]);
   await page.close();
 });
 

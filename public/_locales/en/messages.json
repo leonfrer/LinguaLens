@@ -375,6 +375,9 @@
   "panelSave": {
     "message": "Save"
   },
+  "panelUndo": {
+    "message": "Undo"
+  },
   "panelGeneratingTranslation": {
     "message": "Generating translation"
   },

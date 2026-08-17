@@ -21,12 +21,14 @@ export type PanelState = {
   provider?: LlmProvider;
   model?: string;
   status: 'loading' | 'ready' | 'saved' | 'error';
+  savedItemId?: string;
   error?: string;
 };
 
 type PanelActions = {
   onClose: () => void;
   onSave: () => void;
+  onUndo: () => void;
 };
 
 let panelHost: HTMLDivElement | null = null;
@@ -116,12 +118,14 @@ export function positionPanel(selection: Selection): void {
 export function renderPanel(state: PanelState, actions: PanelActions): void {
   const root = ensurePanel();
   panelHost?.setAttribute('lang', getInterfaceLocale());
+  const canUndo = state.status === 'saved' && Boolean(state.savedItemId);
   const saveDisabled = state.status !== 'ready';
+  const statusIsError = state.status === 'error' || Boolean(state.status === 'saved' && state.error);
   const statusText =
     state.status === 'loading'
       ? t('panelTranslatingStatus')
       : state.status === 'saved'
-        ? t('panelSavedStatus')
+        ? state.error ?? t('panelSavedStatus')
         : state.status === 'error'
           ? state.error ?? t('panelTranslationFailed')
           : state.model ?? 'LLM';
@@ -248,7 +252,7 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
       }
 
       .status {
-        color: ${state.status === 'error' ? 'var(--panel-danger)' : 'var(--panel-text-muted)'};
+        color: ${statusIsError ? 'var(--panel-danger)' : 'var(--panel-text-muted)'};
         flex: 1 1 auto;
         font-size: 12px;
         line-height: 1.35;
@@ -312,14 +316,18 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
         <div class="explanation"${state.explanation ? '' : ' hidden'}></div>
       </div>
       <div class="actions">
-        <span class="status"${state.status === 'error' ? ' role="alert"' : ''}></span>
+        <span class="status"${statusIsError ? ' role="alert"' : ''}></span>
         <div class="actionButtons">
           <button class="secondary iconButton" type="button" data-action="close" aria-label="${t('panelClose')}">
             <svg aria-hidden="true" viewBox="0 0 20 20">
               <path d="M5.25 5.25l9.5 9.5M14.75 5.25l-9.5 9.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
             </svg>
           </button>
-          <button type="button" data-action="save"${saveDisabled ? ' disabled' : ''}>${t('panelSave')}</button>
+          ${
+            canUndo
+              ? `<button type="button" data-action="undo">${t('panelUndo')}</button>`
+              : `<button type="button" data-action="save"${saveDisabled ? ' disabled' : ''}>${t('panelSave')}</button>`
+          }
         </div>
       </div>
     </section>
@@ -334,4 +342,5 @@ export function renderPanel(state: PanelState, actions: PanelActions): void {
   root.querySelector('.status')!.textContent = statusText;
   root.querySelector('[data-action="close"]')?.addEventListener('click', actions.onClose);
   root.querySelector('[data-action="save"]')?.addEventListener('click', actions.onSave);
+  root.querySelector('[data-action="undo"]')?.addEventListener('click', actions.onUndo);
 }

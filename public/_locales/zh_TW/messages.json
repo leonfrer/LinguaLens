@@ -375,6 +375,9 @@
   "panelSave": {
     "message": "儲存"
   },
+  "panelUndo": {
+    "message": "復原"
+  },
   "panelGeneratingTranslation": {
     "message": "正在生成翻譯"
   },

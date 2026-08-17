@@ -21,6 +21,11 @@ import {
 } from './panel';
 import { getSentenceContextFromSelection } from './selection-context';
 import {
+  contentSettingsEffects,
+  decideSelectionLookup,
+  shouldScheduleSelectionChange
+} from './selection-lifecycle';
+import {
   hideTriggerIcon,
   isTriggerIconEventTarget,
   isTriggerIconVisible,
@@ -83,25 +88,28 @@ function applyContentSettings(settings: ContentSettings): void {
   setTriggerIconAppearance(settings.appearance);
   renderCurrentPanel();
 
-  if (!settings.wordLookupEnabled) {
+  const effects = contentSettingsEffects(previous, settings, currentState !== null);
+
+  if (effects.hideAll) {
     hideCurrentPanel();
     return;
   }
 
   // Instant mode no longer needs a waiting icon.
-  if (settings.instantTranslateOnSelect && !previous.instantTranslateOnSelect) {
+  if (effects.hideTrigger) {
     hidePendingTrigger();
   }
 
   // Icon mode: dismiss an open panel so the next selection shows the icon path.
-  if (!settings.instantTranslateOnSelect && previous.instantTranslateOnSelect && currentState) {
+  if (effects.dismissPanel) {
     hidePanel();
     currentState = null;
     lastRequestedText = '';
   }
 
-  // Re-evaluate the current selection under the new mode.
-  scheduleSelectionChange();
+  if (effects.rescheduleSelection) {
+    scheduleSelectionChange();
+  }
 }
 
 async function initializeContentSettings(): Promise<void> {
@@ -291,16 +299,23 @@ async function handleSelectionChange(): Promise<void> {
 
   const selection = window.getSelection();
   const text = normalizeSelectedText(selection?.toString() ?? '');
-
-  if (!selection || !isValidSelectionText(text)) {
-    hideCurrentPanel();
-    return;
-  }
-
-  const extractedContext = getSentenceContextFromSelection(selection, text);
+  const hasValidSelection = Boolean(selection && isValidSelectionText(text));
   const { explanationLanguage, wordLookupEnabled, instantTranslateOnSelect } = contentSettings;
+  const decision = decideSelectionLookup({
+    hasValidSelection,
+    wordLookupEnabled,
+    instantTranslateOnSelect,
+    text,
+    explanationLanguage,
+    lastRequestedText,
+    panelStatus: currentState?.status ?? null,
+    panelExplanationLanguage: currentState?.explanationLanguage ?? null,
+    pendingText: pendingLookup?.text ?? null,
+    pendingExplanationLanguage: pendingLookup?.explanationLanguage ?? null,
+    triggerVisible: isTriggerIconVisible()
+  });
 
-  if (!wordLookupEnabled) {
+  if (decision === 'hide' || !selection) {
     hideCurrentPanel();
     return;
   }
@@ -308,27 +323,17 @@ async function handleSelectionChange(): Promise<void> {
   // Some pages keep the selection when the user clicks elsewhere. mouseup /
   // selectionchange still fire, so skip a duplicate request for the same text
   // while a non-error result (or in-flight request) is already shown.
-  if (
-    text === lastRequestedText &&
-    currentState &&
-    currentState.explanationLanguage === explanationLanguage &&
-    currentState.status !== 'error'
-  ) {
+  if (decision === 'reposition-panel') {
     positionPanel(selection);
     return;
   }
 
-  if (
-    !instantTranslateOnSelect &&
-    pendingLookup &&
-    pendingLookup.text === text &&
-    pendingLookup.explanationLanguage === explanationLanguage &&
-    isTriggerIconVisible()
-  ) {
+  if (decision === 'reposition-trigger') {
     positionTriggerIcon(selection);
     return;
   }
 
+  const extractedContext = getSentenceContextFromSelection(selection, text);
   const lookup: PendingLookup = {
     text,
     explanationLanguage,
@@ -336,7 +341,7 @@ async function handleSelectionChange(): Promise<void> {
     selectionStartInContext: extractedContext?.selectionStart
   };
 
-  if (!instantTranslateOnSelect) {
+  if (decision === 'show-trigger') {
     showSelectionTrigger(selection, lookup);
     return;
   }
@@ -368,7 +373,12 @@ function cancelScheduledSelectionChange(): void {
 }
 
 function scheduleSelectionChange(event?: Event): void {
-  if (isSelectingWithPointer || isLingualensUiEventTarget(event?.target ?? null)) {
+  if (
+    !shouldScheduleSelectionChange(
+      isSelectingWithPointer,
+      isLingualensUiEventTarget(event?.target ?? null)
+    )
+  ) {
     return;
   }
 

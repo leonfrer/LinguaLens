@@ -32,7 +32,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
 | Piece | Path | Role |
 | --- | --- | --- |
-| Content script entry | `src/content/selection.ts` | Manifest entry → `index.ts` (selection lifecycle), `selection-context.ts` (DOM sentence context), `panel.ts` (floating panel) |
+| Content script entry | `src/content/selection.ts` | Manifest entry → `index.ts` (selection wiring), `selection-lifecycle.ts` (settle / dedupe / settings-transition decisions), `selection-context.ts` (DOM sentence context), `panel.ts` (floating panel) |
 | Background entry | `src/background/service-worker.ts` | Manifest entry → `index.ts` (routing), `action-icon.ts` (toolbar icon), `toggle-word-lookup.ts` (commands) |
 | Manifest | `manifest.config.ts` | MV3 permissions, entries, locales, `commands` |
 | App constants | `src/config.ts` | Shared non-secret constants |
@@ -57,7 +57,7 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 
 ### Unit tests
 
-Co-located `*.test.ts` under `src/shared/`, `src/background/`, and `src/saved/` (Vitest). Prefer pure modules for DOM-heavy parsing so logic stays unit-testable.
+Co-located `*.test.ts` under `src/shared/`, `src/background/`, `src/content/`, and `src/saved/` (Vitest). Prefer pure modules for DOM-heavy parsing so logic stays unit-testable. CI runs `npm test` then `npm run build` on pull requests and `main`; Playwright remains a local command (`npm run test:e2e`).
 
 ## Runtime boundaries (do not break)
 

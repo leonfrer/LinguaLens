@@ -2,7 +2,7 @@
   "name": "LinguaLens",
   "target_platforms": ["chrome"],
   "source_reference": "direct-authored side-caret selection mark from semantic-icon-design.json",
-  "brief": "LinguaLens selection mark: ink-navy stage, empty 3.5:1 word highlight, two pale iOS-style handles. Vertical carets sit on the left and right edges of the rectangle. Start knob sits fully above the top-left; end knob sits fully below the bottom-right.",
+  "brief": "LinguaLens selection mark: vivid indigo stage, empty 3.5:1 word highlight, two white iOS-style handles. Vertical carets sit on the left and right edges of the rectangle. Start knob sits fully above the top-left; end knob sits fully below the bottom-right.",
   "semantic_review": {
     "status": "exact-enough",
     "identity_risk": "low",
@@ -40,7 +40,7 @@
         "alignment_basis": "authored from locked 1024 canvas coordinates in semantic-icon-design.json",
         "spec_constraints": [
           "rounded rectangle 560x160 at 232,432 with rx 16",
-          "opaque #9AA5B5 fill",
+          "opaque #A8B8FF fill",
           "no stroke or material helper geometry"
         ]
       },
@@ -73,7 +73,7 @@
       }
     ],
     "acceptance_checks": [
-      "preview remains two pale discs on a diagonal plus a short mid bar at full size and 64px",
+      "preview remains two white discs on a diagonal plus a short mid bar at full size and 64px",
       "vertical carets sit on the left and right sides of the rectangle",
       "bar proportion reads as a selected word, not a card",
       "package verification has no svg_material_warnings",
@@ -81,19 +81,19 @@
     ]
   },
   "fill": {
-    "solid": "extended-srgb:0.09020 0.12549 0.20000 1"
+    "solid": "extended-srgb:0.23922 0.35294 0.83922 1"
   },
   "layers": [
     {
       "name": "background",
-      "svg": "<rect width=\"1024\" height=\"1024\" fill=\"#172033\"/>",
+      "svg": "<rect width=\"1024\" height=\"1024\" fill=\"#3D5AD6\"/>",
       "composer": {
         "include": false
       }
     },
     {
       "name": "selection bar",
-      "svg": "<rect x=\"232\" y=\"432\" width=\"560\" height=\"160\" rx=\"16\" fill=\"#9AA5B5\"/>",
+      "svg": "<rect x=\"232\" y=\"432\" width=\"560\" height=\"160\" rx=\"16\" fill=\"#A8B8FF\"/>",
       "composer": {
         "format": "svg",
         "reason": "simple rounded selection bar should remain editable geometry"
@@ -101,7 +101,7 @@
     },
     {
       "name": "start handle",
-      "svg": "<g fill=\"#F4F6FA\"><circle cx=\"232\" cy=\"362\" r=\"70\"/><rect x=\"216\" y=\"362\" width=\"32\" height=\"230\"/></g>",
+      "svg": "<g fill=\"#FFFFFF\"><circle cx=\"232\" cy=\"362\" r=\"70\"/><rect x=\"216\" y=\"362\" width=\"32\" height=\"230\"/></g>",
       "composer": {
         "format": "svg",
         "reason": "start handle is two filled primitives and should remain editable geometry"
@@ -109,7 +109,7 @@
     },
     {
       "name": "end handle",
-      "svg": "<g fill=\"#F4F6FA\"><circle cx=\"792\" cy=\"662\" r=\"70\"/><rect x=\"776\" y=\"432\" width=\"32\" height=\"230\"/></g>",
+      "svg": "<g fill=\"#FFFFFF\"><circle cx=\"792\" cy=\"662\" r=\"70\"/><rect x=\"776\" y=\"432\" width=\"32\" height=\"230\"/></g>",
       "composer": {
         "format": "svg",
         "reason": "end handle is two filled primitives and should remain editable geometry"

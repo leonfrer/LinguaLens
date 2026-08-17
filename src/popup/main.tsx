@@ -305,7 +305,7 @@ function App() {
     <main className="popup">
       <header className="header">
         <div className="headerTitle">
-          <img className="brandMark" src="icons/icon48.png" alt="" />
+          <img className="brandMark" src="icons/icon.svg" alt="" />
           <div>
             <h1>LinguaLens</h1>
             <p>{t('savedRecent')}</p>

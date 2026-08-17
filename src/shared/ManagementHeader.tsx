@@ -8,7 +8,7 @@ export function ManagementHeader({ activePage }: { activePage: ManagementPage })
   return (
     <div className="managementTopbar">
       <a className="managementBrand" href="saved.html">
-        <img src="icons/icon48.png" alt="" />
+        <img src="icons/icon.svg" alt="" />
         <span>LinguaLens</span>
       </a>
       <div className="managementActions">

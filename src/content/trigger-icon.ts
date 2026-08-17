@@ -123,7 +123,7 @@ export function showTriggerIcon(selection: Selection, onClick: () => void): void
   onTriggerClick = onClick;
   triggerHost?.setAttribute('lang', getInterfaceLocale());
 
-  const iconUrl = chrome.runtime.getURL('icons/icon32.png');
+  const iconUrl = chrome.runtime.getURL('icons/icon.svg');
 
   root.innerHTML = `
     <style>

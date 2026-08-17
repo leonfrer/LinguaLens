@@ -29,7 +29,7 @@ export default defineManifest({
   // Content-script trigger icon is rendered into host pages; expose the asset explicitly.
   web_accessible_resources: [
     {
-      resources: ['icons/icon32.png'],
+      resources: ['icons/icon.svg'],
       matches: ['<all_urls>']
     }
   ],

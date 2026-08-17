@@ -37,6 +37,8 @@ HTML entry shells: `index.html` (popup), `settings.html`, `saved.html`.
 | Manifest | `manifest.config.ts` | MV3 permissions, entries, locales, `commands` |
 | App constants | `src/config.ts` | Shared non-secret constants |
 | Locales | `public/_locales/{en,zh_CN,zh_TW}/messages.json` | Chrome i18n message catalogs |
+| Agent skills | `.agents/skills/` | Shared Agent Skills (`SKILL.md` packages). Codex, Pi, and other compatible harnesses load this directory. |
+| Codex project config | `.codex/config.toml` | Codex-only sandbox / runtime settings. Not the skill store. |
 
 ### Shared modules (`src/shared/`)
 

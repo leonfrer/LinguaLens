@@ -59,7 +59,13 @@ Open that file when changing directory layout, content/background boundaries, st
 - Commit messages and PR titles use Conventional Commits, such as `feat(content): detect selected text`.
 - Keep subjects imperative, lowercase, concise, and under 72 characters. Allowed types/scopes match `.github/workflows/lint-pr.yml` (types include `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`; scopes include `popup`, `settings`, `saved`, `content`, `background`, `shared`, `i18n`, `e2e`, `manifest`, `build`, `release`, `deps`).
 - Use `chore(deps): ...` for dependency updates. PR title format is enforced by the lint-pr workflow.
-- Use `.codex/skills/lingualens-release/SKILL.md` when preparing, PRing, tagging, documenting, or verifying a release.
-- Use `.codex/skills/lingualens-storage-message/SKILL.md` when adding storage keys, settings fields, or runtime messages.
-- Use `.codex/skills/lingualens-locale/SKILL.md` when adding or changing UI strings.
+- Use `.agents/skills/lingualens-release/SKILL.md` when preparing, PRing, tagging, documenting, or verifying a release.
+- Use `.agents/skills/lingualens-storage-message/SKILL.md` when adding storage keys, settings fields, or runtime messages.
+- Use `.agents/skills/lingualens-locale/SKILL.md` when adding or changing UI strings.
 - Package and manifest versions use plain semver; Git tags add `v`.
+
+## Agent skills
+
+Project skills live in `.agents/skills/<name>/SKILL.md` (Agent Skills standard). Codex, Pi, and other compatible harnesses load this directory. Put new skills here, not under `.codex/`.
+
+`.codex/config.toml` is Codex-only sandbox and project config. Keep it when changing Codex runtime behavior; do not use `.codex/` as the skill store.

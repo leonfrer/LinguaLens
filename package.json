@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:e2e": "npm run build && playwright test",
     "test:e2e:headed": "npm run build && playwright test --headed",
-    "test:e2e:ui": "npm run build && playwright test --ui"
+    "test:e2e:ui": "npm run build && playwright test --ui",
+    "icons": "node scripts/rasterize-icons.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.33",

@@ -62,6 +62,7 @@ Load or refresh the unpacked extension from `dist/`.
 | `npm run test:e2e:headed` | Run extension tests in a headed browser. |
 | `npm run test:e2e:ui` | Open the Playwright test UI. |
 | `npm run preview` | Preview the production build. |
+| `npm run icons` | Rasterize toolbar/store PNGs from the rounded preview SVG. |
 
 ## Documentation
 

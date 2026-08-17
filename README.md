@@ -62,7 +62,7 @@ Load or refresh the unpacked extension from `dist/`.
 | `npm run test:e2e:headed` | Run extension tests in a headed browser. |
 | `npm run test:e2e:ui` | Open the Playwright test UI. |
 | `npm run preview` | Preview the production build. |
-| `npm run icons` | Rasterize toolbar/store PNGs from the rounded preview SVG. |
+| `npm run icons` | Run `scripts/rasterize-icons.mjs`: copy the rounded preview SVG to `public/icons/icon.svg` and rasterize toolbar/store PNGs (`icon{16,32,48,128}.png` plus `-disabled`). Needs Playwright Chromium and Python 3 + Pillow. |
 
 ## Documentation
 

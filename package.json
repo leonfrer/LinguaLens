@@ -15,14 +15,14 @@
     "icons": "node scripts/rasterize-icons.mjs"
   },
   "dependencies": {
-    "@ai-sdk/openai": "4.0.33",
+    "@ai-sdk/openai": "4.0.45",
     "@crxjs/vite-plugin": "2.7.1",
-    "@vitejs/plugin-react": "6.0.5",
-    "ai": "7.0.55",
+    "@vitejs/plugin-react": "6.1.0",
+    "ai": "7.0.71",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "typescript": "7.0.2",
-    "vite": "8.2.1"
+    "vite": "8.2.2"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

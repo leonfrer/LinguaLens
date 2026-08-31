@@ -15,10 +15,10 @@
     "icons": "node scripts/rasterize-icons.mjs"
   },
   "dependencies": {
-    "@ai-sdk/openai": "4.0.45",
+    "@ai-sdk/openai": "4.0.50",
     "@crxjs/vite-plugin": "2.7.1",
     "@vitejs/plugin-react": "6.1.0",
-    "ai": "7.0.71",
+    "ai": "7.0.83",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "typescript": "7.0.2",
